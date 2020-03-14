@@ -133,14 +133,15 @@ function AF.showChatDebug(functionName, chatOutputVars)
     end
     --Chat output
     if not strings then return end
-    d(">====================================>")
+    d(">>>======== AF ERROR - BEGIN ========>>>")
     d(afPrefixError .. "|c00ccff" .. tostring(functionNameStr) .. "|r")
     d(strings.errorWhatToDo1)
     d(strings.errorWhatToDo2)
+    d("-> [" .. tostring(functionNameStr) .. "]\n")
     if chatOutputVars ~= "" then
-        d("-> " .. chatOutputVars)
+        d(chatOutputVars)
     end
-    d("<====================================<")
+    d("<<<======== AF ERROR - END ========<<<")
 end
 local showChatDebug = AF.showChatDebug
 

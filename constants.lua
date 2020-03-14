@@ -1575,3 +1575,5 @@ local itemIds = {
 }
 AF.itemIds = itemIds
 
+--Table where external dropdown filter plugins can register themselves for checks done by other addos
+AF.externalDropdownFilterPlugins = {}
