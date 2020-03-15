@@ -557,7 +557,7 @@ AF.subfilterCallbacks = {
                 itemTypes = {WEAPONTYPE_BOW},
             },
             filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end,
-            filterCallback = function() return GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}) end,
+            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
             dropdownCallbacks = {
                 {name = "Bow", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
             },

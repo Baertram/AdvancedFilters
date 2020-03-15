@@ -5,9 +5,8 @@ local AF = AdvancedFilters
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-01-16
---AF Version: 1.5.3.4
---Max todos: #25
+--TODO Last updated: 2020-03-15
+--Max todos: #26
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -29,9 +28,10 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
+
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.5.3.3
+--  UPDATE INFORMATION: since AF 1.5.3.6 - Current 1.5.3.7
 --______________________________________________________________________________________________________________________
 
 
@@ -47,10 +47,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#22: Error messages multi language support
---#23: User kebabman: Bank closing raised an error "user:/AddOns/AdvancedFilters/main.lua:304: attempt to index a nil value"
---#24: Compatibility with CraftStoreFixedAndImproved rune chanages to show subfilter bars properly if vanilla UI and CS ui are mixed
---#25: Unsupported filterBar recipes at enchanting table will not show an error message to the chat anymore
+--#26: Bows not only showing bows at woodworking station
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
