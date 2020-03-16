@@ -10,6 +10,13 @@ local textures = {
     --MuseumPiece = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Museum_Piece_%s.dds",
     RecipeFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Recipe_Fragment_%s.dds",
     Scroll = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    --TODO: Search and replace the textures for CollectiblesFragment -> UpgradeFragment
+    CollectibleFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    Key = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    MaterialUpgrader = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    RuneboxFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    Toy = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    UpgradeFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
 
     --WEAPONS
     OneHand = "AdvancedFilters/assets/weapons/onehanded_%s.dds",
