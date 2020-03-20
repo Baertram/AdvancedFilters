@@ -353,6 +353,8 @@ function AF_FilterBar:ActivateButton(newButton)
         p_newButton.dropdownCallbacks = BuildDropdownCallbacks(p_newButton.groupName, p_newButton.name)
 
         comboBox.submenuCandidates = {}
+        local textures = AF.textures
+        local texturesReSize = AF.texturesReSize
         for _, v in ipairs(p_newButton.dropdownCallbacks) do
             if v.submenuName then
                 table.insert(comboBox.submenuCandidates, v)
@@ -363,11 +365,18 @@ function AF_FilterBar:ActivateButton(newButton)
                 end
                 local iconForDropdownCallbackEntry = ""
                 if AF.settings.showIconsInFilterDropdowns and v.showIcon ~= nil and v.showIcon == true then
-                    local textureName = AF.textures[v.name] or ""
+                    local textureName = textures[v.name] or ""
                     if textureName ~= "" then
                         --Remove the placeholder %s
                         textureName = string.format(textureName, "up")
-                        iconForDropdownCallbackEntry = zo_iconFormat(textureName, 28, 28)
+                        local width, height = 28, 28
+                        if texturesReSize then
+                            local textureReSizeData = texturesReSize[v.name]
+                            if textureReSizeData and textureReSizeData.width and textureReSizeData.height then
+                                width, height = textureReSizeData.width, textureReSizeData.height
+                            end
+                        end
+                        iconForDropdownCallbackEntry = zo_iconFormat(textureName, width, height)
                     end
                 end
                 local itemEntryName = AF.strings[dropdownEntryName] or ""

@@ -20,6 +20,8 @@ local strings = {
     RuneboxFragment = util.Localize(SI_SPECIALIZEDITEMTYPE108),
     Toy = util.Localize(SI_SPECIALIZEDITEMTYPE111),
     UpgradeFragment = util.Localize(SI_SPECIALIZEDITEMTYPE110),
+    Fish = util.Localize(SI_ITEMTYPE54),
+    RareFish = util.Localize(SI_SPECIALIZEDITEMTYPE80),
 
     --WEAPON
     OneHand = util.Localize(SI_GAMEPADWEAPONCATEGORY1),
