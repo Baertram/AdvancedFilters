@@ -202,7 +202,7 @@ local strings = {
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",
-    errorLibrayMissing      = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
+    errorLibraryMissing     = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
     errorWhatToDo1          = "!> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) What did you do?\n2)Where did you do it?\n3)Did you test if the error happenes with only the addon AdvancedFilters and librraies activated (please test this!)?\n4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error?",
 

@@ -30,7 +30,7 @@ local strings = {
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Bitte lese die Fehlermeldung im Chat!",
-    errorLibrayMissing      = afPrefixError .. " Benötigte Bibliothek \'%s\' ist nicht aktiviert. Dieses AddOn funktioniert nicht ohne diese!",
+    errorLibraryMissing     = afPrefixError .. " Benötigte Bibliothek \'%s\' ist nicht aktiviert. Dieses AddOn funktioniert nicht ohne diese!",
     errorWhatToDo1          = "!> Bitte beantworte die folgenden 4 Fragen und schreibe die Antworten (und wenn verfügbar: die Variablen, welche in den Chat Zeilen nach den Fragen mit -> beginnen) in den AddOn Kommentaren von AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) Was hast du gemacht als der Fehler auftrat?\n2)Wo hast du es gemacht?\n3)Hast du ausprobiert, ob der Fehler auch auftritt, wenn NUR das AddOn AdvancedFilters und die Bibliotheken aktiv sind (Bitte teste dies unbedingt!)?\n4)Wenn der Fehler mit anderen AddOns aktiv auftritt: Welche anderen AddOns waren aktiv, und kannst du eingrenzen welches es verursacht?",
 
