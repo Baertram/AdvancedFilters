@@ -14,14 +14,6 @@ local strings = {
     MuseumPiece = util.Localize(SI_SPECIALIZEDITEMTYPE103),
     RecipeFragment = util.Localize(SI_SPECIALIZEDITEMTYPE104),
     Scroll = util.Localize(SI_SPECIALIZEDITEMTYPE105),
-    CollectibleFragment = util.Localize(SI_SPECIALIZEDITEMTYPE109),
-    Key = util.Localize(SI_SPECIALIZEDITEMTYPE107),
-    MaterialUpgrader = util.Localize(SI_SPECIALIZEDITEMTYPE106),
-    RuneboxFragment = util.Localize(SI_SPECIALIZEDITEMTYPE108),
-    Toy = util.Localize(SI_SPECIALIZEDITEMTYPE111),
-    UpgradeFragment = util.Localize(SI_SPECIALIZEDITEMTYPE110),
-    Fish = util.Localize(SI_ITEMTYPE54),
-    RareFish = util.Localize(SI_SPECIALIZEDITEMTYPE80),
 
     --WEAPON
     OneHand = util.Localize(SI_GAMEPADWEAPONCATEGORY1),
@@ -202,7 +194,7 @@ local strings = {
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",
-    errorLibraryMissing     = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
+    errorLibrayMissing      = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
     errorWhatToDo1          = "!> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) What did you do?\n2)Where did you do it?\n3)Did you test if the error happenes with only the addon AdvancedFilters and librraies activated (please test this!)?\n4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error?",
 

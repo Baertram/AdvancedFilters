@@ -11,7 +11,7 @@ AF.dependenciesLoaded = false
 function AF.loadLibraries(calledFromEventPlayerActivated)
     calledFromEventPlayerActivated = calledFromEventPlayerActivated or false
     local strings = AF.strings
-    local libMissingString = strings.errorLibraryMissing
+    local libMissingString = strings.errorLibrayMissing
 
     --LibCommonInventoryFilters
     util.libCIF = LibCIF

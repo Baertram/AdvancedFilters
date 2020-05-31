@@ -44,7 +44,7 @@ local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local weaponType = GetItemLinkWeaponType(itemLink)
@@ -61,7 +61,7 @@ local function GetFilterCallbackForArmorType(filterTypes, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local armorType = GetItemLinkArmorType(itemLink)
@@ -79,7 +79,7 @@ local function GetFilterCallbackForGear(filterTypes, armorTypes, checkOnlyJunk)
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local goOn = false
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         if armorTypes ~= nil then
             local armorType = GetItemLinkArmorType(itemLink)
             for i=1, #armorTypes do
@@ -106,7 +106,7 @@ local function GetFilterCallbackForJewelry(filterTypes, itemTraitType, checkOnly
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local _, _, _, equipType = GetItemLinkInfo(itemLink)
@@ -124,7 +124,7 @@ local function GetFilterCallbackForClothing(checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local armorType = GetItemLinkArmorType(itemLink)
@@ -145,7 +145,7 @@ local function GetFilterCallbackForTrophy(checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local itemType = GetItemLinkItemType(itemLink)
@@ -163,7 +163,7 @@ local function GetFilterCallbackForFence(checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local itemType = GetItemLinkItemType(itemLink)
@@ -182,7 +182,7 @@ local function GetFilterCallbackForStolen(checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         if IsItemLinkStolen(itemLink) then
@@ -333,7 +333,7 @@ local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         if categoryConst == AF.util.LibMotifCategories:GetMotifCategory(itemLink) then
@@ -350,13 +350,14 @@ local function GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sS
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if(not sItemTypes and not sSpecializedItemTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+
         for i = 1, #sItemTypes do
             if sItemTypes[i] == itemType then
-                if needsItemTypeAndSpecializedItemType == true then
+                if needsItemTypeAndSpecializedItemType then
                     for j = 1, #sSpecializedItemTypes do
                         if sSpecializedItemTypes[j] == specializedItemType then
                             return true
@@ -371,22 +372,22 @@ local function GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sS
     end
 end
 
-local function GetFilterCallbackForSpecializedItemtype(sSpecializedItemTypes, checkOnlyJunk, checkItemTypeToo)
+local function GetFilterCallbackForSpecializedItemtype(sItemTypes, checkOnlyJunk, checkItemTypeToo)
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
         checkItemTypeToo = checkItemTypeToo or false
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if(not sSpecializedItemTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if(not sItemTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local itemType, specializedItemType = GetItemLinkItemType(itemLink)
 
-        for i = 1, #sSpecializedItemTypes do
-            if sSpecializedItemTypes[i] == specializedItemType then
+        for i = 1, #sItemTypes do
+            if sItemTypes[i] == specializedItemType then
                 return true
             else
-                if checkItemTypeToo and sSpecializedItemTypes[i] == itemType then
+                if checkItemTypeToo and sItemTypes[i] == itemType then
                     return true
                 end
             end
@@ -400,7 +401,7 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
         checkOnlyJunk = checkOnlyJunk or false
         slot = checkCraftingStationSlot(slot, slotIndex)
         if(not filterTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         local itemId = GetItemLinkItemId(itemLink)
@@ -445,7 +446,7 @@ local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, che
         --Call the original filter function
         local origCallbackResult = origButtonCallback(slot, slotIndex)
         if(not origCallbackResult) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if checkOnlyJunk then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         --Return the original callback function result
         return origCallbackResult
         ]]
@@ -456,13 +457,7 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- Subfilter callback setup table
 ---------------------------------------------------------------------------------------------------------------------------
-local subfilterCallbacks = {
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
--- -v- Inventory main filters subfilter bars                                                                         -v-
---=============================================================================================================================================================================================
-    --All
+AF.subfilterCallbacks = {
     [AF_CONST_ALL] = {
         addonDropdownCallbacks = {},
         dropdownCallbacks = {
@@ -477,8 +472,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Weapons
     Weapons = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -519,8 +512,79 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Armor
+    WeaponsSmithing = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        OneHand = {
+            filterForAll = {
+                filterTypes = {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}) end,
+            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}), {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
+            dropdownCallbacks = {
+                {name = "Axe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_AXE})},
+                {name = "Hammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_HAMMER})},
+                {name = "Sword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
+                {name = "Dagger", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_DAGGER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
+            },
+        },
+        TwoHand = {
+            filterForAll = {
+                filterTypes = {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}) end,
+            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
+            dropdownCallbacks = {
+                {name = "TwoHandAxe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE})},
+                {name = "TwoHandHammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
+                {name = "TwoHandSword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
+            },
+        },
+    },
+    WeaponsWoodworking = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Bow = {
+            filterForAll = {
+                itemTypes = {WEAPONTYPE_BOW},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end,
+            filterCallback = function() return GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}) end,
+            dropdownCallbacks = {
+                {name = "Bow", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
+            },
+        },
+        DestructionStaff = {
+            filterForAll = {
+                itemTypes = {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}) end,
+            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
+            dropdownCallbacks = {
+                {name = "Fire", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FIRE_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF})},
+                {name = "Frost", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FROST_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
+                {name = "Lightning", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_LIGHTNING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
+            },
+        },
+        HealStaff = {
+            filterForAll = {
+                itemTypes = {WEAPONTYPE_HEALING_STAFF},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end,
+            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
+            dropdownCallbacks = {
+                {name = "HealStaff", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
+            },
+        },
+    },
     Armor = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -570,8 +634,88 @@ local subfilterCallbacks = {
         },
         ]]
     },
---=============================================================================================================================================================================================
-    --Jewelry
+    ArmorSmithing = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Heavy = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_HEAVY},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_HEAVY) end,
+            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
+            dropdownCallbacks = {
+                {name = "Head", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
+                {name = "Chest", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
+                {name = "Shoulders", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
+                {name = "Hand", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
+                {name = "Waist", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
+                {name = "Legs", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
+                {name = "Feet", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+            },
+        },
+    },
+    ArmorClothier = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        LightArmor = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_LIGHT},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_LIGHT) end,
+            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
+            dropdownCallbacks = {
+                {name = "Head", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_LIGHT})},
+                {name = "Chest", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_LIGHT})},
+                {name = "Shoulders", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_LIGHT})},
+                {name = "Hand", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_LIGHT})},
+                {name = "Waist", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_LIGHT})},
+                {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
+                {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
+            },
+        },
+        Medium = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_MEDIUM},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_MEDIUM) end,
+            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
+            dropdownCallbacks = {
+                {name = "Head", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_MEDIUM})},
+                {name = "Chest", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_MEDIUM})},
+                {name = "Shoulders", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_MEDIUM})},
+                {name = "Hand", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_MEDIUM})},
+                {name = "Waist", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_MEDIUM})},
+                {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
+                {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
+            },
+        },
+    },
+    ArmorWoodworking = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Shield = {
+            filterForAll = {
+                equipTypes = {EQUIP_TYPE_OFF_HAND},
+            },
+            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end,
+            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
+            dropdownCallbacks = {
+                {name = "Shield", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
+            },
+        },
+    },
     Jewelry = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -620,8 +764,6 @@ local subfilterCallbacks = {
             },
         },
     },
---=============================================================================================================================================================================================
-    --Consumables
     Consumables = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -675,22 +817,9 @@ local subfilterCallbacks = {
         },
         Trophy = {
             filterCallback = GetFilterCallbackForTrophy(),
-            dropdownCallbacks = {
-                {name = "KeyFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT})},
-                {name = "RecipeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT})},
-                {name = "Scroll", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL})},
-                {name = "CollectibleFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_COLLECTIBLE_FRAGMENT})},
-                {name = "Key", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY})},
-                {name = "MaterialUpgrader", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_MATERIAL_UPGRADER})},
-                {name = "RuneboxFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT})},
-                {name = "Toy", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TOY})},
-                {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
-                {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
-            },
+            dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Materials
     Crafting = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -791,8 +920,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Furnishing
     Furnishings = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -820,8 +947,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Miscellaneous
     Miscellaneous = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -857,9 +982,10 @@ local subfilterCallbacks = {
             dropdownCallbacks = {
                 {name = "TreasureMaps", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP})},
                 {name = "SurveyReport", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SURVEY_REPORT})},
+                {name = "KeyFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT})},
                 {name = "MuseumPiece", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_MUSEUM_PIECE})},
+                {name = "RecipeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT})},
                 {name = "Scroll", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL})},
-                {name = "RareFish", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_COLLECTIBLE_RARE_FISH})},
             },
         },
         Fence = {
@@ -879,300 +1005,115 @@ local subfilterCallbacks = {
             },
         },
     },
---=============================================================================================================================================================================================
-    --Junk -> See at the bottom of the table!
---=============================================================================================================================================================================================
--- -^- Inventory main filters subfilter bars                                                                         -^-
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
---=============================================================================================================================================================================================
--- -v- Subfilters of the subfilterbars                                                                               -v-
---=============================================================================================================================================================================================
-
-    --Collectibles
-    Collectibles = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL]         = {
-            filterCallback    = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-    },
-
---=============================================================================================================================================================================================
--- -v- Weapons & Crafting                                                                                            -v-
---=============================================================================================================================================================================================
-    WeaponsSmithing = {
+    Junk = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
-            filterCallback = GetFilterCallback(nil),
+            filterCallback = GetFilterCallback(nil, true),
             dropdownCallbacks = {},
         },
-        OneHand = {
-            filterForAll = {
-                filterTypes = {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}) end,
-            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}), {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
+        Weapon = {
+            filterCallback = GetFilterCallback({ITEMTYPE_WEAPON}, true),
             dropdownCallbacks = {
-                {name = "Axe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_AXE})},
-                {name = "Hammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_HAMMER})},
-                {name = "Sword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
-                {name = "Dagger", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_DAGGER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
+                {name = "OneHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}, true)},
+                {name = "TwoHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}, true)},
+                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}, true)},
+                {name = "DestructionStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}, true)},
+                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}, true)},
             },
         },
-        TwoHand = {
-            filterForAll = {
-                filterTypes = {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}) end,
-            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
+        Armor = {
+            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET}, nil, true),
             dropdownCallbacks = {
-                {name = "TwoHandAxe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE})},
-                {name = "TwoHandHammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
-                {name = "TwoHandSword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
+                {name = "Heavy", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}, true)},
+                {name = "Medium", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}, true)},
+                {name = "LightArmor", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}, true)},
+                --{name = "Clothier", filterCallback = GetFilterCallbackForClothing()},
+                {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}, nil, true)},
+                --{name = "Vanity", filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_DISGUISE, EQUIP_TYPE_COSTUME})},
+                --{name = "Vanity", filterCallback = GetFilterCallbackForClothing(true)},
             },
         },
-    },
---=============================================================================================================================================================================================
-    WeaponsWoodworking = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        Bow = {
-            filterForAll = {
-                itemTypes = {WEAPONTYPE_BOW},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end,
-            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
+        Jewelry = {
+            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING, EQUIP_TYPE_NECK}, nil, true),
             dropdownCallbacks = {
-                {name = "Bow", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
+                {name = "Ring", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING}, nil, true)},
+                {name = "Neck", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK}), nil, true},
             },
         },
-        DestructionStaff = {
-            filterForAll = {
-                itemTypes = {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}) end,
-            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
+        Consumable = {
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
+                                                ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_TROPHY,
+                                                ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_TREASURE}, true, itemIds.lockpick),
             dropdownCallbacks = {
-                {name = "Fire", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FIRE_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF})},
-                {name = "Frost", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FROST_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
-                {name = "Lightning", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_LIGHTNING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
+                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}, true)},
+                {name = "Food", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_FOOD}, true)},
+                {name = "Drink", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DRINK}, true)},
+                {name = "Recipe", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}, true)},
+                {name = "Potion", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POTION}, true)},
+                {name = "Poison", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POISON}, true)},
+                {name = "Motif", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RACIAL_STYLE_MOTIF}, true)},
+                {name = "Writ", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_MASTER_WRIT}, true)},
+                {name = "Container", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY}, true, true)},
+                {name = "Repair", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR}, true, itemIds.lockpick)},
+                {name = "Trophy", showIcon=true, filterCallback = GetFilterCallbackForTrophy(true)},
             },
         },
-        HealStaff = {
-            filterForAll = {
-                itemTypes = {WEAPONTYPE_HEALING_STAFF},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end,
-            filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
+        Materials = {
+            filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_BLACKSMITHING_MATERIAL, ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_BLACKSMITHING_BOOSTER,
+                                                ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_CLOTHIER_BOOSTER,
+                                                ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_WOODWORKING_BOOSTER,
+                                                ITEMTYPE_JEWELRYCRAFTING_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_MATERIAL,
+                                                ITEMTYPE_REAGENT, ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE,
+                                                ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY,
+                                                ITEMTYPE_INGREDIENT, ITEMTYPE_STYLE_MATERIAL,
+                                                ITEMTYPE_RAW_MATERIAL, ITEMTYPE_JEWELRY_RAW_TRAIT, ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL,
+                                                ITEMTYPE_WEAPON_TRAIT, ITEMTYPE_ARMOR_TRAIT, ITEMTYPE_JEWELRY_TRAIT,
+                                                ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING,
+                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING,
+                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING,
+                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING,
+            }, true, true),
             dropdownCallbacks = {
-                {name = "HealStaff", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
+                {name = "Blacksmithing", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_BLACKSMITHING_MATERIAL, ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_BLACKSMITHING_BOOSTER}, true)},
+                {name = "Clothier", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_CLOTHIER_BOOSTER}, true)},
+                {name = "Woodworking", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_WOODWORKING_BOOSTER}, true)},
+                {name = "JewelryCrafting", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_MATERIAL, ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}, true)},
+                {name = "Alchemy", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_REAGENT, ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE}, true)},
+                {name = "Enchanting", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY}, true)},
+                {name = "Provisioning", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}, true)},
+                {name = "Style", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_STYLE_MATERIAL, ITEMTYPE_RAW_MATERIAL}, true)},
+                {name = "ArmorTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ARMOR_TRAIT}, true)},
+                {name = "WeaponTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_WEAPON_TRAIT}, true)},
+                {name = "JewelryAllTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT, ITEMTYPE_JEWELRY_TRAIT}, true)},
+                {name = "Furnishings", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING})},
             },
         },
-    },
---=============================================================================================================================================================================================
--- -^- Weapons & Crafting                                                                                            -^-
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
--- -v- Armor & Crafting & Refine                                                                                     -v-
---=============================================================================================================================================================================================
-    ArmorSmithing = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        Heavy = {
-            filterForAll = {
-                armorTypes = {ARMORTYPE_HEAVY},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_HEAVY) end,
-            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
+        Furnishings = {
+            filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION, SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT, SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL, SPECIALIZED_ITEMTYPE_FURNISHING_SEATING, SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY}, true),
             dropdownCallbacks = {
-                {name = "Head", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-                {name = "Chest", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-                {name = "Shoulders", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-                {name = "Hand", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-                {name = "Waist", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-                {name = "Legs", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-                {name = "Feet", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            },
+                {name = "CraftingStation", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION})},
+                {name = "Light", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT})},
+                {name = "Ornamental", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL})},
+                {name = "Seating", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_SEATING})},
+                {name = "TargetDummy", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY})},
+            }
         },
-    },
---=============================================================================================================================================================================================
-    --Smithing refine
-    RefineSmithing = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        RawMaterialSmithing = {
-            filterCallback = GetFilterCallback({ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-    },
---=============================================================================================================================================================================================
-    ArmorClothier = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        LightArmor = {
-            filterForAll = {
-                armorTypes = {ARMORTYPE_LIGHT},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_LIGHT) end,
-            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
+        Miscellaneous = {
+            filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON, ITEMTYPE_SOUL_GEM, ITEMTYPE_SIEGE, ITEMTYPE_LURE, ITEMTYPE_TOOL, ITEMTYPE_TROPHY, ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_TREASURE, ITEMTYPE_TRASH, ITEMTYPE_DISGUISE, ITEMTYPE_TABARD}, true, itemIds.repairtools),
             dropdownCallbacks = {
-                {name = "Head", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_LIGHT})},
-                {name = "Chest", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_LIGHT})},
-                {name = "Shoulders", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_LIGHT})},
-                {name = "Hand", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_LIGHT})},
-                {name = "Waist", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_LIGHT})},
-                {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
-                {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
-            },
-        },
-        Medium = {
-            filterForAll = {
-                armorTypes = {ARMORTYPE_MEDIUM},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_MEDIUM) end,
-            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {
-                {name = "Head", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_MEDIUM})},
-                {name = "Chest", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_MEDIUM})},
-                {name = "Shoulders", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_MEDIUM})},
-                {name = "Hand", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_MEDIUM})},
-                {name = "Waist", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_MEDIUM})},
-                {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
-                {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
+                {name = "Glyphs", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON}, true)},
+                {name = "SoulGem", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SOUL_GEM}, true)},
+                {name = "Siege", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SIEGE}, true)},
+                {name = "Bait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_LURE}, true)},
+                {name = "Tool", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_TOOL}, true, itemIds.repairtools)},
+                {name = "Trophy", showIcon=true, filterCallback = GetFilterCallbackForTrophy(true)},
+                {name = "Fence", showIcon=true, filterCallback = GetFilterCallbackForFence(true)},
+                {name = "Trash", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_TRASH}, true)},
+                {name = "Vanity", showIcon=true, filterCallback = GetFilterCallbackForClothing(true)},
+                --{name = "Costume",  filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_COSTUME})},
             },
         },
     },
---=============================================================================================================================================================================================
-    --Clothier refine
-    RefineClothier = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        RawMaterialClothier = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-    },
---=============================================================================================================================================================================================
-    ArmorWoodworking = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        Shield = {
-            filterForAll = {
-                equipTypes = {EQUIP_TYPE_OFF_HAND},
-            },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end,
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
-            dropdownCallbacks = {
-                {name = "Shield", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
-            },
-        },
-    },
---=============================================================================================================================================================================================
-    --Woodworking refine
-    RefineWoodworking = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        RawMaterialWoodworking = {
-            filterCallback = GetFilterCallback({ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-    },
---=============================================================================================================================================================================================
--- -^- Armor & Crafting & Refine                                                                                     -^-
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
--- -v- Jewelry & Crafting & Refine                                                                                   -v-
---=============================================================================================================================================================================================
-    --JewelryCrafting
-    JewelryCrafting = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        Plating = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_BOOSTER}),
-            dropdownCallbacks = {},
-        },
-        RefinedMaterialJewelry = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-        RawPlating = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER}),
-            dropdownCallbacks = {},
-        },
-        RawMaterialJewelry = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-        FurnishingMat = {
-            filterCallback = GetFilterCallback({ITEMTYPE_FURNISHING_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-    },
-
-    --Jewelry crafting refine
-    RefineJewelryCraftingStation = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
-        },
-        RawPlating = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER}),
-            dropdownCallbacks = {},
-        },
-        RawMaterialJewelry = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}),
-            dropdownCallbacks = {},
-        },
-        JewelryRawTrait = {
-            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT}),
-            dropdownCallbacks = {},
-        },
-    },
---=============================================================================================================================================================================================
--- -^- Jewelry & Crafting & Refine                                                                                   -^-
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
--- -v- CraftBag & Materials                                                                                          -v-
---=============================================================================================================================================================================================
-    --Blacksmithing
     Blacksmithing = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1196,8 +1137,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Clothing
     Clothing = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1221,8 +1160,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Woodworking
     Woodworking = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1246,8 +1183,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Alchemy
     Alchemy = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1271,8 +1206,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Enchanting
     Enchanting = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1296,8 +1229,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Runes
     Runes = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1305,8 +1236,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Glyphs
     Glyphs = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1326,8 +1255,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Provisioning
     Provisioning = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1359,8 +1286,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Style
     Style = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1388,8 +1313,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Traits
     Traits = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1412,14 +1335,85 @@ local subfilterCallbacks = {
             },
         },
     },
---=============================================================================================================================================================================================
--- -^- CraftBag & Materials                                                                                          -^-
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
--- -v- Retrait                                                                                                       -v-
---=============================================================================================================================================================================================
-    --Weapons retrait
+    JewelryCrafting = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Plating = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_BOOSTER}),
+            dropdownCallbacks = {},
+        },
+        RefinedMaterialJewelry = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+        RawPlating = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER}),
+            dropdownCallbacks = {},
+        },
+        RawMaterialJewelry = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+        FurnishingMat = {
+            filterCallback = GetFilterCallback({ITEMTYPE_FURNISHING_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+    },
+    RefineJewelryCraftingStation = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        RawPlating = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER}),
+            dropdownCallbacks = {},
+        },
+        RawMaterialJewelry = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+        JewelryRawTrait = {
+            filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT}),
+            dropdownCallbacks = {},
+        },
+    },
+    RefineSmithing = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        RawMaterialSmithing = {
+            filterCallback = GetFilterCallback({ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+    },
+    RefineClothier = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        RawMaterialClothier = {
+            filterCallback = GetFilterCallback({ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+    },
+    RefineWoodworking = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        RawMaterialWoodworking = {
+            filterCallback = GetFilterCallback({ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
+            dropdownCallbacks = {},
+        },
+    },
     WeaponsRetrait = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1460,8 +1454,6 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
     },
---=============================================================================================================================================================================================
-    --Armor retrait
     ArmorRetrait = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1487,8 +1479,6 @@ local subfilterCallbacks = {
             },
         },
     },
---=============================================================================================================================================================================================
-    --Jewelry retrait
     JewelryRetrait = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
@@ -1528,13 +1518,13 @@ local subfilterCallbacks = {
             },
         },
     },
-
---=============================================================================================================================================================================================
--- -^- Retrait                                                                                                       -^-
---=============================================================================================================================================================================================
-
---=============================================================================================================================================================================================
---Not added yet
+    Collectibles = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL]         = {
+            filterCallback    = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+    },
     --[[
     CreateArmorSmithing = {
         addonDropdownCallbacks = {},
@@ -1657,116 +1647,7 @@ local subfilterCallbacks = {
         },
     },
     ]]
---=============================================================================================================================================================================================
-    Junk = {
-        addonDropdownCallbacks = {},
-        [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil, true),
-            dropdownCallbacks = {},
-        },
-        Weapon = {
-            filterCallback = GetFilterCallback({ITEMTYPE_WEAPON}, true),
-            dropdownCallbacks = {
-                {name = "OneHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}, true)},
-                {name = "TwoHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}, true)},
-                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}, true)},
-                {name = "DestructionStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}, true)},
-                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}, true)},
-            },
-        },
-        Armor = {
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET}, nil, true),
-            dropdownCallbacks = {
-                {name = "Heavy", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}, true)},
-                {name = "Medium", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}, true)},
-                {name = "LightArmor", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}, true)},
-                --{name = "Clothier", filterCallback = GetFilterCallbackForClothing()},
-                {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}, nil, true)},
-                --{name = "Vanity", filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_DISGUISE, EQUIP_TYPE_COSTUME})},
-                --{name = "Vanity", filterCallback = GetFilterCallbackForClothing(true)},
-            },
-        },
-        Jewelry = {
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING, EQUIP_TYPE_NECK}, nil, true),
-            dropdownCallbacks = {
-                {name = "Ring", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING}, nil, true)},
-                {name = "Neck", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK}), nil, true},
-            },
-        },
-        Consumable = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
-                                                ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_TROPHY,
-                                                ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_TREASURE}, true, itemIds.lockpick),
-            dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}, true)},
-                {name = "Food", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_FOOD}, true)},
-                {name = "Drink", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DRINK}, true)},
-                {name = "Recipe", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}, true)},
-                {name = "Potion", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POTION}, true)},
-                {name = "Poison", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POISON}, true)},
-                {name = "Motif", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RACIAL_STYLE_MOTIF}, true)},
-                {name = "Writ", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_MASTER_WRIT}, true)},
-                {name = "Container", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY}, true, true)},
-                {name = "Repair", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR}, true, itemIds.lockpick)},
-                {name = "Trophy", showIcon=true, filterCallback = GetFilterCallbackForTrophy(true)},
-            },
-        },
-        Materials = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_BLACKSMITHING_MATERIAL, ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_BLACKSMITHING_BOOSTER,
-                                                ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_CLOTHIER_BOOSTER,
-                                                ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_WOODWORKING_BOOSTER,
-                                                ITEMTYPE_JEWELRYCRAFTING_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_MATERIAL,
-                                                ITEMTYPE_REAGENT, ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE,
-                                                ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY,
-                                                ITEMTYPE_INGREDIENT, ITEMTYPE_STYLE_MATERIAL,
-                                                ITEMTYPE_RAW_MATERIAL, ITEMTYPE_JEWELRY_RAW_TRAIT, ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL,
-                                                ITEMTYPE_WEAPON_TRAIT, ITEMTYPE_ARMOR_TRAIT, ITEMTYPE_JEWELRY_TRAIT,
-                                                ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING,
-                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING,
-                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING,
-                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING,
-            }, true, true),
-            dropdownCallbacks = {
-                {name = "Blacksmithing", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_BLACKSMITHING_MATERIAL, ITEMTYPE_BLACKSMITHING_RAW_MATERIAL, ITEMTYPE_BLACKSMITHING_BOOSTER}, true)},
-                {name = "Clothier", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, ITEMTYPE_CLOTHIER_BOOSTER}, true)},
-                {name = "Woodworking", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL, ITEMTYPE_WOODWORKING_BOOSTER}, true)},
-                {name = "JewelryCrafting", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_MATERIAL, ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}, true)},
-                {name = "Alchemy", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_REAGENT, ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE}, true)},
-                {name = "Enchanting", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY}, true)},
-                {name = "Provisioning", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}, true)},
-                {name = "Style", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_STYLE_MATERIAL, ITEMTYPE_RAW_MATERIAL}, true)},
-                {name = "ArmorTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ARMOR_TRAIT}, true)},
-                {name = "WeaponTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_WEAPON_TRAIT}, true)},
-                {name = "JewelryAllTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT, ITEMTYPE_JEWELRY_TRAIT}, true)},
-                {name = "Furnishings", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING})},
-            },
-        },
-        Furnishings = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION, SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT, SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL, SPECIALIZED_ITEMTYPE_FURNISHING_SEATING, SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY}, true),
-            dropdownCallbacks = {
-                {name = "CraftingStation", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION})},
-                {name = "Light", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT})},
-                {name = "Ornamental", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL})},
-                {name = "Seating", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_SEATING})},
-                {name = "TargetDummy", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_TARGET_DUMMY})},
-            }
-        },
-        Miscellaneous = {
-            filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON, ITEMTYPE_SOUL_GEM, ITEMTYPE_SIEGE, ITEMTYPE_LURE, ITEMTYPE_TOOL, ITEMTYPE_TROPHY, ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_TREASURE, ITEMTYPE_TRASH, ITEMTYPE_DISGUISE, ITEMTYPE_TABARD}, true, itemIds.repairtools),
-            dropdownCallbacks = {
-                {name = "Glyphs", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON}, true)},
-                {name = "SoulGem", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SOUL_GEM}, true)},
-                {name = "Siege", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SIEGE}, true)},
-                {name = "Bait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_LURE}, true)},
-                {name = "Tool", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_TOOL}, true, itemIds.repairtools)},
-                {name = "Trophy", showIcon=true, filterCallback = GetFilterCallbackForTrophy(true)},
-                {name = "Fence", showIcon=true, filterCallback = GetFilterCallbackForFence(true)},
-                {name = "Trash", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_TRASH}, true)},
-                {name = "Vanity", showIcon=true, filterCallback = GetFilterCallbackForClothing(true)},
-                --{name = "Costume",  filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_COSTUME})},
-            },
-        },
-    },
+
 --=============================================================================================================================================================================================
     --CUSTOM ADDON TABs
     --[[
@@ -1778,14 +1659,9 @@ local subfilterCallbacks = {
         },
     },
     ]]
---=============================================================================================================================================================================================
-} --subfilterCallbacks
-
+}
 --Clones of subfilterCallbacks
-subfilterCallbacks.JewelryCraftingStation = subfilterCallbacks.Jewelry
---Global variable
-AF.subfilterCallbacks = subfilterCallbacks
-
+AF.subfilterCallbacks.JewelryCraftingStation = AF.subfilterCallbacks.Jewelry
 --Callback functions for external addons, used on AF.util.SubfilterRefresh() filter function to grey out subfilter buttons
 AF.SubfilterRefreshCallbacks = {}
 
@@ -1840,9 +1716,9 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
     --Check if the same addon information is already in the callback tables for the filterType
     --and remove the old one, before adding the same/newer one again
     local removedDuplicate = false
-    local subfilterCallBacksOfGroup = subfilterCallbacks[groupName]
+    local subfilterCallBacksOfGroup = AF.subfilterCallbacks[groupName]
     if subfilterCallBacksOfGroup ~= nil and subfilterCallBacksOfGroup.addonDropdownCallbacks ~= nil then
-        local existingAFSubfilterCallbacksInfo = subfilterCallbacks[groupName].addonDropdownCallbacks
+        local existingAFSubfilterCallbacksInfo = AF.subfilterCallbacks[groupName].addonDropdownCallbacks
         for index, subfilterCallbacksInfo in pairs(existingAFSubfilterCallbacksInfo) do
             --FilterInformation got a submenu? Compare the submenu names and remove exisitng before re-adding this
             if addonInformation.submenuName ~= nil then
@@ -1907,7 +1783,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
             d("[AdvancedFilters_RegisterFilter]Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
             return
         else
-            if subfilterCallbacks[groupName] == nil or subfilterCallbacks[groupName].addonDropdownCallbacks == nil then return end
+            if AF.subfilterCallbacks[groupName] == nil or AF.subfilterCallbacks[groupName].addonDropdownCallbacks == nil then return end
         end
 
         --Check if the same addon information is already in the callback tables for the filterType
@@ -1915,7 +1791,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName)
 
         --insert addon information
-        table.insert(subfilterCallbacks[groupName].addonDropdownCallbacks, addonInformation)
+        table.insert(AF.subfilterCallbacks[groupName].addonDropdownCallbacks, addonInformation)
 
         --if strings are going to be generated, end registration now
         if filterInformation.generator then return end

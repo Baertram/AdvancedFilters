@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.5.3.9"
+AF.version = "1.5.3.4"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -1575,5 +1575,3 @@ local itemIds = {
 }
 AF.itemIds = itemIds
 
---Table where external dropdown filter plugins can register themselves for checks done by other addos
-AF.externalDropdownFilterPlugins = {}

@@ -149,9 +149,10 @@ function util.GetCurrentFilter(invType)
 
     --Crafting
     local isCraftingInventoryType = false
-    --local craftingType = util.GetCraftingType()
-    --local subfilterBarBase = util.GetSubfilterBar(invType, craftingType)
-    local subfilterBar = util.GetActiveSubfilterBar(invType)
+    local subfilterGroup = AF.subfilterGroups[invType]
+    local craftingType = util.GetCraftingType()
+    local subfilterBarBase = subfilterGroup[craftingType]
+    local subfilterBar = subfilterBarBase[currentFilter]
     if util.IsCraftingPanelShown() and subfilterBar then
         isCraftingInventoryType = util.IsCraftingStationInventoryType(subfilterBar.inventoryType)
     end
@@ -159,9 +160,11 @@ function util.GetCurrentFilter(invType)
     if invType == INVENTORY_TYPE_VENDOR_BUY then
         currentFilter = controlsForChecks.store.currentFilter
     elseif isCraftingInventoryType then
-        local craftingInv = subfilterBar and util.GetInventoryFromCraftingPanel(subfilterBar.inventoryType)
-        if not craftingInv then return end
-        currentFilter = craftingInv.currentFilter
+        if isCraftingInventoryType then
+            local craftingInv = subfilterBar and util.GetInventoryFromCraftingPanel(subfilterBar.inventoryType)
+            if not craftingInv then return end
+            currentFilter = craftingInv.currentFilter
+        end
     else
         --Get the player inventory for the inventory type
         local playerInv = PLAYER_INVENTORY.inventories[invType]
@@ -341,8 +344,8 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
         groupNameLocal = groupNameLocal or ""
         subfilterNameLocal = subfilterNameLocal or subfilterNameLocal
         if AF.settings.doDebugOutput then
-            AF._addonTableBuildDropdownCallbacks = AF._addonTableBuildDropdownCallbacks or {}
-            table.insert(AF._addonTableBuildDropdownCallbacks, addonTable)
+            AF._addonTable = AF._addonTable or {}
+            table.insert(AF._addonTable, addonTable)
         end
         local addonName = ""
         if addonTable.name ~= nil and addonTable.name ~= "" then
@@ -973,21 +976,20 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                 end
                 --Check if the item can be sold
                 if isVendorPanel or isFencePanel then
-                    isItemSellable = true
+                    local itemSellInformation = GetItemLinkSellInformation(GetItemLink(itemData.bagId, itemData.slotIndex))
                     --[[
-                        local itemSellInformation = GetItemLinkSellInformation(GetItemLink(itemData.bagId, itemData.slotIndex))
-                        --ItemSellInformation
-                        --        * ITEM_SELL_INFORMATION_CANNOT_SELL = 4
-                        --        * ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED = 3
-                        --        * ITEM_SELL_INFORMATION_INTRICATE = 2
-                        --        * ITEM_SELL_INFORMATION_PRIORITY_SELL = 1
-                        --        * ITEM_SELL_INFORMATION_NONE = 0
-                        if itemSellInformation == ITEM_SELL_INFORMATION_CANNOT_SELL then
-                            isItemSellable = false
-                        else
-                            isItemSellable = true
-                        end
+                    ItemSellInformation
+                            * ITEM_SELL_INFORMATION_CANNOT_SELL = 4
+                            * ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED = 3
+                            * ITEM_SELL_INFORMATION_INTRICATE = 2
+                            * ITEM_SELL_INFORMATION_PRIORITY_SELL = 1
+                            * ITEM_SELL_INFORMATION_NONE = 0
                     ]]
+                    if itemSellInformation == ITEM_SELL_INFORMATION_CANNOT_SELL then
+                        isItemSellable = false
+                    else
+                        isItemSellable = true
+                    end
                 end
                 --Check if item is stolen (crafting or banks)
                 if isABankDepositPanel or isVendorPanel or not isNoCrafting or isGuildStoreSellPanel or isFencePanel or isLaunderPanel then
@@ -1188,6 +1190,16 @@ function util.GetListControlForSubfilterBarReanchor(inventoryType)
     return listControlForSubfilterBarReanchor, moveInvBottomBarDown
 end
 
+--Get the current subFilterBar's active button
+function util.GetActiveSubfilterBarButton(invType)
+    if not invType then return end
+    local subfilterBarBase = AF.subfilterGroups[invType]
+    if not subfilterBarBase then return end
+    local currentSubfilterBar = subfilterBarBase.currentSubfilterBar
+    if not currentSubfilterBar then return end
+    local currentActiveSubfilterBarButton = currentSubfilterBar.activeButton
+    return currentActiveSubfilterBarButton
+end
 --======================================================================================================================
 -- -^- Subfilter bar functions                                                                                      -^-
 --======================================================================================================================
@@ -1196,7 +1208,7 @@ end
 -- -v- Filter functions                                                                                             -v-
 --======================================================================================================================
 
---Apply the LiFilters filter to the inventory now
+--Apply the LIbFilters filter to the inventory now
 function util.ApplyFilter(button, filterTag, requestUpdate, filterType)
 
     local currentInvType    = AF.currentInventoryType
@@ -1756,24 +1768,6 @@ end
 -- -^- Crafting functions                                                                                           -^-
 --======================================================================================================================
 
-
---======================================================================================================================
--- -v- Filter plugin for the filterBar dropdown box functions                                                       -v-
---======================================================================================================================
-function util.ResetExternalDropdownFilterPluginsIsFiltering()
-    local externalDropdownFilterPlugins = AF.externalDropdownFilterPlugins
-    if externalDropdownFilterPlugins then
-        for externalFilterPluginName, externalFilterPluginData in pairs(externalDropdownFilterPlugins) do
-            if externalFilterPluginData and externalFilterPluginData.isFiltering == true then
-                externalFilterPluginData.isFiltering = false
-            end
-        end
-    end
-end
---======================================================================================================================
--- -^- Filter plugin for the filterBar dropdown box functions                                                       -^-
---======================================================================================================================
-
 --======================================================================================================================
 -- -v- Other addons functions                                                                                       -v-
 --======================================================================================================================
@@ -1855,66 +1849,6 @@ function util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters(slotData, inve
         end
     end
     return retVar
-end
-
---Get a subfilterBar
---invType: nilable  Inventory type
---craftType: nilable Crafting type
-function util.GetSubfilterBar(invType, craftType)
-    invType = invType or AF.currentInventoryType
-    if not invType then return end
-    local subfilterGroup = AF.subfilterGroups[invType]
-    if not subfilterGroup then return end
-    if craftType == nil then
-        return subfilterGroup
-    end
-    local subfilterBar = subfilterGroup[craftType]
-    return subfilterBar
-end
-
---Get the currently active subfilterBar
---invType: nilable  Inventory type
-function util.GetActiveSubfilterBar(invType)
-    local subfilterGroup = util.GetSubfilterBar(invType, nil)
-    if not subfilterGroup then return end
-    local activeSubfilterBar = subfilterGroup.currentSubfilterBar
-    return activeSubfilterBar
-end
-
---Get the currently active subfilterBar's button
---invType: nilable  Inventory type
-function util.GetActiveSubfilterBarButton(invType)
-    local activeSubfilterBar = util.GetActiveSubfilterBar(invType)
-    if not activeSubfilterBar then return end
-    return activeSubfilterBar.activeButton
-end
-
---Get the currently active subfilterBar's dropdown box
---invType: nilable  Inventory type
-function util.GetActiveSubfilterBarDropdown(invType)
-    local activeSubfilterBar = util.GetActiveSubfilterBar(invType)
-    if not activeSubfilterBar then return end
-    return activeSubfilterBar.dropdown
-end
-
---Get the currently active subfilterBar's dropdown box's selected filter plugin data
---invType: nilable  Inventory type
-function util.GetActiveSubfilterBarSelectedDropdownFilterData(invType)
-    local dropdown = util.GetActiveSubfilterBarDropdown(invType)
-    if not dropdown then return end
-    local comboBox = dropdown.m_comboBox
-    if not comboBox then return end
-    local selectedItemData = comboBox.m_selectedItemData
-    return selectedItemData
-end
-
---Re-Apply the last selected filterBar's dropdown filter, or apply the first entry of the dropdown box
-function util.ReApplyDropdownFilter()
-    local activeSubfilterBar = util.GetActiveSubfilterBar()
-    if not activeSubfilterBar then return end
-    if activeSubfilterBar.ApplyDropdownSelection then
-        activeSubfilterBar:ApplyDropdownSelection()
-    end
 end
 --======================================================================================================================
 -- -^- API functions                                                                                               -^-
