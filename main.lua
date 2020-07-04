@@ -5,9 +5,8 @@ local AF = AdvancedFilters
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-01-16
---AF Version: 1.5.3.4
---Max todos: #25
+--TODO Last updated: 2020-07-03
+--Max todos: #30
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -29,28 +28,40 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
+--#27: 2020-05-20 User F-Lambda in esoui AF comments: Split jewelry trait dropdown filters into submenus for rings and neck
+
+--#27: 2020-06-28 User sirinsidiator in gitter IM: Vendor Woodworking -> Furniture -> Close vendor -> Visit vendor smithing (No furniture) -> Furniture filters are still shown
+--                and cannot be changed as there is only 1 main filterbutton at the vendor, but showing furniture subfilter buttons and filtering all items "out"
+
+--#28 2020-06-30, FooWasHere: Talk to vendor for woodworking, sell tab, change filter from ALL to "Weapons". Leave the woodworking vendor. Open any other vendor where there is NO
+--                            Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hiddem, including items
+
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.5.3.3
+--  UPDATE INFORMATION: since AF 1.5.4.4 - Current 1.5.4.5
 --______________________________________________________________________________________________________________________
 
 
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
+--#31 Vendor buy panel uses subfilter buttons now for existing inventory subfilters (e.g. armor, weapons, furniture, misc., consumables)
+--#32 Vendor buy panel subfilter buttons will grey out if there ar enot items to buy at this vendor (and the grey out setting is enabled)
 
 
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
 --______________________________________________________________________________________________________________________
+--#30 AvA keep recall stones were added to Consumables -> Trophies (ITEMTYPE_RECALL_STONE)
+
+--______________________________________________________________________________________________________________________
+--                                                  Changed
+--______________________________________________________________________________________________________________________
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#22: Error messages multi language support
---#23: User kebabman: Bank closing raised an error "user:/AddOns/AdvancedFilters/main.lua:304: attempt to index a nil value"
---#24: Compatibility with CraftStoreFixedAndImproved rune chanages to show subfilter bars properly if vanilla UI and CS ui are mixed
---#25: Unsupported filterBar recipes at enchanting table will not show an error message to the chat anymore
+--#28 Vendor buy panels behave properly again if you change between vendors who got different filter buttons (e.g. 1st got furniture, 2nd didn't. All items were hidden)
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -133,14 +144,15 @@ function AF.showChatDebug(functionName, chatOutputVars)
     end
     --Chat output
     if not strings then return end
-    d(">====================================>")
+    d(">>>======== AF ERROR - BEGIN ========>>>")
     d(afPrefixError .. "|c00ccff" .. tostring(functionNameStr) .. "|r")
     d(strings.errorWhatToDo1)
     d(strings.errorWhatToDo2)
+    d("-> [" .. tostring(functionNameStr) .. "]\n")
     if chatOutputVars ~= "" then
-        d("-> " .. chatOutputVars)
+        d(chatOutputVars)
     end
-    d("<====================================<")
+    d("<<<======== AF ERROR - END ========<<<")
 end
 local showChatDebug = AF.showChatDebug
 
@@ -275,6 +287,7 @@ local function InitializeHooks()
     --Their parents (e.g. the player inventory or the bank or the crafting smithing station) are defined in file constants.lua in table "filterBarParents"
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType)
         if AF.settings.debugSpam then d(">>-----------------------------------------------\n----------------------------------------------->>") end
+        ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar)
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
@@ -321,8 +334,9 @@ local function InitializeHooks()
             --Should something else be moved or re-anchored (e.g. at the research panel the horizontal scroll list part)
             --AF.util.ReAnchorControlsForSubfilterBar(self, shiftY, p_currentFilter, p_craftingType)
         end
-        local invType = currentInvType or AF.currentInventoryType
+        ----------------------------------------------------------------------------------------------------------------
 
+        local invType = currentInvType or AF.currentInventoryType
         --Check for custom added inventory filter button
         --CraftBag
         if invType == INVENTORY_CRAFT_BAG then
@@ -331,7 +345,7 @@ local function InitializeHooks()
             if afCBCurrentFilter and afCBCurrentFilter ~= ITEMFILTERTYPE_ALL and afCBCurrentFilter == currentFilter then
                 --Set prevention variable for function ShowSubfilterBar at the craftbag.
 
-                --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbagm and reopening the craftbag now.
+                --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
                 local currentCBFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter
                 --d(">currentCBFilter: " .. tostring(currentCBFilter))
@@ -542,11 +556,16 @@ local function InitializeHooks()
         if customInventoryFilterButtonsItemType then
             if AF.settings.debugSpam then d("[AF]ChangeFilterInventory-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
         end
+        --[[
+        --Causes bug with #28
+        #28 2020-06-30, FooWasHere: Talk to vendor for woodworking, sell tab, change filter from ALL to "Weapons". Leave the woodworking vendor. Open any other vendor where there is NO
+        --                            Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hiddem, including items
         local doNotUpdateInventoriesWithInventoryChangeFilterFunction = AF.doNotUpdateInventoriesWithInventoryChangeFilterFunction
         local shouldNotUpdateWithInventoryChangeFilterFunc = doNotUpdateInventoriesWithInventoryChangeFilterFunction[currentInvType] or false
         if not shouldNotUpdateWithInventoryChangeFilterFunc then
+        ]]
             ThrottledUpdate("ShowSubfilterBar" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, currentInvType)
-        end
+        --end
         --Update the total count for quest items as there are no epxlicit filterBars available until today!
         local currentFilterToCheck = customInventoryFilterButtonsItemType or currentFilter
         local inactiveSubFilterBarInventoryType = AF.subFiltersBarInactive[currentFilterToCheck] or nil
@@ -583,27 +602,37 @@ local function InitializeHooks()
     ]]
     ZO_PreHook(PLAYER_INVENTORY, "ChangeFilter", ChangeFilterInventory)
 
-    --[[
-    --  Seems to not be needed anymore here as the normal inventory's function ChangeFilter is executed for "vendor sell" panels!
+    --  Store "BUY" changefilter function
         local function ChangeFilterVendor(self, filterTab)
-    --d("[AF]ChangeFilterVendor")
+            --d("[AF]ChangeFilterVendor")
+            local invType = INVENTORY_TYPE_VENDOR_BUY -- AF.currentInventoryType
             local currentFilter = filterTab.filterType
+
             if CheckIfNoSubfilterBarShouldBeShown(currentFilter) then return end
 
-            ThrottledUpdate("ShowSubfilterBar" .. tostring(INVENTORY_TYPE_VENDOR_BUY), 10, ShowSubfilterBar,
-              currentFilter)
-            local invType = INVENTORY_TYPE_VENDOR_BUY -- AF.currentInventoryType
-            local subfilterGroup = AF.subfilterGroups[invType]
-            if not subfilterGroup then return end
-            local craftingType = GetCraftingType()
-            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
-            if not currentSubfilterBar then return end
+            ThrottledUpdate("ShowSubfilterBar" .. tostring(invType), 10, ShowSubfilterBar,
+                    currentFilter)
 
-            ThrottledUpdate("RefreshSubfilterBar" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-              RefreshSubfilterBar, currentSubfilterBar)
-    end
+
+            zo_callLater(function()
+                local subfilterGroup = AF.subfilterGroups[invType]
+                if not subfilterGroup then return end
+                local craftingType = GetCraftingType()
+                local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+                if not currentSubfilterBar then return end
+
+                ThrottledUpdate("RefreshSubfilterBar" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                        RefreshSubfilterBar, currentSubfilterBar)
+            end, 25)
+
+            --Update the count of filtered/shown items in the inventory FreeSlot label
+            --Delay this function call as the data needs to be filtered first!
+            --[[
+            ThrottledUpdate("RefreshItemCount_" .. invType,
+                    50, util.updateInventoryInfoBarCountLabel, invType, false)
+            ]]
+        end
     ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
-    ]]
 
     --Filter changing function for crafting stations and retrait station.
     --Recognizes if a button like armor/weapons was changed at the crafting station (which is a filter change internally)

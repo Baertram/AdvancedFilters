@@ -22,7 +22,7 @@ local dropdownCallbacks = {
 }
 
 local strings = {
-    ["MotifCategories"] = "Motif Categories",
+    ["MotifCategories"] = "Motif categories",
     ["NormalStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_NORMAL),
     ["RareStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_RARE),
     ["AllianceStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_ALLIANCE),
@@ -31,12 +31,16 @@ local strings = {
 }
 local stringsDE = {
     ["MotifCategories"] = "Motiv Kategorien",
-    ["NormalStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_NORMAL),
-    ["RareStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_RARE),
-    ["AllianceStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_ALLIANCE),
-    ["ExoticStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_EXOTIC),
-    ["DroppedStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_DROPPED),
 }
+stringsDE = setmetatable(strings, {__index = strings})
+local stringsES = {
+    ["MotifCategories"] = "Diseños por categoría",
+}
+stringsES = setmetatable(strings, {__index = strings})
+local stringsFR = {
+    ["MotifCategories"] = "Catégories de motifs",
+}
+stringsFR = setmetatable(strings, {__index = strings})
 
 local filterInformation = {
     submenuName = "MotifCategories",
@@ -44,7 +48,9 @@ local filterInformation = {
     filterType = ITEMFILTERTYPE_WEAPONS,
     subfilters = {"All",},
     deStrings = stringsDE,
+	esStrings = stringsES,
     enStrings = strings,
+    frStrings = stringsFR,
 }
 
 AdvancedFilters_RegisterFilter(filterInformation)

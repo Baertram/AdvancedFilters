@@ -35,9 +35,9 @@ local styleDropdownCallbacks = {
 }
 
 local strings = {
-    ["MotifKnowledge"]  = "Motif Knowledge",
-    ["CraftableMotif"]  = "Craftable Motif",
-    ["KnownMotif"]      = "Known Motif",
+    ["MotifKnowledge"]  = "Motif knowledge",
+    ["CraftableMotif"]  = "Craftable motif",
+    ["KnownMotif"]      = "Known motif",
 }
 local stringsDE = {
     ["MotifKnowledge"]  = "Motiv Wissen",
@@ -45,9 +45,14 @@ local stringsDE = {
     ["KnownMotif"]      = "Bekannte Motive",
 }
 local stringsFR = {
-    ["MotifKnowledge"]  = "Motif Connaissance",
+    ["MotifKnowledge"]  = "Motif connaissance",
     ["CraftableMotif"]  = "Motif artisanal",
     ["KnownMotif"]      = "Motif connu",
+}
+local stringsES = {
+    ["MotifKnowledge"]  = "Conocimiento en diseños",
+    ["CraftableMotif"]  = "Diseños fabricables",
+    ["KnownMotif"]      = "Diseños conocidos",
 }
 
 local filterInformation = {
@@ -58,6 +63,7 @@ local filterInformation = {
     deStrings = stringsDE,
     enStrings = strings,
     frStrings = stringsFR,
+	esStrings = stringsES,
 }
 
 AdvancedFilters_RegisterFilter(filterInformation)

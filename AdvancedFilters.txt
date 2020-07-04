@@ -1,9 +1,9 @@
 ## Title: Advanced Filters
 ## Author: Randactyl & Baertram
-## Version: 1.5.3.5
-## AddOnVersion: 1535
-## APIVersion: 100029 100030
-## DependsOn: LibAddonMenu-2.0 libCommonInventoryFilters LibCustomMenu LibFilters-3.0 LibMotifCategories
+## Version: 1.5.4.5
+## AddOnVersion: 1545
+## APIVersion: 100031 100032
+## DependsOn: LibAddonMenu-2.0>=28 libCommonInventoryFilters>=140 LibCustomMenu>=682 LibFilters-3.0>=315 LibMotifCategories>=2
 ## OptionalDependsOn: CraftBagExtended Multicraft
 ## SavedVariables: AdvancedFilters_Settings
 

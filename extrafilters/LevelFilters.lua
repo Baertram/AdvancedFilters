@@ -82,6 +82,11 @@ local stringsDE = {
     ["LevelFilters"] = "Level Filter",
 }
 stringsDE = setmetatable(stringsDE, {__index = strings})
+local stringsES = {
+    --Remember to provide a string for your submenu if using one (see below).
+    ["LevelFilters"] = "Filtrar por nivel",
+}
+stringsES = setmetatable(stringsES, {__index = strings})
 
 --[[----------------------------------------------------------------------------
     This section packages the data for Advanced Filters to use.
@@ -113,7 +118,7 @@ local filterInformation = {
     deStrings = stringsDE,
     frStrings = strings,
     ruStrings = strings,
-    esStrings = strings,
+    esStrings = stringsES,
 }
 --[[----------------------------------------------------------------------------
     Register your filters by passing your filter information to this function.

@@ -6,6 +6,7 @@ local afPrefixError     = string.format(afPrefix, " ERROR")
 
 local strings = {
     --SHARED
+    None = util.Localize(SI_ARMORTYPE0),
     All = util.Localize(SI_ITEMFILTERTYPE0),
     Trophy = util.Localize(SI_ITEMTYPE5),
     TreasureMaps = util.Localize(SI_SPECIALIZEDITEMTYPE100),
@@ -14,6 +15,14 @@ local strings = {
     MuseumPiece = util.Localize(SI_SPECIALIZEDITEMTYPE103),
     RecipeFragment = util.Localize(SI_SPECIALIZEDITEMTYPE104),
     Scroll = util.Localize(SI_SPECIALIZEDITEMTYPE105),
+    CollectibleFragment = util.Localize(SI_SPECIALIZEDITEMTYPE109),
+    Key = util.Localize(SI_SPECIALIZEDITEMTYPE107),
+    MaterialUpgrader = util.Localize(SI_SPECIALIZEDITEMTYPE106),
+    RuneboxFragment = util.Localize(SI_SPECIALIZEDITEMTYPE108),
+    Toy = util.Localize(SI_SPECIALIZEDITEMTYPE111),
+    UpgradeFragment = util.Localize(SI_SPECIALIZEDITEMTYPE110),
+    Fish = util.Localize(SI_ITEMTYPE54),
+    RareFish = util.Localize(SI_SPECIALIZEDITEMTYPE80),
 
     --WEAPON
     OneHand = util.Localize(SI_GAMEPADWEAPONCATEGORY1),
@@ -175,6 +184,9 @@ local strings = {
     --Transmutation
     Retrait = util.Localize(SI_RETRAIT_STATION_ITEM_TO_RETRAIT_HEADER),
 
+    --Recall stones
+    RecallStone = util.Localize(SI_ITEMTYPE69),
+
     --LAM settings menu
     lamDescription = "Show additional filter buttons in the inventories to seperate item types",
     lamHideItemCount = "Hide item count",
@@ -194,7 +206,7 @@ local strings = {
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",
-    errorLibrayMissing      = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
+    errorLibraryMissing     = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
     errorWhatToDo1          = "!> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) What did you do?\n2)Where did you do it?\n3)Did you test if the error happenes with only the addon AdvancedFilters and librraies activated (please test this!)?\n4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error?",
 
@@ -233,6 +245,8 @@ strings.Robust_Ring = strings.Robust .. ringStr
 strings.Swift_Ring = strings.Swift .. ringStr
 strings.Triune_Ring = strings.Triune .. ringStr
 strings.Protective_Ring = strings.Protective .. ringStr
+strings.All_Ring = strings.All .. ringStr
+strings.None_Ring = strings.None .. ringStr
 local neckStr = " (" .. strings.Neck .. ")"
 strings.Arcane_Neck = strings.Arcane .. neckStr
 strings.Bloodthirsty_Neck = strings.Bloodthirsty .. neckStr
@@ -245,6 +259,8 @@ strings.Robust_Neck = strings.Robust .. neckStr
 strings.Swift_Neck = strings.Swift .. neckStr
 strings.Triune_Neck = strings.Triune .. neckStr
 strings.Protective_Neck = strings.Protective .. neckStr
+strings.All_Neck = strings.All .. neckStr
+strings.None_Neck = strings.None .. neckStr
 
 --AdvancedFilters Prefix
 strings.AFPREFIX        = afPrefix

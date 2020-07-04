@@ -17,10 +17,16 @@ local dropdownCallback = {
 }
 
 local strings = {
-    ["BoPTrade"] = "Bound but Tradeable",
+    ["BoPTrade"] = "Bound but tradeable (BOP)",
 }
 local stringsDE = {
     ["BoPTrade"] = "Gebunden & handelbar",
+}
+local stringsES = {
+    ["BoPTrade"] = "Intercambiable temporalmente",
+}
+local stringsFR = {
+    ["BoPTrade"] = "Lié mais échangeable",
 }
 
 local filterInformation = {
@@ -34,6 +40,8 @@ local filterInformation = {
     },
     deStrings = stringsDE,
     enStrings = strings,
+	esStrings = stringsES,
+    frStrings = stringsFR,
 }
 
 AdvancedFilters_RegisterFilter(filterInformation)
@@ -49,6 +57,7 @@ filterInformation = {
     },
     deStrings = stringsDE,
     enStrings = strings,
+	esStrings = stringsES,
 }
 
 AdvancedFilters_RegisterFilter(filterInformation)

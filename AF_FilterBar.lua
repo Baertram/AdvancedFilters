@@ -84,13 +84,15 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 [1] = {
                     name = AF.strings.ResetToAll,
                     callback = function()
+                        --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
+                        util.ResetExternalDropdownFilterPluginsIsFiltering()
                         comboBox:SelectFirstItem()
                         filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
                         button.previousDropdownSelection[filterPanelIdActive] = comboBox.m_sortedItems[1]
 
                         PlaySound(SOUNDS.MENU_BAR_CLICK)
 
-                        local filterType = util.GetCurrentFilterTypeForInventory(self.inventoryType)
+                        local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
                         util.LibFilters:RequestUpdate(filterType)
                     end,
                 },
@@ -98,8 +100,10 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 [2] = {
                     name = invertFilterText,
                     callback = function()
+                        --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
+                        util.ResetExternalDropdownFilterPluginsIsFiltering()
                         filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-                        local filterType = util.GetCurrentFilterTypeForInventory(self.inventoryType)
+                        local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
                         local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[filterPanelIdActive]) or nil
                         local currentlySelectedDropdownItem = comboBox.m_selectedItemData
                         if not currentlySelectedDropdownItem then return end
@@ -177,8 +181,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 PlaySound(SOUNDS.MENU_BAR_CLICK)
             end
 
-            AddCustomMenuItem(item.name, OnSelect, nil, self.m_font,
-                    self.m_normalColor, self.m_highlightColor)
+            AddCustomMenuItem(item.name, OnSelect, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
         end
 
         local submenuCandidates = self.submenuCandidates
@@ -186,13 +189,21 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         for _, submenuCandidate in ipairs(submenuCandidates) do
             local entries = {}
             for _, callbackEntry in ipairs(submenuCandidate.callbackTable) do
+                local nameOfEntry = AF.strings[callbackEntry.name]
+                local nameOfEntryWithIcon = callbackEntry.nameWithIcon
+                if not nameOfEntryWithIcon or nameOfEntryWithIcon == "" then
+                    nameOfEntryWithIcon = nameOfEntry
+                end
+                if not nameOfEntry or nameOfEntry == "" then
+                    d("[AdvancedFilters] ERROR: FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames))
+                end
                 local entry = {
-                    label = AF.strings[callbackEntry.name],
+                    label = nameOfEntryWithIcon,
                     callback = function()
                         util.ApplyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
                         button.forceNextDropdownRefresh = true
-                        self.m_selectedItemText:SetText(AF.strings[callbackEntry.name])
-                        self.m_selectedItemData = self:CreateItemEntry(AF.strings[callbackEntry.name],
+                        self.m_selectedItemText:SetText(nameOfEntryWithIcon)
+                        self.m_selectedItemData = self:CreateItemEntry(nameOfEntryWithIcon,
                                 function(comboBox, itemName, item, selectionChanged)
                                     util.ApplyFilter(callbackEntry,
                                             AF_CONST_DROPDOWN_FILTER,
@@ -347,33 +358,81 @@ function AF_FilterBar:ActivateButton(newButton)
     local function PopulateDropdown(p_newButton)
         local comboBox = self.dropdown.m_comboBox
         p_newButton.dropdownCallbacks = BuildDropdownCallbacks(p_newButton.groupName, p_newButton.name)
+        local showIconsInFilterDropdowns = AF.settings.showIconsInFilterDropdowns
+        local textures = AF.textures
+        local texturesReSize = AF.texturesReSize
+
+        --Update the entry's text and texture
+        local function updateDropdownEntry(v, isSubmenu)
+            isSubmenu = isSubmenu or false
+            local totalDropdownEntryWithIcon
+
+            local dropdownEntryName = v.name
+            if v.addString ~= nil and v.addString ~= "" then
+                dropdownEntryName = dropdownEntryName .. "_" .. v.addString
+            end
+            local iconForDropdownCallbackEntry = ""
+            if showIconsInFilterDropdowns and v.showIcon ~= nil and v.showIcon == true then
+--d(">v.name: " ..tostring(v.name))
+                local textureName = textures[v.name] or ""
+                if textureName ~= "" then
+                    --Remove the placeholder %s
+                    textureName = string.format(textureName, "up")
+                    local width, height = 28, 28
+                    if isSubmenu then
+                        width, height = 18, 18
+                    end
+                    if texturesReSize then
+                        local textureReSizeData = texturesReSize[v.name]
+                        if textureReSizeData and textureReSizeData.width and textureReSizeData.height then
+                            width, height = textureReSizeData.width, textureReSizeData.height
+                            if isSubmenu then
+                                width = width -10
+                                height = height -10
+                                if width < 8 then width = 8 end
+                                if height < 8 then height = 8 end
+                            end
+                        end
+                    end
+                    if textureName ~= "" then
+                        iconForDropdownCallbackEntry = zo_iconFormat(textureName, width, height)
+                    end
+                end
+            end
+            local itemEntryName = AF.strings[dropdownEntryName] or ""
+
+            if itemEntryName == "" then
+                d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tostring(dropdownEntryName))
+                return nil, nil, nil, nil
+            else
+                if showIconsInFilterDropdowns and iconForDropdownCallbackEntry ~= "" then
+                    totalDropdownEntryWithIcon = iconForDropdownCallbackEntry .. " " .. itemEntryName
+                else
+                    totalDropdownEntryWithIcon = itemEntryName
+                end
+            end
+            return dropdownEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownEntryWithIcon
+        end
 
         comboBox.submenuCandidates = {}
         for _, v in ipairs(p_newButton.dropdownCallbacks) do
             if v.submenuName then
+                --Check each of the callbackTable entries if an icon should be shown or a pre/suffix text needs to be added
+                if v.callbackTable and #v.callbackTable > 0 then
+                    for idx,cbTableDataTab in ipairs(v.callbackTable) do
+                        if (cbTableDataTab.addString ~= nil and cbTableDataTab.addString ~= "") or cbTableDataTab.showIcon == true then
+                            local dropdownEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownEntryWithIcon = updateDropdownEntry(cbTableDataTab, true)
+                            if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
+                                v.callbackTable[idx].nameWithIcon = totalDropdownEntryWithIcon
+                            end
+                        end
+                    end
+                end
                 table.insert(comboBox.submenuCandidates, v)
             else
-                local dropdownEntryName = v.name
-                if v.addString ~= nil and v.addString ~= "" then
-                    dropdownEntryName = dropdownEntryName .. "_" .. v.addString
-                end
-                local iconForDropdownCallbackEntry = ""
-                if AF.settings.showIconsInFilterDropdowns and v.showIcon ~= nil and v.showIcon == true then
-                    local textureName = AF.textures[v.name] or ""
-                    if textureName ~= "" then
-                        --Remove the placeholder %s
-                        textureName = string.format(textureName, "up")
-                        iconForDropdownCallbackEntry = zo_iconFormat(textureName, 28, 28)
-                    end
-                end
-                local itemEntryName = AF.strings[dropdownEntryName] or ""
-                if itemEntryName == "" then
-                    d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tostring(dropdownEntryName))
-                else
-                    if AF.settings.showIconsInFilterDropdowns and iconForDropdownCallbackEntry ~= "" then
-                        itemEntryName = iconForDropdownCallbackEntry .. " " .. itemEntryName
-                    end
-                    local itemEntry = ZO_ComboBox:CreateItemEntry(itemEntryName,
+                local dropdownEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownEntryWithIcon = updateDropdownEntry(v, false)
+                if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
+                    local itemEntry = ZO_ComboBox:CreateItemEntry(totalDropdownEntryWithIcon,
                             function(comboBox, itemName, item, selectionChanged)
                                 util.ApplyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
                             end)
@@ -389,7 +448,7 @@ function AF_FilterBar:ActivateButton(newButton)
         comboBox:SetDropdownFont("ZoFontGameSmall")
     end
     --------------------------------------------------------------------------------------------------------------------
-    local inventoryTypeOfFilterBar = self.inventoryType
+    local inventoryTypeOfFilterBar = self:GetInventoryType()
 
     --Should the subfilterBar be shown?
     if util.CheckIfNoSubfilterBarShouldBeShown(nil, inventoryTypeOfFilterBar) then
@@ -444,34 +503,47 @@ function AF_FilterBar:ActivateButton(newButton)
     end
     --add new dropdown data
     PopulateDropdown(newButton)
+    --re-select the previous selected/first entry of the dropdown box
     if inventoryTypeOfFilterBar and filterPanelIdActive then
-        --select the first item if there is no previous selection or the setting to remember the last selection is disabled
-        if not AF.settings.rememberFilterDropdownsLastSelection or not newButton.previousDropdownSelection or not newButton.previousDropdownSelection[filterPanelIdActive] then
-            --Select the first entry
-            self.dropdown.m_comboBox:SelectFirstItem()
-            --util.LibFilters:UnregisterFilter(AF_CONST_DROPDOWN_FILTER, filterType)
-            --util.LibFilters:RegisterFilter(AF_CONST_DROPDOWN_FILTER, filterType, filterCallback)
-            --util.LibFilters:RequestUpdate(filterType)
-            newButton.previousDropdownSelection = newButton.previousDropdownSelection or {}
-            newButton.previousDropdownSelection[filterPanelIdActive] = self.dropdown.m_comboBox.m_sortedItems[1]
+        self:ApplyDropdownSelection(newButton)
+    end
+end
+
+function AF_FilterBar:ApplyDropdownSelection(newButton)
+    newButton = newButton or self:GetCurrentButton()
+    if newButton == nil then return end
+    local inventoryTypeOfFilterBar = self:GetInventoryType()
+    if inventoryTypeOfFilterBar == nil then return end
+    local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryTypeOfFilterBar)
+    if filterPanelIdActive == nil then return end
+    --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
+    util.ResetExternalDropdownFilterPluginsIsFiltering()
+    --select the first item if there is no previous selection or the setting to remember the last selection is disabled
+    if not AF.settings.rememberFilterDropdownsLastSelection or not newButton.previousDropdownSelection or not newButton.previousDropdownSelection[filterPanelIdActive] then
+        --Select the first entry
+        self.dropdown.m_comboBox:SelectFirstItem()
+        --util.LibFilters:UnregisterFilter(AF_CONST_DROPDOWN_FILTER, filterType)
+        --util.LibFilters:RegisterFilter(AF_CONST_DROPDOWN_FILTER, filterType, filterCallback)
+        --util.LibFilters:RequestUpdate(filterType)
+        newButton.previousDropdownSelection = newButton.previousDropdownSelection or {}
+        newButton.previousDropdownSelection[filterPanelIdActive] = self.dropdown.m_comboBox.m_sortedItems[1]
+    else
+        --restore previous dropdown selection if the settings is enabled for this
+        local previousDropdownSelection = newButton.previousDropdownSelection[filterPanelIdActive]
+        --Check if the previous selection was a right mouse context menu "invert" option
+        if previousDropdownSelection.isInverted then
+            --Reapply the filter of the inversion
+            --local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
+            local originalCallback = previousDropdownSelection.callback
+            previousDropdownSelection.filterCallback = originalCallback
+            util.ApplyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
+            --Select the dropdown entry but do not call the callback function as the filter was updated above already
+            self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, true)
         else
-            --restore previous dropdown selection if the settings is enabled for this
-            local previousDropdownSelection = newButton.previousDropdownSelection[filterPanelIdActive]
-            --Check if the previous selection was a right mouse context menu "invert" option
-            if previousDropdownSelection.isInverted then
-                --Reapply the filter of the inversion
-                --local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
-                local originalCallback = previousDropdownSelection.callback
-                previousDropdownSelection.filterCallback = originalCallback
+            if previousDropdownSelection.filterCallback ~= nil then
                 util.ApplyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
-                --Select the dropdown entry but do not call the callback function as the filter was updated above already
-                self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, true)
-            else
-                if previousDropdownSelection.filterCallback ~= nil then
-                    util.ApplyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
-                end
-                self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, false)
             end
+            self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, false)
         end
     end
 end
@@ -488,6 +560,9 @@ function AF_FilterBar:SetInventoryType(inventoryType)
     self.inventoryType = inventoryType
 end
 
+function AF_FilterBar:GetInventoryType()
+    return self.inventoryType
+end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Create the subfilter bars below the inventory's filters (e.g. the weapons filters from the game will get a subfilter bar with 1hd, 2hd, staffs, shields)

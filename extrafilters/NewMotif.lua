@@ -17,10 +17,16 @@ local dropdownCallback = {
 }
 
 local strings = {
-    ["NewMotif"] = "New Motif",
+    ["NewMotif"] = "New motifs",
 }
 local stringsDE = {
     ["NewMotif"] = "Neue Motive",
+}
+local stringsFR = {
+    ["NewMotif"] = "Nouveau motifs",
+}
+local stringsES = {
+    ["NewMotif"] = "Diseños nuevos",
 }
 
 local filterInformation = {
@@ -29,6 +35,8 @@ local filterInformation = {
     subfilters = {"All",},
     deStrings = stringsDE,
     enStrings = strings,
+    frStrings = stringsFR,
+	esStrings = stringsES,
 }
 
 AdvancedFilters_RegisterFilter(filterInformation)

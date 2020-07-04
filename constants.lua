@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.5.3.4"
+AF.version = "1.5.4.5"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -366,14 +366,20 @@ local subfilterBarsShouldOnlyBeShownSpecial = {
 AF.subfilterBarsShouldOnlyBeShownSpecial = subfilterBarsShouldOnlyBeShownSpecial
 
 --Inventory types which should not be updated via function ChangeFilter in PLAYER_INVENTORY
+--[[
+--> This caused the problem with bug #28:
+#28 2020-06-30, FooWasHere: Talk to vendor for woodworking, sell tab, change filter from ALL to "Weapons". Leave the woodworking vendor. Open any other vendor where there is NO
+--                          Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hiddem, including items
+
 local doNotUpdateInventoriesWithInventoryChangeFilterFunction = {
     [INVENTORY_TYPE_VENDOR_BUY] = true,
 }
 AF.doNotUpdateInventoriesWithInventoryChangeFilterFunction = doNotUpdateInventoriesWithInventoryChangeFilterFunction
+]]
 
 --Abort the subfilter bar refresh for the following inventory types
 local abortSubFilterRefreshInventoryTypes = {
-    [INVENTORY_TYPE_VENDOR_BUY]             = true, --Vendor buy
+    --[INVENTORY_TYPE_VENDOR_BUY]             = true, --Vendor buy
     [INVENTORY_QUEST_ITEM]                  = true, --Quest items
     --Custom addons
     [ITEMFILTERTYPE_AF_STOLENFILTER] = true,
@@ -1571,7 +1577,10 @@ local itemIds = {
         44877, --Common repair kit
         44878, --Greater repair kit
         44879, --Big repair kit
+        157516 --GroupRepair of the Impressaria event
     }
 }
 AF.itemIds = itemIds
 
+--Table where external dropdown filter plugins can register themselves for checks done by other addos
+AF.externalDropdownFilterPlugins = {}

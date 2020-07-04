@@ -2,14 +2,22 @@ AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
 
 local textures = {
+    None = "", -- TODO
     All = "esoui/art/inventory/inventory_tabicon_all_%s.dds",
     Trophy = "AdvancedFilters/assets/miscellaneous/trophy/trophy_%s.dds",
     TreasureMaps = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Treasure_Map_%s.dds",
-    --SurveyReport = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Survey_Report_%s.dds",
+    SurveyReport = "/esoui/art/icons/quest_summerset_completed_report.dds",
     --KeyFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Key_Fragment_%s.dds",
-    --MuseumPiece = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Museum_Piece_%s.dds",
+    MuseumPiece = "esoui/art/icons/servicemappins/servicepin_museum.dds",
     RecipeFragment = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Recipe_Fragment_%s.dds",
     Scroll = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Scroll_%s.dds",
+    CollectibleFragment = "esoui/art/treeicons/store_indexicon_fragments_%s.dds",
+    Key = "esoui/art/worldmap/map_indexicon_key_%s.dds",
+    MaterialUpgrader = "esoui/art/tradinghouse/tradinghouse_materials_blacksmithing_mats_%s.dds",
+    RuneboxFragment = "esoui/art/tradinghouse/tradinghouse_trophy_runebox_fragment_%s.dds",
+    Toy = "esoui/art/icons/justice_stolen_toy_001.dds",
+    UpgradeFragment = "esoui/art/treeicons/collection_indexicon_upgrade_%s.dds",
+    Fish = "esoui/art/icons/housing_gen_exc_fish001.dds",
 
     --WEAPONS
     OneHand = "AdvancedFilters/assets/weapons/onehanded_%s.dds",
@@ -154,6 +162,22 @@ local textures = {
 
     --Retrait
     Retrait = "EsoUI/Art/Crafting/retrait_tabIcon_%s.dds",
+
+    --Traits
+    Arcane = "/esoui/art/icons/jewelrycrafting_trait_refined_cobalt.dds",
+    Bloodthirsty = "/esoui/art/icons/crafting_enchantment_baxe_bloodstone_r1.dds",
+    Harmony = "/esoui/art/icons/crafting_metals_tin.dds",
+    Healthy = "/esoui/art/icons/jewelrycrafting_trait_refined_antimony.dds",
+    Infused = "/esoui/art/icons/crafting_enchantment_base_jade_r1.dds",
+    Intricate = "/esoui/art/inventory/inventory_trait_intricate_icon.dds",
+    Ornate = "/esoui/art/inventory/inventory_trait_ornate_icon.dds",
+    Protective = "/esoui/art/icons/crafting_runecrafter_armor_component_006.dds",
+    Robust = "/esoui/art/icons/jewelrycrafting_trait_refined_zinc.dds",
+    Swift = "/esoui/art/icons/crafting_outfitter_plug_component_002.dds",
+    Triune = "/esoui/art/icons/jewelrycrafting_trait_refined_dawnprism.dds",
+
+    --Recall stones
+    RecallStone = "/esoui/art/icons/rune_a.dds",
 }
 
 --ALCHEMY
@@ -174,6 +198,26 @@ textures.FurnishingMat = textures.Seating
 textures.WeaponGlyph = textures.OneHand
 textures.ArmorGlyph = textures.Heavy
 textures.JewelryGlyph = textures.Jewelry
+
+--COLLECTIBLES
+textures.RareFish = textures.Fish
+
+
+--Change the size of the textures for the dropdown filter boxes?
+--All others will use 28 x 28
+local texturesReSize = {
+    --[[
+        Example entry
+        Trophy = {width=20, height=20},
+    ]]
+    Fish            = {width=20, height=20},
+    RareFish        = {width=20, height=20},
+    Toy             = {width=20, height=20},
+    MuseumPiece     = {width=20, height=20},
+    SurveyReport    = {width=20, height=20},
+    RecallStone     = {width=20, height=20},
+}
+AF.texturesReSize = texturesReSize
 
 --Add the textures to the addon namespace
 AF.textures = textures
