@@ -27,6 +27,10 @@ local strings = {
     lamShowIconsInFilterDropdownsTT = "Zeige Symbole in den Filter Aufklapp Boxen an",
     lamRememberFilterDropdownsLastSelection = "Merke letzte Filter Box Auswahl",
     lamRememberFilterDropdownsLastSelectionTT = "Merkt sich je Unterfilter und Filter Panel (Inventar, Mail senden, Handerksstation, ...) die letzte Filter Box Auswahl und stellt diese wieder her, wenn du den Unterfilter auf diesem Filter Panel das nächste mal besuchst.\NDies wird NICHT über eine Ausloggen/Benutzeroberfläche Neuladen hinweg gemerkt!",
+    lamShowDropdownSelectedReminderAnimation = "Filter Box Auswahl Aufleuchten",
+    lamShowDropdownSelectedReminderAnimationTT = "Lässt die Filter Auswahlbox aufleuchten, wenn auf eine Unterfilter Leiste gewechselt wird, auf welcher die Auswahl Box nicht den Eintrag \'".. util.Localize(SI_ITEMFILTERTYPE0) .. "\' ausgewählt hat.",
+    lamShowDropdownLastSelectedEntries = "Zeige Filter Box Auswahl Historie",
+    lamShowDropdownLastSelectedEntriesTT = "Klicke rechts auf die Filter Auswahl Box, um die Historie der letzten 10 ausgewählten Einträge aus den Filter Auswahl Boxen anzuzeigen (unterhalb der standard Einträge des Kontextmenüs). Klicke auf einen der Historien Einträge, um diesen erneut auszuwählen, sofern die Filter Auswahlbox der aktuellen Unterfilter Leiste diesen Eintrag besitzt (da die Historie übergreifend über alle zuletzt verwendeten Auswahl Filter Boxen funktioniert).",
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Bitte lese die Fehlermeldung im Chat!",

@@ -4,7 +4,7 @@ local enStrings = AdvancedFilters.ENstrings
 local afPrefixNormal    = enStrings.AFPREFIXNORMAL
 local afPrefixError     = string.format(enStrings.AFPREFIX, " ERROR")
 
---Provided 2020-03-20 by Inval1d @www.esoui.com. Gracias!
+--Provided 2020-03-20 by Inval1d @www.esoui.com. ¡Gracias!
 local strings = {
     --SHARED
     All                                       = "Todo",
@@ -52,13 +52,13 @@ local strings = {
     InvertDropdownFilter                      = "Invertir filtro: %s",
 
     --LAM settings menu
-    lamDescription                            = "Muestra filtros adicionales en el inventario para separar objetos por su tipo",
+    lamDescription                            = "Muestra filtros adicionales en el inventario para separar objetos por su tipo.",
     lamHideItemCount                          = "Ocultar cantidad de objetos",
-    lamHideItemCountTT                        = "Oculta la cantidad de objetos, mostrada entre una \'(...)\', al fondo de las ventanas de inventario",
+    lamHideItemCountTT                        = "Oculta la cantidad de objetos, mostrada entre una \'(...)\', al fondo de las ventanas de inventario.",
     lamHideItemCountColor                     = "Color de cantidad de objetos",
-    lamHideItemCountColorTT                   = "Selecciona el color del indicador de cantidad al fondo del inventario",
+    lamHideItemCountColorTT                   = "Selecciona el color del indicador de cantidad al fondo del inventario.",
     lamHideSubFilterLabel                     = "Ocultar título en subfiltros",
-    lamHideSubFilterLabelTT                   = "Oculta el título de los subfiltros en la parte superior de las ventanas de inventario (a la izquiera de los botones de selección subfiltro).",
+    lamHideSubFilterLabelTT                   = "Oculta el título de los subfiltros en la parte superior de las ventanas de inventario (a la izquierda de los botones de selección subfiltro).",
     lamGrayOutSubFiltersWithNoItems           = "Desactivar los subfiltros sin objetos",
     lamGrayOutSubFiltersWithNoItemsTT         = "Desactiva los botones de subfiltros que no contengan ningún objeto.",
     lamShowIconsInFilterDropdowns             = "Mostrar íconos en la lista deplegable",

@@ -5,8 +5,8 @@ local AF = AdvancedFilters
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-07-03
---Max todos: #30
+--TODO Last updated: 2020-07-19
+--Max todos: #33
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -28,40 +28,32 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
---#27: 2020-05-20 User F-Lambda in esoui AF comments: Split jewelry trait dropdown filters into submenus for rings and neck
-
---#27: 2020-06-28 User sirinsidiator in gitter IM: Vendor Woodworking -> Furniture -> Close vendor -> Visit vendor smithing (No furniture) -> Furniture filters are still shown
---                and cannot be changed as there is only 1 main filterbutton at the vendor, but showing furniture subfilter buttons and filtering all items "out"
-
---#28 2020-06-30, FooWasHere: Talk to vendor for woodworking, sell tab, change filter from ALL to "Weapons". Leave the woodworking vendor. Open any other vendor where there is NO
---                            Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hiddem, including items
-
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.5.4.4 - Current 1.5.4.5
+--  UPDATE INFORMATION: since AF 1.5.4.5 - Current 1.5.4.6
 --______________________________________________________________________________________________________________________
 
 
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
---#31 Vendor buy panel uses subfilter buttons now for existing inventory subfilters (e.g. armor, weapons, furniture, misc., consumables)
---#32 Vendor buy panel subfilter buttons will grey out if there ar enot items to buy at this vendor (and the grey out setting is enabled)
-
+--    Show an animated rectangle around the filter dropdown box if the selected entry in the box is ~= "All", so users more easily
+--    recognize a filter is still enabled.
+--    Added a setting to enable the animated rectangle (standard setting: On)
 
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
 --______________________________________________________________________________________________________________________
---#30 AvA keep recall stones were added to Consumables -> Trophies (ITEMTYPE_RECALL_STONE)
+
 
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
+--ES translations by Inval1d
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#28 Vendor buy panels behave properly again if you change between vendors who got different filter buttons (e.g. 1st got furniture, 2nd didn't. All items were hidden)
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -480,9 +472,8 @@ local function InitializeHooks()
             subfilterGroup.currentSubfilterBar = subfilterBar
             if AF.settings.debugSpam then d(">subfilterBar exists, name: " .. tostring(subfilterBar.control:GetName()) .. ",  inventoryType: " ..tostring(subfilterBar.inventoryType)) end
             --Update the currentFilter to the current inventory
-            --UpdateCurrentFilter(subfilterBar.inventoryType, currentFilter, isCraftingInventoryType, craftingInv)
             UpdateCurrentFilter(subfilterBar.inventoryType, currentFilter, isCraftingInventoryType, craftingInv)
-            --activate current subfilter bar's button
+            --activate current subfilter bar's button -> Will also update the filter dropdown box!
             subfilterBar:ActivateButton(subfilterBar:GetCurrentButton())
             --show the new subfilter bar
             subfilterBar:SetHidden(false)
@@ -502,8 +493,8 @@ local function InitializeHooks()
                     craftingInv = GetInventoryFromCraftingPanel(invType)
                 end
             end
-            --Update the currentfilter to the inventory so it will be the correct one (e.g. if you change after this "return false" below to teh CraftBag and back to teh inventory,
-            --the currentFilter will be the wrong one from before, and thus the subfilterbar of the before filter wil be shown at this currentFilter.
+            --Update the currentfilter to the inventory so it will be the correct one (e.g. if you change after this "return false" below to the CraftBag and back to the inventory,
+            --the currentFilter will be the wrong one from before, and thus the subfilterbar of the before filter wil be shown at this currentFilter).
             --Update the currentFilter to the current inventory
             UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv)
             --remove all filters

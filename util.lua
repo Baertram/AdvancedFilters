@@ -208,7 +208,6 @@ function AF.util.GetActiveInventoryFilterBarButtonData(invType)
     local currentlySelectedInventoryFilterBarButton = filterBar.m_object.m_clickedButton
     return currentlySelectedInventoryFilterBarButton
 end
-
 --======================================================================================================================
 -- -^- Inventory filter functions                                                                                  -^-
 --======================================================================================================================
@@ -1284,6 +1283,12 @@ function util.ApplyFilter(button, filterTag, requestUpdate, filterType)
     if filterTypeToUse == nil then
         d("[AdvancedFilters] ERROR - ApplyFilter: FilterType at inventory \'".. tostring(currentInvType) .. "\'  was nil!\n" .. errorSuffix)
         return
+    end
+
+    --Save the currently selected filter dropdown box entry
+    if filterTag == AF_CONST_DROPDOWN_FILTER then
+--d("[AF]util.ApplyFilter-Dropdownbox selected filter entry updated: " ..tostring(button.name))
+        AF.currentlySelectedDropDownEntry = button
     end
 
     --Check if the parameter to reset the current dropdown filter to "All" was registered

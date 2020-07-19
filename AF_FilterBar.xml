@@ -1,4 +1,15 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="AF_SubFilterBarDropdownPulse" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="800" startAlpha=".45" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
     <Controls>
         <!-- Base Control -->
         <Control name="AF_Base" virtual="true" hidden="true">
@@ -32,5 +43,18 @@
                 </Texture>
             </Controls>
         </Button>
+
+        <TopLevelControl name="AF_DropdownPulse" hidden="true" tier="HIGH" keyboardEnabled="true">
+            <Controls>
+                <Backdrop name="$(parent)BG">
+                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="8" offsetY="8" />
+
+                    <Edge file="EsoUI/Art/Miscellaneous/textEntry_highlight_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Crafting/crafting_toolTip_glow_center.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

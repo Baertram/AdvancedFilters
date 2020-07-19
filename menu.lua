@@ -110,6 +110,31 @@ function AF.LAMSettingsMenu()
                 default = defSettings.rememberFilterDropdownsLastSelection,
             },
             --==============================================================================
+            {
+                type = "checkbox",
+                name = strings.lamShowDropdownSelectedReminderAnimation,
+                tooltip = strings.lamShowDropdownSelectedReminderAnimationTT,
+                getFunc = function() return settings.showDropdownSelectedReminderAnimation end,
+                setFunc = function(value)
+                    AF.settings.showDropdownSelectedReminderAnimation = value
+                end,
+                default = defSettings.showDropdownSelectedReminderAnimation,
+                disabled = function() return not settings.rememberFilterDropdownsLastSelection end,
+            },
+            --==============================================================================
+            --[[
+            {
+                type = "checkbox",
+                name = strings.lamShowDropdownLastSelectedEntries,
+                tooltip = strings.lamShowDropdownLastSelectedEntriesTT,
+                getFunc = function() return settings.showDropdownLastSelectedEntries end,
+                setFunc = function(value)
+                    AF.settings.showDropdownLastSelectedEntries = value
+                end,
+                default = defSettings.showDropdownLastSelectedEntries,
+            },
+            ]]
+            --==============================================================================
             --                              DEBUG
             --==============================================================================
             {

@@ -201,6 +201,10 @@ local strings = {
     lamShowIconsInFilterDropdownsTT = "Show icons for the filter entries in the filter dropdown boxes",
     lamRememberFilterDropdownsLastSelection = "Remember last filter dropdown selection",
     lamRememberFilterDropdownsLastSelectionTT = "Remenber the last filter dropdown box at each subfilter and filterpanel (inventory, mail, crafting table, ...) and re-apply this filter in the dropdown entry if you return to this filterpanel and subfilter.\nThis will NOT be saved if you logout/do a reload of the UI!",
+    lamShowDropdownSelectedReminderAnimation = "Last filter dropdown selection glow",
+    lamShowDropdownSelectedReminderAnimationTT = "Glow the dropdown box as you change to a subfilter bar, where the dropdown box filter is selected and is not showing the \'".. util.Localize(SI_ITEMFILTERTYPE0) .. "\' entry",
+    lamShowDropdownLastSelectedEntries = "Show filter dropdown selection history",
+    lamShowDropdownLastSelectedEntriesTT = "Right click the filter dropdown box to show a list of the last 10 selected dropdown entries below the standard context menu entries. Click an history entry to select it again (if the current subfilterbar's dropdown box provides this entry as the history is created cross-subfilterbars)!",
     lamDebugOutput = "Debug",
     lamDebugSpamOutput = "Debug Spam",
 
@@ -208,7 +212,7 @@ local strings = {
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",
     errorLibraryMissing     = afPrefixError .. " Needed library \'%s\' is not loaded. This addon will not work properly!",
     errorWhatToDo1          = "!> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
-    errorWhatToDo2          = "1) What did you do?\n2)Where did you do it?\n3)Did you test if the error happenes with only the addon AdvancedFilters and librraies activated (please test this!)?\n4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error?",
+    errorWhatToDo2          = "1) What did you do?\n2)Where did you do it?\n3)Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)?\n4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error?",
 
     --Errors because of other addons
     errorOtherAddonsMulticraft = afPrefixError .. "Other addon breaks \'" .. afPrefixNormal .. "\' -> PLEASE DISABLE THIS ADDON: \'MultiCraft\'!",
