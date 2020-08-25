@@ -29,6 +29,7 @@ local strings = {
     ["ExoticStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_EXOTIC),
     ["DroppedStyle"] = lib:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_DROPPED),
 }
+
 local stringsDE = {
     ["MotifCategories"] = "Motiv Kategorien",
 }

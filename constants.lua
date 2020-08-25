@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.5.4.6"
+AF.version = "1.5.4.7"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -81,6 +81,11 @@ local bankInvTypes = {
     [INVENTORY_HOUSE_BANK]  = true,
 }
 AF.bankInvTypes = bankInvTypes
+
+--Include bank checkbox name
+AF.ZOsControlNames = {
+    includeBankedCheckbox   =   "IncludeBanked",
+}
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {

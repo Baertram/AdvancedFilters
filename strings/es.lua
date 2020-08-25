@@ -65,7 +65,11 @@ local strings = {
     lamShowIconsInFilterDropdownsTT           = "Muestra u oculta los íconos para los filtros en las listas desplegables.",
     lamRememberFilterDropdownsLastSelection   = "Recordar el último filtro seleccionado",
     lamRememberFilterDropdownsLastSelectionTT = "Recuerda el último filtro seleccionado de la lista desplegable en cada subfiltro y panel de filtro (inventario, correo, talleres, etc...) y volverá a aplicar este filtro en la lista desplegable si vuelves a este panel de filtros o subfiltro.\n¡Siempre OLVIDARÁ la selección al salir del juego o al recargar la interfaz!",
-    lamDebugOutput                            = "Modo depuración",
+    lamShowDropdownSelectedReminderAnimation  = "Resaltar el último filtro seleccionado",
+    lamShowDropdownSelectedReminderAnimationTT= "Aplicará un brillo en las cajas de las listas desplegables si su valor no es \'".. util.Localize(SI_ITEMFILTERTYPE0) .. "\' en un subfiltro.",
+    lamShowDropdownLastSelectedEntries		  = "Mostrar historial de filtros en menú contextual",
+    lamShowDropdownLastSelectedEntriesTT	  = "Mostrará una lista de los últimos 10 filtros seleccionados de las listas desplegables debajo de las opciones comunes del menú contextual. ¡Haz clic en una opción del historial para seleccionarlo una vez más (siempre que la lista desplegable del subfiltro actual tenga dicha opción disponible, ya que el historial incluye todos los subfiltros)!",
+	lamDebugOutput                            = "Modo depuración",
     lamDebugSpamOutput                        = "Spam de depuración",
 
     --Error messages

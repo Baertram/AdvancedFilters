@@ -280,6 +280,8 @@ local function InitializeHooks()
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType)
         if AF.settings.debugSpam then d(">>-----------------------------------------------\n----------------------------------------------->>") end
         ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar)
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
@@ -327,8 +329,41 @@ local function InitializeHooks()
             --AF.util.ReAnchorControlsForSubfilterBar(self, shiftY, p_currentFilter, p_craftingType)
         end
         ----------------------------------------------------------------------------------------------------------------
+        --ReAnchor other controls so that the subfilter bar will be shown properly
+        local function reAnchorIncludeBankedItemsCheckbox(filterPanelId, subFilterBarHeight)
+--d("[AF]reAnchorIncludeBankedItemsCheckbox")
+            --FCOCraftFilter enabled? Then do nothing as it will hide the checkbox!
+            if FCOCraftFilter ~= nil then return end
+            --Currently the checkbox is only shown at the crafting panels
+            if not util.IsCraftingPanelShown() then return end
+            filterPanelId = filterPanelId or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+--d(">filterPanelId: " ..tostring(filterPanelId))
+            local includeBankedCBoxName = AF.ZOsControlNames.includeBankedCheckbox
+            local craftingTablePanel = util.GetCraftingTablePanel(filterPanelId)
+            local includeBankedCbox = craftingTablePanel and craftingTablePanel.control and craftingTablePanel.control:GetNamedChild(includeBankedCBoxName)
+            local parentCtrl = craftingTablePanel.control
+            if not includeBankedCbox then
+                local craftingTablePanelInv = util.GetCraftingTablePanelInventory(filterPanelId)
+                includeBankedCbox = craftingTablePanelInv and craftingTablePanelInv.control and craftingTablePanelInv.control:GetNamedChild(includeBankedCBoxName)
+                parentCtrl = craftingTablePanelInv.control
+            end
+            if includeBankedCbox and parentCtrl then
+                includeBankedCbox:ClearAnchors()
+                --Move on the y axis the "height of a subfilter bar" pixels to the top
+                --SetAnchor(AnchorPosition myPoint, object anchorTargetControl, AnchorPosition anchorControlsPoint, number offsetX, number offsetY)
+                includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight)
+                --Hide the buttonDivider control
+                local includeBankedCBoxButtonDividerName = AF.ZOsControlNames.includeBankedCheckboxButtonDivider
+                local buttonDivider = parentCtrl:GetNamedChild(includeBankedCBoxButtonDividerName)
+                if buttonDivider and buttonDivider.SetHidden then buttonDivider:SetHidden(true) end
+            end
+        end
+        ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
+        ----------------------------------------------------------------------------------------------------------------
 
         local invType = currentInvType or AF.currentInventoryType
+
         --Check for custom added inventory filter button
         --CraftBag
         if invType == INVENTORY_CRAFT_BAG then
@@ -458,6 +493,7 @@ local function InitializeHooks()
         --if new bar exists
         local craftingInv
         local isCraftingInventoryType = false
+        local subFilterBarHeight
         if subfilterBar then
             local isCraftingPanel = IsCraftingPanelShown()
             if AF.settings.debugSpam then d(">>New subfilterBar was found, isCraftingPanel: " ..tostring(isCraftingPanel)) end
@@ -477,13 +513,14 @@ local function InitializeHooks()
             subfilterBar:ActivateButton(subfilterBar:GetCurrentButton())
             --show the new subfilter bar
             subfilterBar:SetHidden(false)
+            subFilterBarHeight = subfilterBar.control:GetHeight()
             --set proper inventory anchor displacement
             if subfilterBar.inventoryType == INVENTORY_TYPE_VENDOR_BUY then
-                UpdateListAnchors(STORE_WINDOW, subfilterBar.control:GetHeight(), subfilterBar)
+                UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar)
             elseif isCraftingInventoryType then
-                UpdateListAnchors(craftingInv, subfilterBar.control:GetHeight(), subfilterBar)
+                UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar)
             else
-                UpdateListAnchors(PLAYER_INVENTORY, subfilterBar.control:GetHeight(), subfilterBar)
+                UpdateListAnchors(PLAYER_INVENTORY, subFilterBarHeight, subfilterBar)
             end
         else
             --Crafting
@@ -515,6 +552,11 @@ local function InitializeHooks()
                     showChatDebug("ShowSubfilterBar - END", "InventoryType: " ..tostring(invType) .. ", craftingType: " ..tostring(craftingType) .. "/" .. util.GetCraftingType() .. ", currentFilter: " .. tostring(currentFilterToUse))
                 end
             end
+        end
+        --Reanchor the checkbox "Include banked items" at the crafting panels
+        if isCraftingInventoryType then
+            subFilterBarHeight = (subfilterBar and subfilterBar.control:GetHeight()) or 50
+            reAnchorIncludeBankedItemsCheckbox(nil, subFilterBarHeight)
         end
     end
 
