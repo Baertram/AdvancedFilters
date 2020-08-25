@@ -348,14 +348,18 @@ local function InitializeHooks()
                 parentCtrl = craftingTablePanelInv.control
             end
             if includeBankedCbox and parentCtrl then
-                includeBankedCbox:ClearAnchors()
-                --Move on the y axis the "height of a subfilter bar" pixels to the top
-                --SetAnchor(AnchorPosition myPoint, object anchorTargetControl, AnchorPosition anchorControlsPoint, number offsetX, number offsetY)
-                includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight)
-                --Hide the buttonDivider control
+                --Unanchor the filterDivider control
+                local includeBankedCBoxFilterDividerName = AF.ZOsControlNames.includeBankedCheckboxFilterDivider
+                local filterDivider = parentCtrl:GetNamedChild(includeBankedCBoxFilterDividerName)
+                if filterDivider and filterDivider.ClearAnchors then filterDivider:ClearAnchors() end
+                --Unanchor the buttonDivider control
                 local includeBankedCBoxButtonDividerName = AF.ZOsControlNames.includeBankedCheckboxButtonDivider
                 local buttonDivider = parentCtrl:GetNamedChild(includeBankedCBoxButtonDividerName)
-                if buttonDivider and buttonDivider.SetHidden then buttonDivider:SetHidden(true) end
+                if buttonDivider and buttonDivider.ClearAnchors then buttonDivider:ClearAnchors() end
+                --Move on the y axis the "height of a subfilter bar" pixels to the top
+                --SetAnchor(AnchorPosition myPoint, object anchorTargetControl, AnchorPosition anchorControlsPoint, number offsetX, number offsetY)
+                includeBankedCbox:ClearAnchors()
+                includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight)
             end
         end
         ----------------------------------------------------------------------------------------------------------------

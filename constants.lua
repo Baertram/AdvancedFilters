@@ -84,7 +84,9 @@ AF.bankInvTypes = bankInvTypes
 
 --Include bank checkbox name
 AF.ZOsControlNames = {
-    includeBankedCheckbox   =   "IncludeBanked",
+    includeBankedCheckbox               =   "IncludeBanked",
+    includeBankedCheckboxFilterDivider  =   "FilterDivider",
+    includeBankedCheckboxButtonDivider  =   "ButtonDivider",
 }
 
 --Control names for the "which panel is shown" checks
