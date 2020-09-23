@@ -474,7 +474,9 @@ local function InitializeHooks()
             return
         end
         --do nothing if we're in a guild store and regular filters are disabled.
-        if not ZO_TradingHouse:IsHidden() and util.libCIF._guildStoreSellFiltersDisabled then
+        if not ZO_TradingHouse:IsHidden()
+            --and util.libCIF._guildStoreSellFiltersDisabled
+        then
             if AF.settings.debugSpam then d("<<ABORT: Trading house libCIF:guildSToreSellFiltersDisabled!") end
             return
         end
@@ -1007,7 +1009,11 @@ local function InitializeHooks()
         ]]
         --Get the current filterType at the retrait station
         if     mode == ZO_RETRAIT_MODE_RETRAIT  then
+            --Retrait
             AF.currentInventoryType = LF_RETRAIT
+        --elseif mode == ZO_RETRAIT_MODE_RECONSTRUCT then
+            --Reconstruction -- Not supported!
+            --AF.currentInventoryType = LF_RECONSTRUCTION
         end
         return false
     end

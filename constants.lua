@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.5.4.7"
+AF.version = "1.6.0.0"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -109,7 +109,7 @@ local controlsForChecks = {
     smithing                = SMITHING,
     enchantingBaseVar       = ZO_Enchanting,
     enchanting              = ENCHANTING,
-    retrait                 = ZO_RETRAIT_STATION_KEYBOARD, -- needed for the other retrait related filter stuff (hooks, util functions)
+    retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
 }
 --Smithing
@@ -123,7 +123,7 @@ controlsForChecks.researchLineList      =   controlsForChecks.researchPanel.rese
 controlsForChecks.enchantCreatePanel    =   controlsForChecks.enchanting
 controlsForChecks.enchantExtractPanel   =   controlsForChecks.enchanting
 --Retrait
-controlsForChecks.retraitPanel          =   controlsForChecks.retrait.retraitPanel
+controlsForChecks.retraitPanel          =   controlsForChecks.retrait --old: controlsForChecks.retrait.retraitPanel
 controlsForChecks.retraitControl        =   controlsForChecks.retraitPanel.control
 
 AF.controlsForChecks = controlsForChecks
