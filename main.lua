@@ -283,12 +283,24 @@ local function InitializeHooks()
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
-        local function UpdateListAnchors(self, shiftY, p_subFilterBar)
+        local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
+d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
-            local layoutData = self.appliedLayout or BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
-            if not layoutData then return end
             local invTypeUpdateListAnchor = AF.currentInventoryType
+            local layoutData = self.appliedLayout
+            if layoutData == nil then
+                if p_isCraftingInventoryType == true then
+                    --Get the own defined layout fragments for the LibFilters LF_* crafting type (see constants.lua)
+                    --to set the offsets of the sort headers, inventory lists etc.
+                    layoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
+                else
+d(">layoutData was taken from BACKPACK_DEFAULT_LAYOUT_FRAGMENT!")
+                    layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
+                end
+            end
+d(">>layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. layoutData.width)
+            if not layoutData then return end
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
                 list = self.inventories[invTypeUpdateListAnchor].listView
@@ -315,6 +327,7 @@ local function InitializeHooks()
                 list:ClearAnchors()
                 list:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, layoutData.backpackOffsetY + shiftY)
                 list:SetAnchor(BOTTOMRIGHT)
+d(">ZO_ScrollList was changed to offsetY: " .. (layoutData.backpackOffsetY + shiftY) .. ", height: " ..tostring(list:GetHeight()))
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
             end
 
@@ -324,7 +337,7 @@ local function InitializeHooks()
             sortBy = sortBy.headerContainer
             sortBy:ClearAnchors()
             sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, layoutData.sortByOffsetY + shiftY)
-
+d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
             --Should something else be moved or re-anchored (e.g. at the research panel the horizontal scroll list part)
             --AF.util.ReAnchorControlsForSubfilterBar(self, shiftY, p_currentFilter, p_craftingType)
         end
@@ -522,11 +535,11 @@ local function InitializeHooks()
             subFilterBarHeight = subfilterBar.control:GetHeight()
             --set proper inventory anchor displacement
             if subfilterBar.inventoryType == INVENTORY_TYPE_VENDOR_BUY then
-                UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar)
+                UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar, false)
             elseif isCraftingInventoryType then
-                UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar)
+                UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             else
-                UpdateListAnchors(PLAYER_INVENTORY, subFilterBarHeight, subfilterBar)
+                UpdateListAnchors(PLAYER_INVENTORY, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             end
         else
             --Crafting
@@ -544,11 +557,11 @@ local function InitializeHooks()
             util.RemoveAllFilters()
             --set original inventory anchor displacement
             if invType == INVENTORY_TYPE_VENDOR_BUY then
-                UpdateListAnchors(STORE_WINDOW, 0)
+                UpdateListAnchors(STORE_WINDOW, 0, nil, false)
             elseif isCraftingInventoryType then
-                UpdateListAnchors(craftingInv, 0)
+                UpdateListAnchors(craftingInv, 0, nil, true)
             else
-                UpdateListAnchors(PLAYER_INVENTORY, 0)
+                UpdateListAnchors(PLAYER_INVENTORY, 0, nil, false)
             end
             --remove current bar reference
             subfilterGroup.currentSubfilterBar = nil
@@ -639,7 +652,7 @@ local function InitializeHooks()
         ZO_MainMenuCategoryBarButton1_MouseUp:3: in function '(main chunk)'
         |caaaaaa<Locals> self = ud, button = 1, upInside = T, ctrl = F, alt = F, shift = F, command = F </Locals>|r
     ]]
-    ZO_PreHook(PLAYER_INVENTORY, "ChangeFilter", ChangeFilterInventory)
+    --ZO_PreHook(PLAYER_INVENTORY, "ChangeFilter", ChangeFilterInventory)
 
     --  Store "BUY" changefilter function
         local function ChangeFilterVendor(self, filterTab)
@@ -671,7 +684,7 @@ local function InitializeHooks()
                     50, util.updateInventoryInfoBarCountLabel, invType, false)
             ]]
         end
-    ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
+    --ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
 
     --Filter changing function for crafting stations and retrait station.
     --Recognizes if a button like armor/weapons was changed at the crafting station (which is a filter change internally)
@@ -711,7 +724,7 @@ local function InitializeHooks()
     ZO_PreHook(smithingVar.deconstructionPanel.inventory,   "ChangeFilter",     function(...) delayedCall(15, ChangeFilterCrafting, ...) end)
     ZO_PreHook(smithingVar.improvementPanel.inventory,      "ChangeFilter",     function(...) delayedCall(15, ChangeFilterCrafting, ...) end)
     ZO_PreHook(smithingVar.researchPanel,                   "ChangeTypeFilter", function(...) delayedCall(15, ChangeFilterCrafting, ...) end)
-    ZO_PreHook(retraitVar.retraitPanel.inventory,           "ChangeFilter",     function(...) delayedCall(15, ChangeFilterCrafting, ...) end)
+    ZO_PreHook(retraitVar.inventory,                        "ChangeFilter",     function(...) delayedCall(15, ChangeFilterCrafting, ...) end)
 
     local function ChangeFilterEnchanting(self, filterTab)
         zo_callLater(function()
@@ -1026,7 +1039,7 @@ local function InitializeHooks()
         HookRetraitSetMode(...)
     end
     ]]
-    SecurePostHook(ZO_RetraitStation_Keyboard, "SetMode", HookRetraitSetMode)
+    SecurePostHook(retraitVar, "SetMode", HookRetraitSetMode)
 
     --Overwrite the standard inventory update function for the used slots/totla slots
     local function hookInventoryInfoBar()
@@ -1244,7 +1257,7 @@ local function PresetCraftingStationHookVariables()
     smithingVar.improvementPanel.inventory.currentFilter    = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_IMPROVEMENT,    CRAFTING_TYPE_BLACKSMITHING)
     smithingVar.researchPanel.currentFilter                 = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_RESEARCH,       CRAFTING_TYPE_BLACKSMITHING)
     enchantingVar.inventory.currentFilter                   = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING,      LF_ENCHANTING_EXTRACTION,   CRAFTING_TYPE_ENCHANTING)
-    retraitVar.retraitPanel.inventory.currentFilter         = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT,                LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
+    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT,                LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
 end
 
 local function onEndCraftingStationInteract(eventCode, craftSkill)
@@ -1340,6 +1353,10 @@ end
 function AF.checkForOtherAddonErrors(eventName, initial)
     --Check if needed libraries are given -> Chat is activated here so we can see error messages!
     if AF.dependenciesLoaded == false then AF.loadLibraries(true) end
+
+    --TODO: Keep this? Or a setting for this?
+    --Vanilla UI's "selected filter label, top left": Hide it
+    ZO_PlayerInventoryTabsActive:SetHidden(true)
 
     --Check for other addons
     if not AF.otherAddons then return end

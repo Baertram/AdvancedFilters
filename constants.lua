@@ -651,6 +651,8 @@ local subfilterGroups = {
 }
 AF.subfilterGroups = subfilterGroups
 
+local filterDividerSuffix = "FilterDivider"
+local buttonDividerSuffix = "ButtonDivider"
 --The filter bar parent controls
 local filterBarParents = {
     [inventoryNames[INVENTORY_BACKPACK]]        = controlsForChecks.inv,
@@ -659,9 +661,9 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = controlsForChecks.storeWindow,
     [inventoryNames[INVENTORY_CRAFT_BAG]]       = controlsForChecks.craftBag,
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
-    [inventoryNames[LF_SMITHING_REFINE]]        = controlsForChecks.smithing.refinementPanel.control,
-    [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = controlsForChecks.smithing.deconstructionPanel.control,
-    [inventoryNames[LF_SMITHING_IMPROVEMENT]]   = controlsForChecks.smithing.improvementPanel.control,
+    [inventoryNames[LF_SMITHING_REFINE]]        = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
+    [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+    [inventoryNames[LF_SMITHING_IMPROVEMENT]]   = GetControl(controlsForChecks.smithing.improvementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_RESEARCH]]      = controlsForChecks.smithing.researchPanel.control,
     --[inventoryNames[LF_JEWELRY_CREATION]]       = controlsForChecks.smithing.creationPanel.control,
     [inventoryNames[LF_JEWELRY_REFINE]]         = controlsForChecks.smithing.refinementPanel.control,
@@ -674,6 +676,36 @@ local filterBarParents = {
     [inventoryNames[LF_RETRAIT]]                = controlsForChecks.retraitControl,
 }
 AF.filterBarParents = filterBarParents
+
+--The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
+--2020-09-24: https://github.com/esoui/esoui/blob/c47af79c7c51681ae315d4f9a6d70d9e965ad514/esoui/ingame/inventory/backpacklayouts.lua#L6
+local defaultInventoryBackpackLayoutData = {
+    --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
+    width = 565,
+    backpackOffsetY = 96,
+    --inventoryTopOffsetY = -20,
+    --inventoryBottomOffsetY = -30,
+    sortByOffsetY = 63,
+    --emptyLabelOffsetY = 100,
+    --sortByHeaderWidth = 576,
+    --sortByNameWidth = 241,
+    --hideBankInfo = true,
+    --hideCurrencyInfo = false,
+}
+local filterBarCraftingInventoryLayoutData = {
+    [LF_SMITHING_REFINE]        = defaultInventoryBackpackLayoutData,
+    [LF_SMITHING_DECONSTRUCT]   = defaultInventoryBackpackLayoutData,
+    [LF_SMITHING_IMPROVEMENT]   = defaultInventoryBackpackLayoutData,
+    [LF_SMITHING_RESEARCH]      = defaultInventoryBackpackLayoutData,
+    [LF_JEWELRY_REFINE]         = defaultInventoryBackpackLayoutData,
+    [LF_JEWELRY_DECONSTRUCT]    = defaultInventoryBackpackLayoutData,
+    [LF_JEWELRY_IMPROVEMENT]    = defaultInventoryBackpackLayoutData,
+    [LF_JEWELRY_RESEARCH]       = defaultInventoryBackpackLayoutData,
+    [LF_ENCHANTING_CREATION]    = defaultInventoryBackpackLayoutData,
+    [LF_ENCHANTING_EXTRACTION]  = defaultInventoryBackpackLayoutData,
+    [LF_RETRAIT]                = defaultInventoryBackpackLayoutData,
+}
+AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
 
 --SUBFILTER BAR BUTTONS
 --The subfilter bars button names
