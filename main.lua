@@ -294,6 +294,7 @@ d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
                     --Get the own defined layout fragments for the LibFilters LF_* crafting type (see constants.lua)
                     --to set the offsets of the sort headers, inventory lists etc.
                     layoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
+                    util.HideCraftingInventoryControls(invTypeUpdateListAnchor)
                 else
 d(">layoutData was taken from BACKPACK_DEFAULT_LAYOUT_FRAGMENT!")
                     layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData

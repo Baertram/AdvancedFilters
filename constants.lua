@@ -662,7 +662,7 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_CRAFT_BAG]]       = controlsForChecks.craftBag,
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
     [inventoryNames[LF_SMITHING_REFINE]]        = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
-    [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+    [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_IMPROVEMENT]]   = GetControl(controlsForChecks.smithing.improvementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_RESEARCH]]      = controlsForChecks.smithing.researchPanel.control,
     --[inventoryNames[LF_JEWELRY_CREATION]]       = controlsForChecks.smithing.creationPanel.control,
@@ -676,6 +676,17 @@ local filterBarParents = {
     [inventoryNames[LF_RETRAIT]]                = controlsForChecks.retraitControl,
 }
 AF.filterBarParents = filterBarParents
+
+--Controls which should be hidden as the filter bar is shown at this panel
+local filterBarParentControlsToHide = {
+    [LF_SMITHING_DECONSTRUCT]   = {
+        GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+    },
+    [LF_JEWELRY_DECONSTRUCT]    = {
+        GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+    },
+}
+AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 
 --The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
 --2020-09-24: https://github.com/esoui/esoui/blob/c47af79c7c51681ae315d4f9a6d70d9e965ad514/esoui/ingame/inventory/backpacklayouts.lua#L6

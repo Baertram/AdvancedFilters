@@ -74,7 +74,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     self.activeButton = nil
 
     self.dropdown = WINDOW_MANAGER:CreateControlFromVirtual("AF_FilterBar" .. self.name .. "DropdownFilter", self.control, "ZO_ComboBox")
-    self.dropdown:SetAnchor(RIGHT, self.control, RIGHT, 0, 0)
+    self.dropdown:SetAnchor(RIGHT, self.control, RIGHT, -10, 0)
     self.dropdown:SetHeight(24)
     self.dropdown:SetWidth(104)
 

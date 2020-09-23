@@ -221,6 +221,19 @@ function util.GetCraftingInventoryLayoutData(filterType)
     local filterBarCraftingInventoryLayoutData = AF.filterBarCraftingInventoryLayoutData
     return filterBarCraftingInventoryLayoutData[filterType]
 end
+
+function util.HideCraftingInventoryControls(filterType)
+    local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
+    local controlsToHide = filterBarParentControlsToHide[filterType]
+    if controlsToHide then
+        for _, controlToHide in ipairs(controlsToHide) do
+            if controlToHide ~= nil and
+                controlToHide.IsHidden and controlToHide:IsHidden() and controlToHide.SetHidden then
+                controlToHide:SetHidden(true)
+            end
+        end
+    end
+end
 --======================================================================================================================
 -- -^- Inventory layout functions                                                                                  -^-
 --======================================================================================================================
