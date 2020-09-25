@@ -223,13 +223,16 @@ function util.GetCraftingInventoryLayoutData(filterType)
 end
 
 function util.HideCraftingInventoryControls(filterType)
+--d("[AF]util.HideCraftingInventoryControls - filterType: " ..tostring(filterType))
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
     local controlsToHide = filterBarParentControlsToHide[filterType]
     if controlsToHide then
         for _, controlToHide in ipairs(controlsToHide) do
-            if controlToHide ~= nil and
-                controlToHide.IsHidden and controlToHide:IsHidden() and controlToHide.SetHidden then
-                controlToHide:SetHidden(true)
+            if controlToHide ~= nil then
+                --if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
+                if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
+                    controlToHide:SetHidden(true)
+                end
             end
         end
     end
@@ -1275,11 +1278,13 @@ function util.GetListControlForSubfilterBarReanchor(inventoryType)
     local listControlForSubfilterBarReanchor
     local listControlForSubfilterBarReanchorData = listControlsForSubfilterBarReanchor[filterPanelId]
     local moveInvBottomBarDown = false
+    local reanchorData
     if listControlForSubfilterBarReanchorData then
         listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchorData.control
         moveInvBottomBarDown = listControlForSubfilterBarReanchorData.moveInvBottomBarDown
+        reanchorData = listControlForSubfilterBarReanchorData.reanchorData
     end
-    return listControlForSubfilterBarReanchor, moveInvBottomBarDown
+    return listControlForSubfilterBarReanchor, moveInvBottomBarDown, reanchorData
 end
 
 --======================================================================================================================
@@ -1731,8 +1736,8 @@ function util.GetCraftingTablePanelInventory(filterType)
     local craftingInv
     if craftingPanel.inventory then
         craftingInv = craftingPanel.inventory
-        --For research panels
     else
+        --For research panels
         craftingInv = craftingPanel
     end
     return craftingInv

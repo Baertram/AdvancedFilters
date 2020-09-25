@@ -294,26 +294,29 @@ d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
                     --Get the own defined layout fragments for the LibFilters LF_* crafting type (see constants.lua)
                     --to set the offsets of the sort headers, inventory lists etc.
                     layoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
-                    util.HideCraftingInventoryControls(invTypeUpdateListAnchor)
                 else
 d(">layoutData was taken from BACKPACK_DEFAULT_LAYOUT_FRAGMENT!")
                     layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
                 end
             end
-d(">>layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. layoutData.width)
+d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
             if not layoutData then return end
+
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
                 list = self.inventories[invTypeUpdateListAnchor].listView
             end
             if not list then
+d(">no list control found yet")
                 local moveInvBottomBarDown
                 local anchorTo = (p_subFilterBar and p_subFilterBar.control) or nil
-                list, moveInvBottomBarDown = util.GetListControlForSubfilterBarReanchor(AF.currentInventoryType)
+                local reanchorData
+                --Get the Smithing research list(s) e.g. and reanchor it
+                list, moveInvBottomBarDown, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
                 if not list then return end
-                list:SetWidth(layoutData.width)
+                --list:SetWidth(layoutData.width)
                 list:ClearAnchors()
-                list:SetAnchor(TOPLEFT, anchorTo, BOTTOMLEFT, 0, 0)
+                list:SetAnchor(TOP, anchorTo, BOTTOM, 0, layoutData.backpackOffsetY)
                 --Move the inventory's bottom bar more down?
                 if moveInvBottomBarDown then
                     --Do not move the bar if the addon PerfectPixel is active as it was moved already
@@ -322,6 +325,21 @@ d(">>layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", 
                         moveInvBottomBarDown:SetAnchor(TOPLEFT, list:GetParent(), BOTTOMLEFT, 0, shiftY)
                         moveInvBottomBarDown:SetAnchor(BOTTOMRIGHT)
                     end
+                end
+                --Additional controls to reanchor?
+                if reanchorData ~= nil then
+                    for _, reanchorControlData in ipairs(reanchorData) do
+                        local controlToReanchor = reanchorControlData.control
+                        if controlToReanchor ~= nil then
+                            if reanchorControlData.anchorPoint ~= nil
+                                    and reanchorControlData.relativeTo ~= nil and reanchorControlData.relativePoint ~= nil
+                                    and reanchorControlData.offsetX ~= nil and reanchorControlData.offsetY ~= nil then
+                                controlToReanchor:ClearAnchors()
+                                controlToReanchor:SetAnchor(reanchorControlData.anchorPoint, reanchorControlData.relativeTo, reanchorControlData.relativePoint, reanchorControlData.offsetX, reanchorControlData.offsetY)
+                            end
+                        end
+                    end
+
                 end
             else
                 list:SetWidth(layoutData.width)
@@ -333,14 +351,19 @@ d(">ZO_ScrollList was changed to offsetY: " .. (layoutData.backpackOffsetY + shi
             end
 
             local sortBy = self.sortHeaders or self.sortHeaderGroup
-            if sortBy == nil and self.GetDisplayInventoryTable then sortBy = self:GetDisplayInventoryTable(invTypeUpdateListAnchor).sortHeaders end
+            if sortBy == nil and self.GetDisplayInventoryTable then
+                sortBy = self:GetDisplayInventoryTable(invTypeUpdateListAnchor).sortHeaders
+            end
             if sortBy == nil then return end
             sortBy = sortBy.headerContainer
             sortBy:ClearAnchors()
             sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, layoutData.sortByOffsetY + shiftY)
 d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
-            --Should something else be moved or re-anchored (e.g. at the research panel the horizontal scroll list part)
-            --AF.util.ReAnchorControlsForSubfilterBar(self, shiftY, p_currentFilter, p_craftingType)
+            --Crafting inventory?
+            if p_isCraftingInventoryType == true then
+                --Should some crafting panel control be hidden?
+                util.HideCraftingInventoryControls(invTypeUpdateListAnchor)
+            end
         end
         ----------------------------------------------------------------------------------------------------------------
         --ReAnchor other controls so that the subfilter bar will be shown properly
@@ -352,7 +375,8 @@ d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
             if not util.IsCraftingPanelShown() then return end
             filterPanelId = filterPanelId or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
 --d(">filterPanelId: " ..tostring(filterPanelId))
-            local includeBankedCBoxName = AF.ZOsControlNames.includeBankedCheckbox
+            local ZOsControlNames = AF.ZOsControlNames
+            local includeBankedCBoxName = ZOsControlNames.includeBankedCheckbox
             local craftingTablePanel = util.GetCraftingTablePanel(filterPanelId)
             local includeBankedCbox = craftingTablePanel and craftingTablePanel.control and craftingTablePanel.control:GetNamedChild(includeBankedCBoxName)
             local parentCtrl = craftingTablePanel.control
@@ -363,17 +387,17 @@ d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
             end
             if includeBankedCbox and parentCtrl then
                 --Unanchor the filterDivider control
-                local includeBankedCBoxFilterDividerName = AF.ZOsControlNames.includeBankedCheckboxFilterDivider
+                local includeBankedCBoxFilterDividerName = ZOsControlNames.filterDivider
                 local filterDivider = parentCtrl:GetNamedChild(includeBankedCBoxFilterDividerName)
                 if filterDivider and filterDivider.ClearAnchors then filterDivider:ClearAnchors() end
                 --Unanchor the buttonDivider control
-                local includeBankedCBoxButtonDividerName = AF.ZOsControlNames.includeBankedCheckboxButtonDivider
+                local includeBankedCBoxButtonDividerName = ZOsControlNames.buttonDivider
                 local buttonDivider = parentCtrl:GetNamedChild(includeBankedCBoxButtonDividerName)
                 if buttonDivider and buttonDivider.ClearAnchors then buttonDivider:ClearAnchors() end
-                --Move on the y axis the "height of a subfilter bar" pixels to the top
+                --Move on the y axis the "height of a subfilter bar" pixels to the top, and an additional 5 pixels more to the top
                 --SetAnchor(AnchorPosition myPoint, object anchorTargetControl, AnchorPosition anchorControlsPoint, number offsetX, number offsetY)
                 includeBankedCbox:ClearAnchors()
-                includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight)
+                includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight-5)
             end
         end
         ----------------------------------------------------------------------------------------------------------------
@@ -996,6 +1020,7 @@ d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
             else
                 AF.currentInventoryType = LF_SMITHING_RESEARCH
             end
+            util.HideCraftingInventoryControls(AF.currentInventoryType)
             --Show the subfilterbar for the research panel now as the function
             --"ChangeFilterCrafting(self, filterData)" will not be called automatically here
             util.ClearResearchPanelCustomFilters()

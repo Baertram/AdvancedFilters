@@ -84,10 +84,15 @@ AF.bankInvTypes = bankInvTypes
 
 --Include bank checkbox name
 AF.ZOsControlNames = {
-    includeBankedCheckbox               =   "IncludeBanked",
-    includeBankedCheckboxFilterDivider  =   "FilterDivider",
-    includeBankedCheckboxButtonDivider  =   "ButtonDivider",
+    includeBankedCheckbox   =   "IncludeBanked",
+    filterDivider           =   "FilterDivider",
+    buttonDivider           =   "ButtonDivider",
+    title                   =   "Title"
 }
+local ZOsControlNames = AF.ZOsControlNames
+local filterDividerSuffix = ZOsControlNames.filterDivider
+local buttonDividerSuffix = ZOsControlNames.buttonDivider
+local titleSuffix = ZOsControlNames.title
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
@@ -321,17 +326,31 @@ local normalFilter2CraftingFilter = {
 AF.normalFilter2CraftingFilter = normalFilter2CraftingFilter
 
 --SUBFILTER BARS
+local reanchorDataSmithingResearch = {
+    --The timer icon at the top left edge at the SMITHING reasearch panel
+    {
+        --The researching text at the top left edge at the SMITHING reasearch panel
+        control         = ZO_SmithingTopLevelResearchPanelNumResearching,
+        anchorPoint     = TOPLEFT,
+        relativeTo      = ZO_SmithingTopLevelResearchPanel,
+        relativePoint   = TOPLEFT,
+        offsetX         = 68,
+        offsetY         = 8, --18 original
+    },
+}
 --The list controls for the reanchoring of subfilter bars
 local listControlForSubfilterBarReanchor = {
     [LF_SMITHING_RESEARCH]  =
     {
-        control                 = ZO_SmithingTopLevelResearchPanelResearchLineList,
-        moveInvBottomBarDown    = ZO_SmithingTopLevelResearchPanelInfoBar,
+        control                 = controlsForChecks.researchPanel.researchLineList.control,
+        moveInvBottomBarDown    = ZO_SmithingTopLevelResearchPanelInfoBar, --For addon "PerfectPixel"
+        reanchorData            = reanchorDataSmithingResearch,
     },
     [LF_JEWELRY_RESEARCH]   =
     {
-        control                 = ZO_SmithingTopLevelResearchPanelResearchLineList,
-        moveInvBottomBarDown    = ZO_SmithingTopLevelResearchPanelInfoBar,
+        control                 = controlsForChecks.researchPanel.researchLineList.control,
+        moveInvBottomBarDown    = ZO_SmithingTopLevelResearchPanelInfoBar, --For addon "PerfectPixel"
+        reanreanchorData        = reanchorDataSmithingResearch,
     },
 }
 AF.listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchor
@@ -651,8 +670,6 @@ local subfilterGroups = {
 }
 AF.subfilterGroups = subfilterGroups
 
-local filterDividerSuffix = "FilterDivider"
-local buttonDividerSuffix = "ButtonDivider"
 --The filter bar parent controls
 local filterBarParents = {
     [inventoryNames[INVENTORY_BACKPACK]]        = controlsForChecks.inv,
@@ -664,12 +681,12 @@ local filterBarParents = {
     [inventoryNames[LF_SMITHING_REFINE]]        = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_IMPROVEMENT]]   = GetControl(controlsForChecks.smithing.improvementPanel.inventory.control, filterDividerSuffix),
-    [inventoryNames[LF_SMITHING_RESEARCH]]      = controlsForChecks.smithing.researchPanel.control,
+    [inventoryNames[LF_SMITHING_RESEARCH]]      = GetControl(controlsForChecks.smithing.researchPanel.control, buttonDividerSuffix),
     --[inventoryNames[LF_JEWELRY_CREATION]]       = controlsForChecks.smithing.creationPanel.control,
-    [inventoryNames[LF_JEWELRY_REFINE]]         = controlsForChecks.smithing.refinementPanel.control,
-    [inventoryNames[LF_JEWELRY_DECONSTRUCT]]    = controlsForChecks.smithing.deconstructionPanel.control,
-    [inventoryNames[LF_JEWELRY_IMPROVEMENT]]    = controlsForChecks.smithing.improvementPanel.control,
-    [inventoryNames[LF_JEWELRY_RESEARCH]]       = controlsForChecks.smithing.researchPanel.control,
+    [inventoryNames[LF_JEWELRY_REFINE]]         = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
+    [inventoryNames[LF_JEWELRY_DECONSTRUCT]]    = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
+    [inventoryNames[LF_JEWELRY_IMPROVEMENT]]    = GetControl(controlsForChecks.smithing.improvementPanel.inventory.control, filterDividerSuffix),
+    [inventoryNames[LF_JEWELRY_RESEARCH]]       = GetControl(controlsForChecks.smithing.researchPanel.control, buttonDividerSuffix),
     [inventoryNames[LF_ENCHANTING_CREATION]]    = controlsForChecks.enchanting.inventoryControl,
     [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = controlsForChecks.enchanting.inventoryControl,
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = controlsForChecks.houseBank,
@@ -680,10 +697,19 @@ AF.filterBarParents = filterBarParents
 --Controls which should be hidden as the filter bar is shown at this panel
 local filterBarParentControlsToHide = {
     [LF_SMITHING_DECONSTRUCT]   = {
+        --ZO_SmithingTopLevelDeconstructionPanelInventoryButtonDivider
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
     },
     [LF_JEWELRY_DECONSTRUCT]    = {
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+    },
+    [LF_SMITHING_RESEARCH]    = {
+        ZO_SmithingTopLevelResearchPanelResearchLineListDivider,
+        ZO_SmithingTopLevelResearchPanelResearchLineListTitle,
+    },
+    [LF_JEWELRY_RESEARCH]    = {
+        ZO_SmithingTopLevelResearchPanelResearchLineListDivider,
+        ZO_SmithingTopLevelResearchPanelResearchLineListTitle,
     },
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
@@ -703,15 +729,28 @@ local defaultInventoryBackpackLayoutData = {
     --hideBankInfo = true,
     --hideCurrencyInfo = false,
 }
+local smithingResearchLayoutData = {
+    --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
+    --width = 565,
+    backpackOffsetY = 0,
+    --inventoryTopOffsetY = -20,
+    --inventoryBottomOffsetY = -30,
+    --sortByOffsetY = 0,
+    --emptyLabelOffsetY = 100,
+    --sortByHeaderWidth = 576,
+    --sortByNameWidth = 241,
+    --hideBankInfo = true,
+    --hideCurrencyInfo = false,
+}
 local filterBarCraftingInventoryLayoutData = {
     [LF_SMITHING_REFINE]        = defaultInventoryBackpackLayoutData,
     [LF_SMITHING_DECONSTRUCT]   = defaultInventoryBackpackLayoutData,
     [LF_SMITHING_IMPROVEMENT]   = defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_RESEARCH]      = defaultInventoryBackpackLayoutData,
+    [LF_SMITHING_RESEARCH]      = smithingResearchLayoutData,
     [LF_JEWELRY_REFINE]         = defaultInventoryBackpackLayoutData,
     [LF_JEWELRY_DECONSTRUCT]    = defaultInventoryBackpackLayoutData,
     [LF_JEWELRY_IMPROVEMENT]    = defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_RESEARCH]       = defaultInventoryBackpackLayoutData,
+    [LF_JEWELRY_RESEARCH]       = smithingResearchLayoutData,
     [LF_ENCHANTING_CREATION]    = defaultInventoryBackpackLayoutData,
     [LF_ENCHANTING_EXTRACTION]  = defaultInventoryBackpackLayoutData,
     [LF_RETRAIT]                = defaultInventoryBackpackLayoutData,

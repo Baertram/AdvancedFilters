@@ -52,6 +52,8 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         ]]
     end
 
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
     --unique identifier
     self.name = inventoryName .. tradeSkillname .. groupName
     local AF_FilterBarName = self.name
@@ -73,11 +75,15 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     self.subfilterButtons = {}
     self.activeButton = nil
 
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+    --The dropdown box (combobox) for the filter plugins
     self.dropdown = WINDOW_MANAGER:CreateControlFromVirtual("AF_FilterBar" .. self.name .. "DropdownFilter", self.control, "ZO_ComboBox")
-    self.dropdown:SetAnchor(RIGHT, self.control, RIGHT, -10, 0)
+    self.dropdown:SetAnchor(RIGHT, self.control, RIGHT, -10, 0) -- -10 pixels left of the right screen edge
     self.dropdown:SetHeight(24)
     self.dropdown:SetWidth(104)
 
+------------------------------------------------------------------------------------------------------------------------
     --Function for the mouse right click on the dropdown box (filter plugins) of the subfilterBar
     local function DropdownOnMouseUpHandler(dropdown, mouseButton, upInside)
         local comboBox = dropdown.m_comboBox
@@ -340,6 +346,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         end
     end
     self.dropdown:SetHandler("OnMouseUp", DropdownOnMouseUpHandler)
+------------------------------------------------------------------------------------------------------------------------
 
     local comboBox = self.dropdown.m_comboBox
 
@@ -350,10 +357,12 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         end
     end
     self.dropdown:SetHandler("OnMouseEnter", DropdownOnMouseEnterHandler)
+------------------------------------------------------------------------------------------------------------------------
     local function DropdownOnMouseExitHandler()
         ZO_Tooltips_HideTextTooltip()
     end
     self.dropdown:SetHandler("OnMouseExit", DropdownOnMouseExitHandler)
+------------------------------------------------------------------------------------------------------------------------
 
     local filterBarCreated = self
 
@@ -429,7 +438,9 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             AddCustomSubMenuItem(AF.strings[submenuCandidate.submenuName], entries, "ZoFontGameSmall")
         end
     end
-
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+    --Add the buttons to the subfilterBar now
     for _, subfilterName in ipairs(subfilterNames) do
         --Check if this subfilterName (button) is excluded at the current groupName
         local doNotAddButtonNow = false
@@ -453,6 +464,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     end
 end
 
+--Add a subfilter bar button
 function AF_FilterBar:AddSubfilter(groupName, subfilterName)
     local iconPath = AF.textures[subfilterName]
     if iconPath == nil then
@@ -494,7 +506,8 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
     local filterStartCallback = subfilterButtonData.filterStartCallback
     local filterEndCallback = subfilterButtonData.filterEndCallback
 
-    local anchorX = -116 + #self.subfilterButtons * -32
+    local subfilterBarButtonSize = 32
+    local anchorX = -116 + #self.subfilterButtons * (subfilterBarButtonSize*-1)
 
     local button = WINDOW_MANAGER:CreateControlFromVirtual(self.control:GetName() .. subfilterName .. "Button", self.control, "AF_Button")
     local texture = button:GetNamedChild("Texture")
