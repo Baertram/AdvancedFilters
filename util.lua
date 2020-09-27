@@ -955,6 +955,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
         table.insert(realInvTypes, inventoryType)
     end
     if AF.settings.debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil)) end
+d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil))
     --Check if a bank/guild bank/house storage is opened
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
     local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
@@ -966,9 +967,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local isABankDepositPanel           = (isBankDepositPanel or isGuildBankDepositPanel or isHouseBankDepositPanel) or false
     local isGuildStoreSellPanel         = util.IsFilterPanelShown(LF_GUILDSTORE_SELL) or false
     local isRetraitStation              = util.IsRetraitPanelShown()
-    local isJunkInvButtonActive         = subfilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEMFILTERTYPE_JUNK]) or false
+    local isJunkInvButtonActive         = subfilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
     if AF.settings.debugSpam then d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
+d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems))
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
     ------------------------------------------------------------------------------------------------------------------------
@@ -994,6 +996,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             bagDataToCheck = bagData
         end
         local itemsFound = 0
+AF._bagDataToCheck = bagDataToCheck
         for _, itemData in pairs(bagDataToCheck) do
             breakInventorySlotsLoopNow = false
             local isItemSellable = false
@@ -1008,10 +1011,15 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             local otherAddonUsesFilters = util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters(itemData, realInvType, craftingType, libFiltersPanelId)
             if isNoCrafting then
                 passesCallback = button.filterCallback(itemData)
-                --Like crafting tables the junk inventory got different itemTypes in one section (ITEMFILTERTYPE_JUNK = 9). So the filter comparison does not work and the callback should be enough to check.
-                passesFilter = passesCallback and ((not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEMFILTERTYPE_JUNK))
-                        or (util.IsItemFilterTypeInItemFilterData(itemData.filterData, currentFilter)))
+                --Like crafting tables the junk inventory got different itemTypes in one section (ITEM_TYPE_DISPLAY_CATEGORY_JUNK = 9). So the filter comparison does not work and the callback should be enough to check.
+                passesFilter = passesCallback and ((not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
+                        --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
+                        --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
+                        or (util.IsItemFilterTypeInItemFilterData(itemData, currentFilter)))
                         and otherAddonUsesFilters
+
+local itemlink = GetItemLink(itemData.bagId, itemData.slotIndex)
+d("> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))
                 if AF.settings.debugSpam and isVendorBuy then
                     local itemlink = GetStoreItemLink(itemData.slotIndex)
                     d("> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))
@@ -1218,7 +1226,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
                             if isNoCrafting then
                                 currentFilter = inventory.currentFilter
-                                --d(">currentFilter: " .. tostring(currentFilter))
+d(">invType: " ..tostring(realInvType) .. ", currentFilter: " .. tostring(currentFilter))
                             else
                                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
                                 --Todo: Thus the filter is always marked as "passed". Is this correct and does it work properly? To test!
@@ -1393,11 +1401,17 @@ function util.RemoveAllFilters()
 end
 
 --Check if an item's filterData contains an itemFilterType
-function util.IsItemFilterTypeInItemFilterData(itemFilterData, itemFilterType)
-    if itemFilterData == nil or itemFilterType == nil then return false end
+function util.IsItemFilterTypeInItemFilterData(slot, currentFilter)
+    if slot == nil or currentFilter == nil then return false end
+    --if itemFilterData == nil or itemFilterType == nil then return false end
+    --[[
     for _, itemFilterTypeInFilterData in ipairs(itemFilterData) do
         if itemFilterTypeInFilterData == itemFilterType then return true end
     end
+    ]]
+    --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
+    --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
+    return ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
 end
 
 --Filter a horizontal scroll list and run a filterFunction given to determine the entries to show in the
@@ -2042,6 +2056,7 @@ end
 --Map the itemFilterType to the new ZOs API100033 ItemTypeDisplayCategory
 function util.mapItemFilterTypeToItemFilterCategory(itemFilterType)
     if not itemFilterType then return end
+    --ZO_ItemFilterUtils
     local itemTypeDisplayCategory = ITEM_FILTER_UTILS.GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
             or itemFilterType
     return itemTypeDisplayCategory

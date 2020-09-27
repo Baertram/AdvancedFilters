@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-07-19
---Max todos: #35
+--Max todos: #36
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -33,9 +33,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 --#34: 2020-09-25, Bug, Baertram:
 --     Make AF compatible with ZOs PTS 100033 changes: Inventory filters were added to the vanilla UI.
---     AF needs to support them, or disable them. Decision needs to be taken what way to follow.
---     Best would be: Re-build AF on Vanilla UI...
-
 
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -59,7 +56,13 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
+--#34 Make AF compatible with ZOs PTS 100033 changes: Inventory filters were added to the vanilla UI.
+--    Unfortunately Vendor Buy is currently not supported as ZOs did not change the menu bar buttons to use their new
+--    constants yet, and the valus would not fit in the exisitng AF tables (would overwrite given ones of the normal
+--    inventories). Building 2 tables and using them would be too much effort and error causing, so this is disabled
+--    until ZOs updates the vendor buy panelt o their new constants as well.
 --#35 Support the crafting table filters again and reanchor the needed controls
+--#36 The subfilter bar buttons get disabled even if there are items in the subfilter's ALL tab
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
