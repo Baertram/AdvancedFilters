@@ -547,8 +547,11 @@ local subfilterGroups = {
         },
     },
     --Vendor buy -- no standard ZOs inventory type! Self defined in AdvancedFilters with value 900
+    -->ZOs did not change the vendor buy as well :-( Only the normal inventories were changed
+--[[
     [INVENTORY_TYPE_VENDOR_BUY] = {
         [CRAFTING_TYPE_INVALID] = {
+            --New
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
@@ -558,8 +561,19 @@ local subfilterGroups = {
             [ITEMFILTERTYPE_COLLECTIBLE] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] ={},
+            --Old
+            [ITEMFILTERTYPE_ALL] = {},
+            [ITEMFILTERTYPE_WEAPONS] = {},
+            [ITEMFILTERTYPE_ARMOR] = {},
+            [ITEMFILTERTYPE_CONSUMABLE] = {},
+            [ITEMFILTERTYPE_CRAFTING] = {},
+            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
+            [ITEMFILTERTYPE_COLLECTIBLE] = {},
+            [ITEMFILTERTYPE_JEWELRY] = {},
+            [ITEMFILTERTYPE_FURNISHING] ={},
         },
     },
+]]
 
     --Crafting SMITHING: Create
     --[[
@@ -800,6 +814,7 @@ AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 -->Used for e.g. the vanilla UI searchFilter bars, to disable them (hide them)
 local layoutDataFragments = {
     BACKPACK_DEFAULT_LAYOUT_FRAGMENT,
+    BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
     BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
 }
 AF.layoutDataFragments = layoutDataFragments
@@ -1051,6 +1066,7 @@ local excludeButtonNamesfromSubFilterBar = {
 ]]
 AF.subfilterButtonNames = subfilterButtonNames
 
+
 --DROPDOWN BOXES
 --SubfilterButton entries which should not be added to dropdownCallback entries
 local subfilterButtonEntriesNotForDropdownCallback = {
@@ -1175,6 +1191,7 @@ local keys = {
 local keys = {
     [AF_CONST_ALL] = {},
 }
+
 
 --For each entry in subfilterButtonNames:
 --Get the "key name" by mapping the subfilterButton key to it's name using filterTypeNames

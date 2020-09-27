@@ -206,6 +206,50 @@ local function checkIfBankLastCurrentFilterIsGiven(self, filterTab)
     return currentFilter
 end
 
+--Reanchor & hide some controls at the vanilla UI, like the searchBar and box.
+--Based on the baseControl the controls to change are children
+local function reanchorVanillaUIControls(baseControl)
+    if not baseControl then return end
+    local tabs = GetControl(baseControl, "Tabs")
+    if tabs then
+        local tabsActive = GetControl(tabs, "Active")
+        if tabsActive then tabsActive:SetHidden(true) end
+    end
+
+    local searchFilters = GetControl(baseControl, "SearchFilters")
+    if searchFilters then
+        searchFilters:SetHidden(true)
+        local searchFiltersSubTabs = GetControl(searchFilters, "SubTabs")
+        if searchFiltersSubTabs then searchFiltersSubTabs:SetHidden(true) end
+
+        local searchFiltersTextSearch = GetControl(searchFilters, "TextSearch")
+        if searchFiltersTextSearch then
+            searchFiltersTextSearch:SetHidden(false)
+            searchFiltersTextSearch:ClearAnchors()
+            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 5)
+        end
+    end
+
+    --[[
+        --Vanilla UI's "selected filter label, top left": Hide it
+        ZO_PlayerInventoryTabsActive:SetHidden(true)
+
+        --Vanilla UI's "search filter bar": Hide it
+        -->Done in EVENT_ADD_ON_LOADED via the change to the layoutData.useSearchFilter = false
+        --But does not really hid it AFTER a filter has changed...
+        --So we need to hide it here "properly again"!
+        ZO_PlayerInventorySearchFilters:SetHidden(true)
+        --Vanilla UI's "subfilter bar": Hide it
+        ZO_PlayerInventorySearchFiltersSubTabs:SetHidden(true)
+
+        --Vanilla UI's "search filter search box": Show it and reanchor the text search box to show it above the
+        --inventory again, like before API100033
+        ZO_PlayerInventorySearchFiltersTextSearch:SetHidden(false)
+        ZO_PlayerInventorySearchFiltersTextSearch:ClearAnchors()
+        ZO_PlayerInventorySearchFiltersTextSearch:SetAnchor(BOTTOMLEFT, ZO_PlayerInventory, TOPLEFT, 0, (-1 * ZO_PlayerInventorySearchFiltersTextSearch:GetHeight()) - 5)
+    ]]
+end
+
 --======================================================================================================================
 --=== HOOKS - BEGIN ====================================================================================================
 --======================================================================================================================
@@ -463,6 +507,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
         local currentFilterToUse = customInventoryFilterButtonsItemType or currentFilter
         if craftingType == nil then craftingType = GetCraftingType() end
         if AF.settings.debugSpam then d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType)) end
+d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType))
         --[[
             --Guild store?
             if currentFilter == ITEMFILTERTYPE_TRADING_HOUSE then
@@ -645,6 +690,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing()
             AF.currentInventoryType = inventoryType
+            local inventoryControl
 
             if inventoryType == INVENTORY_TYPE_VENDOR_BUY then
                 --Check if currentFilter is a function and then try to resolve the real filtervalue below it
@@ -654,6 +700,8 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
                 end
                 ThrottledUpdate("ShowSubfilterBar" .. inventoryType, 10,
                         ShowSubfilterBar, STORE_WINDOW.currentFilter, nil, customInventoryFilterButtonsItemType)
+
+                inventoryControl = STORE_WINDOW.control
             else
                 -- fragmentType = "Inv"
                 local currentFilter = PLAYER_INVENTORY.inventories[inventoryType].currentFilter
@@ -675,10 +723,15 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
                     if AF.settings.debugSpam then d("[AF]ChangeFilterCrafting-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
                 end
                 ThrottledUpdate("ShowSubfilterBar" .. inventoryType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType)
+
+                inventoryControl = PLAYER_INVENTORY.inventories[inventoryType].filterBar:GetParent()
             end
             --Call RefreshSubfilterBar via "proxy" metatable function on the inventoryType
             if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
             PLAYER_INVENTORY.isListDirty = track(PLAYER_INVENTORY.isListDirty)
+
+            --Hide and move some controls
+            if inventoryControl then reanchorVanillaUIControls(inventoryControl) end
         end
 
         --[[
@@ -715,7 +768,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
     hookFragment(HOUSE_BANK_FRAGMENT, INVENTORY_HOUSE_BANK)
     hookFragment(GUILD_BANK_FRAGMENT, INVENTORY_GUILD_BANK) -- new value is: 5
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
-    hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
+    --hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
 
 
 --=== SCENES ===========================================================================================================
@@ -793,9 +846,6 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
         --local tabInventory = self.inventories[currentInvType]
         --local currentFilter = tabInventory.currentFilter
         local currentFilter = checkIfBankLastCurrentFilterIsGiven(self, filterTab)
-        --Map the currentFilter (new ZOs itemDisplayCategory) to the old itemFilterType, in order to let the subfilterBars and plugins
-        --register + find + work properly
-        --local currentFilterForSubfilterBar = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
             d("[AF]PLAYER_INVENTORY:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
@@ -862,16 +912,14 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
 --=== VENDOR / STORE ===================================================================================================
         --  Store "BUY" changefilter function
         local function ChangeFilterVendor(self, filterTab)
-            --d("[AF]ChangeFilterVendor")
+--d("[AF]ChangeFilterVendor")
+--AF._vendorFilterTab = filterTab
             local invType = INVENTORY_TYPE_VENDOR_BUY -- AF.currentInventoryType
             local currentFilter = filterTab.filterType
-            --Map the currentFilter (new ZOs itemDisplayCategory) to theold itemFilterType
-            --local currentFilterForSubfilterBar = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
 
             if CheckIfNoSubfilterBarShouldBeShown(currentFilter) then return end
 
-            ThrottledUpdate("ShowSubfilterBar" .. tostring(invType), 10, ShowSubfilterBar,
-                    currentFilter)
+            ThrottledUpdate("ShowSubfilterBar" .. tostring(invType), 10, ShowSubfilterBar, currentFilter)
 
 
             zo_callLater(function()
@@ -892,7 +940,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
                     50, util.updateInventoryInfoBarCountLabel, invType, false)
             ]]
         end
-    ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
+    --ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
 
 
 --=== SMITHING =========================================================================================================
@@ -1443,30 +1491,10 @@ local function SetBankEventVariable(bankType, opened)
     end
 end
 
-local function reanchorVanillaUIControls()
-    --Vanilla UI's "selected filter label, top left": Hide it
-    ZO_PlayerInventoryTabsActive:SetHidden(true)
-
-    --Vanilla UI's "search filter bar": Hide it
-    -->Done in EVENT_ADD_ON_LOADED via the change to the layoutData.useSearchFilter = false
-    --But does not really hid it AFTER a filter has changed...
-    --So we need to hide it here "properly again"!
-    ZO_PlayerInventorySearchFilters:SetHidden(true)
-    --Vanilla UI's "subfilter bar": Hide it
-    ZO_PlayerInventorySearchFiltersSubTabs:SetHidden(true)
-
-    --Vanilla UI's "search filter search box": Show it and reanchor the text search box to show it above the
-    --inventory again, like before API100033
-    ZO_PlayerInventorySearchFiltersTextSearch:SetHidden(false)
-    ZO_PlayerInventorySearchFiltersTextSearch:ClearAnchors()
-    ZO_PlayerInventorySearchFiltersTextSearch:SetAnchor(BOTTOMLEFT, ZO_PlayerInventory, TOPLEFT, 0, (-1 * ZO_PlayerInventorySearchFiltersTextSearch:GetHeight()) - 5)
-end
-
 --Disable the search bar controls (hide them) in some inventory layouts:
 --ZO_InventoryManager:ApplyBackpackLayout e.g.
 --https://github.com/esoui/esoui/blob/5f4f4fa8d40fa9a36aa17225c10b8f1b20c6c978/esoui/ingame/inventory/inventory.lua#L1836
 local function disableVanillaUISearchBarsInLayouts()
-    local defaultInventoryBackpackLayoutData = AF.defaultInventoryBackpackLayoutData
     local layoutDataFragments = AF.layoutDataFragments
     for _, fragmentControl in ipairs(layoutDataFragments) do
         if fragmentControl and fragmentControl.layoutData then
@@ -1480,9 +1508,6 @@ end
 function AF.checkForOtherAddonErrors(eventName, initial)
     --Check if needed libraries are given -> Chat is activated here so we can see error messages!
     if AF.dependenciesLoaded == false then AF.loadLibraries(true) end
-
-    --Reanchor some controls at the vanilla UI
-    reanchorVanillaUIControls()
 
     --Check for other addons
     if not AF.otherAddons then return end

@@ -185,6 +185,8 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
     end
     --set currentFilter since we need it before the original ChangeFilter updates it
     if invType == INVENTORY_TYPE_VENDOR_BUY then
+        --Map the currentfilter, containing the
+        --local currentFilterForVendorBuy =
         controlsForChecks.store.currentFilter = currentFilter
     elseif isCraftingInventoryType then
         craftingInv.currentFilter = currentFilter
