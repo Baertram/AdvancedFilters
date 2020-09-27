@@ -2021,6 +2021,23 @@ function util.ReApplyDropdownFilter()
         activeSubfilterBar:ApplyDropdownSelection()
     end
 end
+
+--======================================================================================================================
+--======================================================================================================================
+--======================================================================================================================
+--Since API100033: ZOs added their own inventory filters. The main buttons are not using the itemfilter_types any longer
+--but so called ItemTypeDisplayCategory. So the filter menu button's buttonData.filterType ("currentFilter" used within
+--AF) is the new ItemTypeDisplayCategory and needs to be mapped to the AF itemfilter_type again, in order to let all AF
+--functions AND plugins work properly (as they need the older ITEMFILTER_TYPE_* variables)!
+function util.mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter_itemFilterCategory)
+    if not currentFilter_itemFilterCategory then return end
+    --Map the itemFilterType from currentFIlter to the new itemTypeDisplayCategory, or return the value passed in
+    --e.g. for AF created itemFilterTypes like ITEMFILTERTYPE_AF_REFINE_SMITHING etc.
+    local itemDisplayCategoryToItemFilterType = AF.itemDisplayCategoryToItemFilterType
+    return itemDisplayCategoryToItemFilterType[currentFilter_itemFilterCategory] or currentFilter_itemFilterCategory
+end
 --======================================================================================================================
 -- -^- API functions                                                                                               -^-
 --======================================================================================================================
+
+

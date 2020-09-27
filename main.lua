@@ -112,6 +112,7 @@ local UpdateCurrentFilter                   = util.UpdateCurrentFilter
 local GetInventoryFromCraftingPanel         = util.GetInventoryFromCraftingPanel
 local IsCraftingStationInventoryType        = util.IsCraftingStationInventoryType
 local IsCraftingPanelShown                  = util.IsCraftingPanelShown
+local mapCurrentFilterItemFilterCategoryToItemFilterType = util.mapCurrentFilterItemFilterCategoryToItemFilterType
 
 local function delayedCall(delay, functionToCall, params)
     if functionToCall then
@@ -171,10 +172,14 @@ local function checkIfBankLastCurrentFilterIsGiven(self, filterTab)
     if AF.settings.debugSpam then d(">checkIfBankLastCurrentFilterIsGiven - START") end
     local tabInvType = filterTab.inventoryType
     local currentInvType = AF.currentInventoryType
-    local tabInventory = self.inventories[currentInvType]
+--    local tabInventory = self.inventories[currentInvType]
     --local currentInvType = AF.currentInventoryType
     --local currentFilter = tabInventory.currentFilter
-    local currentFilter = self:GetTabFilterInfo(tabInvType, filterTab)
+--    local inventory = self:GetDisplayInventoryTable(tabInvType)
+--AF._inventory = inventory
+--    local filterData = inventory.tabFilters[filterTab] or filterTab
+--AF._filterData = filterData
+    local currentFilter, _, _ = self:GetTabFilterInfo(tabInvType, filterTab) --filterData.filterType, filterData.activeTabText, filterData.hiddenColumns
 
 --d(">invType: " ..tostring(currentInvType) ..", currentFilter: " ..tostring(currentFilter))
     if not currentFilter then currentFilter = 0 end
@@ -303,7 +308,7 @@ d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(
             local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
             if layoutData == nil then
 d(">layoutData was taken from default AF BACKPACK LAYOUT!")
-                --Non crafting layout
+                --Standard inv layout
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
             end
 d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
@@ -777,6 +782,8 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
     --Filter changing function for normal inventories
     --Recognizes if a button like armor/weapons/material/... was changed at the inventory (which is a filter change internally)
     local function ChangeFilterInventory(self, filterTab)
+--AF._selfInvFilterTab = self
+--AF._invFilterTab = filterTab
         --self: PLAYER_INVENTORY, filterTab: PLAYER_INVENTORY.filterTab
         local tabInvType = filterTab.inventoryType
         local currentInvType = AF.currentInventoryType
@@ -786,6 +793,8 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
         --local tabInventory = self.inventories[currentInvType]
         --local currentFilter = tabInventory.currentFilter
         local currentFilter = checkIfBankLastCurrentFilterIsGiven(self, filterTab)
+        --Map the currentFilter (new ZOs itemDisplayCategory) to theold itemFilterType
+        currentFilter = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
             d("[AF]PLAYER_INVENTORY:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
@@ -804,7 +813,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
         --[[
         --Causes bug with #28
         #28 2020-06-30, FooWasHere: Talk to vendor for woodworking, sell tab, change filter from ALL to "Weapons". Leave the woodworking vendor. Open any other vendor where there is NO
-        --                            Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hiddem, including items
+        --                            Weapons subfilter given: Only weapons subfilterbar is shown and everything else is hidden, including items
         local doNotUpdateInventoriesWithInventoryChangeFilterFunction = AF.doNotUpdateInventoriesWithInventoryChangeFilterFunction
         local shouldNotUpdateWithInventoryChangeFilterFunc = doNotUpdateInventoriesWithInventoryChangeFilterFunction[currentInvType] or false
         if not shouldNotUpdateWithInventoryChangeFilterFunc then
@@ -855,6 +864,8 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
             --d("[AF]ChangeFilterVendor")
             local invType = INVENTORY_TYPE_VENDOR_BUY -- AF.currentInventoryType
             local currentFilter = filterTab.filterType
+            --Map the currentFilter (new ZOs itemDisplayCategory) to theold itemFilterType
+            currentFilter = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
 
             if CheckIfNoSubfilterBarShouldBeShown(currentFilter) then return end
 
@@ -1459,9 +1470,6 @@ local function disableVanillaUISearchBarsInLayouts()
     for _, fragmentControl in ipairs(layoutDataFragments) do
         if fragmentControl and fragmentControl.layoutData then
             fragmentControl.layoutData.useSearchBar = false
-            --Now replace a few values in the default layouts, like the offsets
-            fragmentControl.layoutData.backpackOffsetY  = defaultInventoryBackpackLayoutData.backpackOffsetY
-            fragmentControl.layoutData.sortByOffsetY    = defaultInventoryBackpackLayoutData.sortByOffsetY
         end
     end
     vanillaUIChangesToSearchBarsWereDone = true
@@ -1515,7 +1523,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_GuildBankOpened",               EVENT_OPEN_GUILD_BANK,                  function() SetBankEventVariable("gb", true) end)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_GuildBankClosed",               EVENT_CLOSE_GUILD_BANK,                 function() SetBankEventVariable("gb", false) end)
     --Bufix to reset "store"'s currentFilter as stable closes
-    EVENT_MANAGER:RegisterForEvent(AF.name .. "_StableClosed",                  EVENT_STABLE_INTERACT_END,              function() controlsForChecks.store.currentFilter = ITEMFILTERTYPE_ALL end)
+    EVENT_MANAGER:RegisterForEvent(AF.name .. "_StableClosed",                  EVENT_STABLE_INTERACT_END,              function() controlsForChecks.store.currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_ALL end) --ITEMFILTERTYPE_ALL
 
     --Create instance of library libFilters
     util.LibFilters:InitializeLibFilters()

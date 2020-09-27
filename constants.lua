@@ -55,6 +55,21 @@ AF.otherAddons = {}
 --Preventer veriables
 AF.preventerVars = {}
 
+--Mapping for the older ITEMFILTERTYPE_* variables to the new ZOs API100033 ITEM_TYPE_DISPLAY_CATEGORY
+--https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L692
+AF.itemDisplayCategoryToItemFilterType = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALL]            = ITEMFILTERTYPE_ALL,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]        = ITEMTYPE_WEAPON,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]          = ITEMTYPE_ARMOR,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]        = ITEMFILTERTYPE_JEWELRY,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]     = ITEMFILTERTYPE_CONSUMABLE,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]       = ITEMFILTERTYPE_CRAFTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]     = ITEMFILTERTYPE_FURNISHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]  = ITEMFILTERTYPE_MISCELLANEOUS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]          = ITEMFILTERTYPE_QUEST,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]           = ITEMFILTERTYPE_JUNK,
+}
+
 --SCENE CHECKS
 --Scene names for the SCENE_MANAGER.currentScene.name check
 local scenesForChecks = {
@@ -446,6 +461,13 @@ local abortSubFilterRefreshInventoryTypes = {
 }
 AF.abortSubFilterRefreshInventoryTypes = abortSubFilterRefreshInventoryTypes
 
+--TODO:
+--https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua
+--All ITEMFILTERTYPE_ variables in the subfilterGroups need to be mapped to
+--the new item display categories...
+--https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L1227
+--ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
+-->ITEM_FILTER_UTILS:GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
 
 --The possible subfilter groups for each inventory type, trade skill type and filtertype.
 local subfilterGroups = {
