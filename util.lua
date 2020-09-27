@@ -1017,9 +1017,8 @@ AF._bagDataToCheck = bagDataToCheck
                         --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
                         or (util.IsItemFilterTypeInItemFilterData(itemData, currentFilter)))
                         and otherAddonUsesFilters
-
-local itemlink = GetItemLink(itemData.bagId, itemData.slotIndex)
-d("> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))
+--local itemlink = GetItemLink(itemData.bagId, itemData.slotIndex)
+--d("> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))
                 if AF.settings.debugSpam and isVendorBuy then
                     local itemlink = GetStoreItemLink(itemData.slotIndex)
                     d("> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))

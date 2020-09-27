@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-07-19
---Max todos: #36
+--Max todos: #38
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -31,8 +31,11 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
---#34: 2020-09-25, Bug, Baertram:
---     Make AF compatible with ZOs PTS 100033 changes: Inventory filters were added to the vanilla UI.
+--#37: 2020-09-28, Bug, Baertram:
+--     Enchanting panel, create: Move the "Quests only" checkbox up
+
+--#38: 2020-09-28, Bug, Baertram:
+--     Bank withdraw filters are not working, always shows all items
 
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
