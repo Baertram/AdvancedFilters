@@ -672,11 +672,11 @@ AF.subfilterGroups = subfilterGroups
 
 --The filter bar parent controls
 local filterBarParents = {
-    [inventoryNames[INVENTORY_BACKPACK]]        = controlsForChecks.inv,
-    [inventoryNames[INVENTORY_BANK]]            = controlsForChecks.bank,
-    [inventoryNames[INVENTORY_GUILD_BANK]]      = controlsForChecks.guildBank,
-    [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = controlsForChecks.storeWindow,
-    [inventoryNames[INVENTORY_CRAFT_BAG]]       = controlsForChecks.craftBag,
+    [inventoryNames[INVENTORY_BACKPACK]]        = GetControl(controlsForChecks.inv, filterDividerSuffix),
+    [inventoryNames[INVENTORY_BANK]]            = GetControl(controlsForChecks.bank, filterDividerSuffix),
+    [inventoryNames[INVENTORY_GUILD_BANK]]      = GetControl(controlsForChecks.guildBank, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
+    [inventoryNames[INVENTORY_CRAFT_BAG]]       = GetControl(controlsForChecks.craftBag, filterDividerSuffix),
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
     [inventoryNames[LF_SMITHING_REFINE]]        = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
@@ -687,9 +687,9 @@ local filterBarParents = {
     [inventoryNames[LF_JEWELRY_DECONSTRUCT]]    = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_JEWELRY_IMPROVEMENT]]    = GetControl(controlsForChecks.smithing.improvementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_JEWELRY_RESEARCH]]       = GetControl(controlsForChecks.smithing.researchPanel.control, buttonDividerSuffix),
-    [inventoryNames[LF_ENCHANTING_CREATION]]    = controlsForChecks.enchanting.inventoryControl,
-    [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = controlsForChecks.enchanting.inventoryControl,
-    [inventoryNames[INVENTORY_HOUSE_BANK]]      = controlsForChecks.houseBank,
+    [inventoryNames[LF_ENCHANTING_CREATION]]    = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
+    [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = controlsForChecks.retraitControl,
 }
 AF.filterBarParents = filterBarParents
@@ -755,6 +755,7 @@ local filterBarCraftingInventoryLayoutData = {
     [LF_ENCHANTING_EXTRACTION]  = defaultInventoryBackpackLayoutData,
     [LF_RETRAIT]                = defaultInventoryBackpackLayoutData,
 }
+AF.defaultInventoryBackpackLayoutData = defaultInventoryBackpackLayoutData
 AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
 
 --SUBFILTER BAR BUTTONS
