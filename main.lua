@@ -793,8 +793,9 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
         --local tabInventory = self.inventories[currentInvType]
         --local currentFilter = tabInventory.currentFilter
         local currentFilter = checkIfBankLastCurrentFilterIsGiven(self, filterTab)
-        --Map the currentFilter (new ZOs itemDisplayCategory) to theold itemFilterType
-        currentFilter = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
+        --Map the currentFilter (new ZOs itemDisplayCategory) to the old itemFilterType, in order to let the subfilterBars and plugins
+        --register + find + work properly
+        --local currentFilterForSubfilterBar = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
             d("[AF]PLAYER_INVENTORY:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
@@ -865,7 +866,7 @@ d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
             local invType = INVENTORY_TYPE_VENDOR_BUY -- AF.currentInventoryType
             local currentFilter = filterTab.filterType
             --Map the currentFilter (new ZOs itemDisplayCategory) to theold itemFilterType
-            currentFilter = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
+            --local currentFilterForSubfilterBar = mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter)
 
             if CheckIfNoSubfilterBarShouldBeShown(currentFilter) then return end
 

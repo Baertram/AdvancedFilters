@@ -58,9 +58,10 @@ AF.preventerVars = {}
 --Mapping for the older ITEMFILTERTYPE_* variables to the new ZOs API100033 ITEM_TYPE_DISPLAY_CATEGORY
 --https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L692
 AF.itemDisplayCategoryToItemFilterType = {
+    --Normal Inventory
     [ITEM_TYPE_DISPLAY_CATEGORY_ALL]            = ITEMFILTERTYPE_ALL,
-    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]        = ITEMTYPE_WEAPON,
-    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]          = ITEMTYPE_ARMOR,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]        = ITEMFILTERTYPE_WEAPONS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]          = ITEMFILTERTYPE_ARMOR,
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]        = ITEMFILTERTYPE_JEWELRY,
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]     = ITEMFILTERTYPE_CONSUMABLE,
     [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]       = ITEMFILTERTYPE_CRAFTING,
@@ -68,6 +69,16 @@ AF.itemDisplayCategoryToItemFilterType = {
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]  = ITEMFILTERTYPE_MISCELLANEOUS,
     [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]          = ITEMFILTERTYPE_QUEST,
     [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]           = ITEMFILTERTYPE_JUNK,
+    --CraftBag
+    [ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING]  = ITEMFILTERTYPE_BLACKSMITHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING]       = ITEMFILTERTYPE_CLOTHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WOODWORKING]    = ITEMFILTERTYPE_WOODWORKING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY]        = ITEMFILTERTYPE_ALCHEMY,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ENCHANTING]     = ITEMFILTERTYPE_ENCHANTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING]   = ITEMFILTERTYPE_PROVISIONING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]= ITEMFILTERTYPE_JEWELRYCRAFTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL] = ITEMFILTERTYPE_STYLE_MATERIALS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM]     = ITEMFILTERTYPE_TRAIT_ITEMS,
 }
 
 --SCENE CHECKS
@@ -270,25 +281,25 @@ AF.tradeSkillNames = tradeSkillNames
 --FILTERTYPE NAMES
 --The names of the filter types. Needed to build the unique subfilter panel names.
 local filterTypeNames = {
-    [ITEMFILTERTYPE_ALL]                            = AF_CONST_ALL,
-    [ITEMFILTERTYPE_WEAPONS]                        = "Weapons",
-    [ITEMFILTERTYPE_ARMOR]                          = "Armor",
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALL]                = AF_CONST_ALL,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]            = "Weapons",
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]              = "Armor",
     [ITEMFILTERTYPE_COLLECTIBLE]                    = "Collectibles",
-    [ITEMFILTERTYPE_CONSUMABLE]                     = "Consumables",
-    [ITEMFILTERTYPE_CRAFTING]                       = "Crafting",
-    [ITEMFILTERTYPE_MISCELLANEOUS]                  = "Miscellaneous",
-    [ITEMFILTERTYPE_JUNK]                           = "Junk",
-    [ITEMFILTERTYPE_BLACKSMITHING]                  = "Blacksmithing",
-    [ITEMFILTERTYPE_CLOTHING]                       = "Clothing",
-    [ITEMFILTERTYPE_WOODWORKING]                    = "Woodworking",
-    [ITEMFILTERTYPE_ALCHEMY]                        = "Alchemy",
-    [ITEMFILTERTYPE_ENCHANTING]                     = "Enchanting",
-    [ITEMFILTERTYPE_PROVISIONING]                   = "Provisioning",
-    [ITEMFILTERTYPE_STYLE_MATERIALS]                = "Style",
-    [ITEMFILTERTYPE_TRAIT_ITEMS]                    = "Traits",
-    [ITEMFILTERTYPE_FURNISHING]                     = "Furnishings",
-    [ITEMFILTERTYPE_JEWELRYCRAFTING]                = "JewelryCrafting",
-    [ITEMFILTERTYPE_JEWELRY]                        = "Jewelry",
+    [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]         = "Consumables",
+    [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]           = "Crafting",
+    [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]      = "Miscellaneous",
+    [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]               = "Junk",
+    [ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING]      = "Blacksmithing",
+    [ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING]           = "Clothing",
+    [ITEM_TYPE_DISPLAY_CATEGORY_WOODWORKING]        = "Woodworking",
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY]            = "Alchemy",
+    [ITEM_TYPE_DISPLAY_CATEGORY_ENCHANTING]         = "Enchanting",
+    [ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING]       = "Provisioning",
+    [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL]     = "Style",
+    [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM]         = "Traits",
+    [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]         = "Furnishings",
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]    = "JewelryCrafting",
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]            = "Jewelry",
     [ITEMFILTERTYPE_AF_WEAPONS_SMITHING]            = "WeaponsSmithing",
     --[ITEMFILTERTYPE_AF_CREATE_ARMOR_SMITHING]       = "CreateArmorSmithing",
     [ITEMFILTERTYPE_AF_REFINE_SMITHING]             = "RefineSmithing",
@@ -318,24 +329,24 @@ local filterTypeNames = {
 AF.filterTypeNames = filterTypeNames
 --Mapping for filter types to crafting AdvancedFilter types
 local normalFilterNames = {
-    [filterTypeNames[ITEMFILTERTYPE_ARMOR]]   = true, -- Armor
-    [filterTypeNames[ITEMFILTERTYPE_WEAPONS]] = true, -- Weapons
-    [filterTypeNames[ITEMFILTERTYPE_JEWELRY]] = true, -- Jewelry
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]]   = true, -- Armor
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]] = true, -- Weapons
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]] = true, -- Jewelry
 }
 AF.normalFilterNames = normalFilterNames
 local normalFilter2CraftingFilter = {
-    [filterTypeNames[ITEMFILTERTYPE_ARMOR]] = {
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]] = {
         [filterTypeNames[ITEMFILTERTYPE_AF_ARMOR_WOODWORKING]]    = true, --ArmorWoodworking
         [filterTypeNames[ITEMFILTERTYPE_AF_ARMOR_SMITHING]]       = true, --ArmorSmithing
         [filterTypeNames[ITEMFILTERTYPE_AF_ARMOR_CLOTHIER]]       = true, --ArmorClothier
         [filterTypeNames[ITEMFILTERTYPE_AF_RETRAIT_ARMOR]]        = true, --ArmorRetrait
     },
-    [filterTypeNames[ITEMFILTERTYPE_WEAPONS]] = {
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]] = {
         [filterTypeNames[ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING]]  = true, --WeaponsWoodworking
         [filterTypeNames[ITEMFILTERTYPE_AF_WEAPONS_SMITHING]]     = true, --WeaponsSmithing
         [filterTypeNames[ITEMFILTERTYPE_AF_RETRAIT_WEAPONS]]      = true, --WeaponsRetrait
     },
-    [filterTypeNames[ITEMFILTERTYPE_JEWELRY]] = {
+    [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]] = {
         [filterTypeNames[ITEMFILTERTYPE_AF_JEWELRY_CRAFTING]]     = true, --JewelryCraftingStation
         [filterTypeNames[ITEMFILTERTYPE_AF_RETRAIT_JEWELRY]]      = true, --JewelryRetrait
     },
@@ -402,9 +413,9 @@ AF.listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchor
 
 --There are no subfilter bars active at the following inventory panels. Used for debug messages!
 local subFiltersBarInactive = {
-    [ITEMFILTERTYPE_QUEST]           = INVENTORY_QUEST_ITEM,  -- Inventory: Quest items
+    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]  = INVENTORY_QUEST_ITEM,  -- Inventory: Quest items
     --Custom addons
-    [ITEMFILTERTYPE_AF_STOLENFILTER] = INVENTORY_BACKPACK,
+    [ITEMFILTERTYPE_AF_STOLENFILTER]    = INVENTORY_BACKPACK,
 }
 AF.subFiltersBarInactive = subFiltersBarInactive
 
@@ -474,16 +485,16 @@ local subfilterGroups = {
     --Player inventory
     [INVENTORY_BACKPACK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
-            [ITEMFILTERTYPE_WEAPONS] = {},
-            [ITEMFILTERTYPE_ARMOR] = {},
-            [ITEMFILTERTYPE_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
             [ITEMFILTERTYPE_JEWELRYCRAFTING] = {},
-            [ITEMFILTERTYPE_CONSUMABLE] = {},
-            [ITEMFILTERTYPE_CRAFTING] = {},
-            [ITEMFILTERTYPE_FURNISHING] = {},
-            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
-            [ITEMFILTERTYPE_JUNK] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
 
             --CUSTOM ADDON TABs
             --[[
@@ -494,36 +505,36 @@ local subfilterGroups = {
     --Bank
     [INVENTORY_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
-            [ITEMFILTERTYPE_WEAPONS] = {},
-            [ITEMFILTERTYPE_ARMOR] = {},
-            [ITEMFILTERTYPE_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
             [ITEMFILTERTYPE_JEWELRYCRAFTING] = {},
-            [ITEMFILTERTYPE_CONSUMABLE] = {},
-            [ITEMFILTERTYPE_CRAFTING] = {},
-            [ITEMFILTERTYPE_FURNISHING] = {},
-            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
-            [ITEMFILTERTYPE_JUNK] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
         },
     },
     --Guild bank
     [INVENTORY_GUILD_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
-            [ITEMFILTERTYPE_WEAPONS] = {},
-            [ITEMFILTERTYPE_ARMOR] = {},
-            [ITEMFILTERTYPE_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
             [ITEMFILTERTYPE_JEWELRYCRAFTING] = {},
-            [ITEMFILTERTYPE_CONSUMABLE] = {},
-            [ITEMFILTERTYPE_CRAFTING] = {},
-            [ITEMFILTERTYPE_FURNISHING] = {},
-            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
         },
     },
     --Craft bag
     [INVENTORY_CRAFT_BAG] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_BLACKSMITHING] = {},
             [ITEMFILTERTYPE_CLOTHING] = {},
             [ITEMFILTERTYPE_WOODWORKING] = {},
@@ -538,15 +549,15 @@ local subfilterGroups = {
     --Vendor buy -- no standard ZOs inventory type! Self defined in AdvancedFilters with value 900
     [INVENTORY_TYPE_VENDOR_BUY] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
-            [ITEMFILTERTYPE_WEAPONS] = {},
-            [ITEMFILTERTYPE_ARMOR] = {},
-            [ITEMFILTERTYPE_CONSUMABLE] = {},
-            [ITEMFILTERTYPE_CRAFTING] = {},
-            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
             [ITEMFILTERTYPE_COLLECTIBLE] = {},
-            [ITEMFILTERTYPE_JEWELRY] = {},
-            [ITEMFILTERTYPE_FURNISHING] ={},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] ={},
         },
     },
 
@@ -554,17 +565,17 @@ local subfilterGroups = {
     --[[
     [LF_SMITHING_CREATION] = {
         [CRAFTING_TYPE_BLACKSMITHING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_CREATE_ARMOR_SMITHING] = {},
             [ITEMFILTERTYPE_AF_CREATE_WEAPONS_SMITHING] = {},
         },
         [CRAFTING_TYPE_WOODWORKING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_CREATE_ARMOR_WOODWORKING] = {},
             [ITEMFILTERTYPE_AF_CREATE_WEAPONS_WOODWORKING] = {},
         },
         [CRAFTING_TYPE_CLOTHIER] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_CREATE_ARMOR_CLOTHIER] = {},
         },
     },
@@ -573,15 +584,15 @@ local subfilterGroups = {
     --Crafting SMITHING: Refine
     [LF_SMITHING_REFINE] = {
         [CRAFTING_TYPE_BLACKSMITHING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_REFINE_SMITHING] = {},
         },
         [CRAFTING_TYPE_WOODWORKING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_REFINE_WOODWORKING] = {},
         },
         [CRAFTING_TYPE_CLOTHIER] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_REFINE_CLOTHIER] = {},
         },
     },
@@ -589,17 +600,17 @@ local subfilterGroups = {
     --Crafting SMITHING: Deconstruction
     [LF_SMITHING_DECONSTRUCT] = {
         [CRAFTING_TYPE_BLACKSMITHING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
         },
         [CRAFTING_TYPE_WOODWORKING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
         },
         [CRAFTING_TYPE_CLOTHIER] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
         },
     },
@@ -607,17 +618,17 @@ local subfilterGroups = {
     --Crafting SMITHING: Improvement
     [LF_SMITHING_IMPROVEMENT] = {
         [CRAFTING_TYPE_BLACKSMITHING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
         },
         [CRAFTING_TYPE_WOODWORKING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
         },
         [CRAFTING_TYPE_CLOTHIER] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
         },
     },
@@ -625,17 +636,17 @@ local subfilterGroups = {
     --Crafting SMITHING: Research
     [LF_SMITHING_RESEARCH] = {
         [CRAFTING_TYPE_BLACKSMITHING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
         },
         [CRAFTING_TYPE_WOODWORKING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
         },
         [CRAFTING_TYPE_CLOTHIER] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
         },
     },
@@ -644,7 +655,7 @@ local subfilterGroups = {
     --[[
     [LF_JEWELRY_CREATION] = {
         [CRAFTING_TYPE_JEWELRYCRAFTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_CREATE_JEWELRY] = {},
         },
     },
@@ -653,7 +664,7 @@ local subfilterGroups = {
     --Crafting JEWELRY: Refine
     [LF_JEWELRY_REFINE] = {
         [CRAFTING_TYPE_JEWELRYCRAFTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_REFINE_JEWELRY] = {},
         },
     },
@@ -661,14 +672,14 @@ local subfilterGroups = {
     --Crafting JEWELRY: Deconstruction
     [LF_JEWELRY_DECONSTRUCT] = {
         [CRAFTING_TYPE_JEWELRYCRAFTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {},
         },
     },
     --Crafting JEWELRY: Improvement
     [LF_JEWELRY_IMPROVEMENT] = {
         [CRAFTING_TYPE_JEWELRYCRAFTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {},
         },
     },
@@ -676,7 +687,7 @@ local subfilterGroups = {
     --Crafting JEWELRY: Research
     [LF_JEWELRY_RESEARCH] = {
         [CRAFTING_TYPE_JEWELRYCRAFTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {},
         },
     },
@@ -684,36 +695,36 @@ local subfilterGroups = {
     --Crafting ENCHANTING: Creation
     [LF_ENCHANTING_CREATION] = {
         [CRAFTING_TYPE_ENCHANTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             --[ITEMFILTERTYPE_AF_RUNES_ENCHANTING] = {}, TODO: Currently disabled as no extra filters are needed/possible
         },
     },
     --Crafting ENCHANTING: Extraction
     [LF_ENCHANTING_EXTRACTION] = {
         [CRAFTING_TYPE_ENCHANTING] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {},
         },
     },
     --Houes bank withdraw
     [INVENTORY_HOUSE_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
-            [ITEMFILTERTYPE_WEAPONS] = {},
-            [ITEMFILTERTYPE_ARMOR] = {},
-            [ITEMFILTERTYPE_CONSUMABLE] = {},
-            [ITEMFILTERTYPE_CRAFTING] = {},
-            [ITEMFILTERTYPE_FURNISHING] = {},
-            [ITEMFILTERTYPE_MISCELLANEOUS] = {},
-            [ITEMFILTERTYPE_JUNK] = {},
-            [ITEMFILTERTYPE_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
             [ITEMFILTERTYPE_JEWELRYCRAFTING] = {},
         },
     },
     --Retrait
     [LF_RETRAIT] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_RETRAIT_ARMOR]   = {},
             [ITEMFILTERTYPE_AF_RETRAIT_WEAPONS] = {},
             [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY] = {},
@@ -840,10 +851,10 @@ AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
 --SUBFILTER BAR BUTTONS
 --The subfilter bars button names
 local subfilterButtonNames = {
-    [ITEMFILTERTYPE_ALL] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {
         AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_WEAPONS] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {
         "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
     },
     --[[
@@ -881,12 +892,12 @@ local subfilterButtonNames = {
     [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {
         "HealStaff", "DestructionStaff", "Bow", AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_ARMOR] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {
         --"Vanity", --> Moved to Miscelaneous
         "Shield", "Clothing", "LightArmor", "Medium",
         "Heavy", AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_JEWELRY] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {
         "Neck", "Ring", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {
@@ -907,25 +918,25 @@ local subfilterButtonNames = {
     [ITEMFILTERTYPE_COLLECTIBLE] = {
         AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_CONSUMABLE] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {
         "Trophy", "Repair", "Container", "Writ", "Motif", "Poison",
         "Potion", "Recipe", "Drink", "Food", "Crown", AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_CRAFTING] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
         "FurnishingMat", "AllTraits", --"JewelryTrait", "WeaponTrait", "ArmorTrait", -> Removed due to not enough place! Combined within "AllTraits"
         "Style",
         "JewelryCrafting", "Provisioning", "Enchanting", "Alchemy", "Woodworking",
         "Clothier", "Blacksmithing", AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_FURNISHING] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {
         "TargetDummy", "Seating", "Ornamental", "Light", "CraftingStation",
         AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_MISCELLANEOUS] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {
         "Vanity", "Trash", "Fence", "Trophy", "Tool", "Bait", "Siege", "SoulGem",
         "Glyphs", AF_CONST_ALL,
     },
-    [ITEMFILTERTYPE_JUNK] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {
         "Miscellaneous", "Furnishings", "Materials", "Consumable", "Jewelry", "Armor", "Weapon",
         AF_CONST_ALL,
     },
@@ -991,14 +1002,14 @@ local excludeButtonNamesfromSubFilterBar = {
         --TradeSkillNames
         [CRAFTING_TYPE_INVALID] = {
             --FilterTypeNames
-            [ITEMFILTERTYPE_CRAFTING] =
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] =
                 --Exclude this single buttons here:
                 "AllTraits"
         }
     },
     [INVENTORY_BACKPACK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_CRAFTING] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
                 --Exclude these buttons here:
                 {"JewelryTrait", "WeaponTrait", "ArmorTrait"}
             }
@@ -1006,7 +1017,7 @@ local excludeButtonNamesfromSubFilterBar = {
     },
     [INVENTORY_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_CRAFTING] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
                 --Exclude these buttons here:
                 {"JewelryTrait", "WeaponTrait", "ArmorTrait"}
             }
@@ -1014,7 +1025,7 @@ local excludeButtonNamesfromSubFilterBar = {
     },
     [INVENTORY_GUILD_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_CRAFTING] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
                 --Exclude these buttons here:
                 {"JewelryTrait", "WeaponTrait", "ArmorTrait"}
             }
@@ -1022,7 +1033,7 @@ local excludeButtonNamesfromSubFilterBar = {
     },
     [INVENTORY_HOUSE_BANK] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_CRAFTING] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
                 --Exclude these buttons here:
                 {"JewelryTrait", "WeaponTrait", "ArmorTrait"}
             }
@@ -1030,7 +1041,7 @@ local excludeButtonNamesfromSubFilterBar = {
     },
     [INVENTORY_TYPE_VENDOR_BUY] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEMFILTERTYPE_CRAFTING] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
                 --Exclude these buttons here:
                 {"JewelryTrait", "WeaponTrait", "ArmorTrait"}
             }
@@ -1043,7 +1054,7 @@ AF.subfilterButtonNames = subfilterButtonNames
 --DROPDOWN BOXES
 --SubfilterButton entries which should not be added to dropdownCallback entries
 local subfilterButtonEntriesNotForDropdownCallback = {
-    [ITEMFILTERTYPE_ARMOR] = {
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {
         ["doNotAdd"] = {"Clothing", "LightArmor", "Medium", "Heavy"}, --These are combined into the entry "Body"
         ["replaceWith"] = "Body",
     },
@@ -1421,7 +1432,7 @@ local craftingTableAFFilterType2ESOFilterType = {
             --[[
             [ITEMFILTERTYPE_AF_RUNES_ENCHANTING]       = ENCHANTING_MODE_CREATION,
             ]]
-            [ITEMFILTERTYPE_ALL]                            = ENCHANTING_MODE_CREATION,
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL]                            = ENCHANTING_MODE_CREATION,
         },
     },
     [LF_ENCHANTING_EXTRACTION] = {
@@ -1539,7 +1550,7 @@ local craftingTableESOFilterType2AFFilterType = {
     },
     [LF_ENCHANTING_CREATION] = {
         [CRAFTING_TYPE_ENCHANTING] = {
-            [ENCHANTING_MODE_CREATION]  = ITEMFILTERTYPE_ALL, --TODO: Enable if itemfiltertype subfilters for the runes work: ITEMFILTERTYPE_AF_RUNES_ENCHANTING,
+            [ENCHANTING_MODE_CREATION]  = ITEM_TYPE_DISPLAY_CATEGORY_ALL, --TODO: Enable if itemfiltertype subfilters for the runes work: ITEMFILTERTYPE_AF_RUNES_ENCHANTING,
         },
     },
     [LF_ENCHANTING_EXTRACTION] = {

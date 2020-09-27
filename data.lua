@@ -1925,6 +1925,11 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
 end
 
 function AdvancedFilters_RegisterFilter(filterInformationTable)
+
+--TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+--TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+--TODO: properly and the dropdown filters won't be registered to the correct bars!
+
 --local pluginName = filterInformationTable.callbackTable[1].name or filterInformationTable.submenuName
 --zo_callLater(function() d("AdvancedFilters_RegisterFilter: " .. tostring(pluginName)) end, 3000)
     --make sure all necessary information is present
@@ -1956,7 +1961,8 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
 --        local filterTypeToGroupName = AF.filterTypeNames
         local groupName = filterTypeToGroupName[filterInformation.filterType] or nil
         if groupName == nil then
-            d("[AdvancedFilters_RegisterFilter]Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
+            local pluginName = filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name)
+            d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\' - Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
             return
         else
             if subfilterCallbacks[groupName] == nil or subfilterCallbacks[groupName].addonDropdownCallbacks == nil then return end

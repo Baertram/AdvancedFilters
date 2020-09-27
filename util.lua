@@ -2029,12 +2029,20 @@ end
 --but so called ItemTypeDisplayCategory. So the filter menu button's buttonData.filterType ("currentFilter" used within
 --AF) is the new ItemTypeDisplayCategory and needs to be mapped to the AF itemfilter_type again, in order to let all AF
 --functions AND plugins work properly (as they need the older ITEMFILTER_TYPE_* variables)!
-function util.mapCurrentFilterItemFilterCategoryToItemFilterType(currentFilter_itemFilterCategory)
-    if not currentFilter_itemFilterCategory then return end
+function util.mapItemFilterCategoryToItemFilterType(itemFilterCategory)
+    if not itemFilterCategory then return end
     --Map the itemFilterType from currentFIlter to the new itemTypeDisplayCategory, or return the value passed in
     --e.g. for AF created itemFilterTypes like ITEMFILTERTYPE_AF_REFINE_SMITHING etc.
     local itemDisplayCategoryToItemFilterType = AF.itemDisplayCategoryToItemFilterType
-    return itemDisplayCategoryToItemFilterType[currentFilter_itemFilterCategory] or currentFilter_itemFilterCategory
+    return itemDisplayCategoryToItemFilterType[itemFilterCategory] or itemFilterCategory
+end
+
+--Map the itemFilterType to the new ZOs API100033 ItemTypeDisplayCategory
+function util.mapItemFilterTypeToItemFilterCategory(itemFilterType)
+    if not itemFilterType then return end
+    local itemTypeDisplayCategory = ITEM_FILTER_UTILS.GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
+            or itemFilterType
+    return itemTypeDisplayCategory
 end
 --======================================================================================================================
 -- -^- API functions                                                                                               -^-
