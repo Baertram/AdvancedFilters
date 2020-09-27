@@ -1,6 +1,9 @@
 AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
 
+local vanillaUIChangesToSearchBarsWereDone = false
+AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
+
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
@@ -292,82 +295,86 @@ d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
-d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
+            d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
             local invTypeUpdateListAnchor = AF.currentInventoryType
             --Check if the current layoutData (offsets of controls in the inventory) is given
-            local layoutData = self.appliedLayout
+            local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
             if layoutData == nil then
-                --Layoutdata is not given: Use AF default values
-                if p_isCraftingInventoryType == true then
-                    --Crafting layout
-                    --Get the own defined layout fragments for the LibFilters LF_* crafting type (see constants.lua)
-                    --to set the offsets of the sort headers, inventory lists etc.
-                    layoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
-                else
-                    d(">layoutData was taken from default AF BACKPACK LAYOUT!")
-                    --Non crafting layout
-                    layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
-                end
+d(">layoutData was taken from default AF BACKPACK LAYOUT!")
+                --Non crafting layout
+                layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
             end
 d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
             if not layoutData then
                 return
-            elseif layoutData == BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData then
-                --The standard backpack layout is moving the inventoryList and sortheader too much down!
-                --Use AF spüecial layout data from constants.lua instead!
-                layoutData = AF.defaultInventoryBackpackLayoutData
             end
+--TODO: Remove after testing
+AF._layoutData = layoutData
 
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
                 list = self.inventories[invTypeUpdateListAnchor].listView
             end
+            --No inventory list found: Detect it now (crafting research e.g.)
             if not list then
 d(">no list control found yet")
+                local listData
                 local moveInvBottomBarDown
                 local anchorTo = (p_subFilterBar and p_subFilterBar.control) or nil
                 local reanchorData
                 --Get the Smithing research list(s) e.g. and reanchor it
-                list, moveInvBottomBarDown, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
-                if not list then return end
+                listData, moveInvBottomBarDown, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
+                if not listData then return end
                 --list:SetWidth(layoutData.width)
-                list:ClearAnchors()
-                list:SetAnchor(TOP, anchorTo, BOTTOM, 0, layoutData.backpackOffsetY)
-                --Move the inventory's bottom bar more down?
-                if moveInvBottomBarDown then
-                    --Do not move the bar if the addon PerfectPixel is active as it was moved already
-                    if not PP then
-                        moveInvBottomBarDown:ClearAnchors()
-                        moveInvBottomBarDown:SetAnchor(TOPLEFT, list:GetParent(), BOTTOMLEFT, 0, shiftY)
-                        moveInvBottomBarDown:SetAnchor(BOTTOMRIGHT)
-                    end
-                end
-                --Additional controls to reanchor?
-                if reanchorData ~= nil then
-                    for _, reanchorControlData in ipairs(reanchorData) do
-                        local controlToReanchor = reanchorControlData.control
-                        if controlToReanchor ~= nil then
-                            if reanchorControlData.anchorPoint ~= nil
-                                    and reanchorControlData.relativeTo ~= nil and reanchorControlData.relativePoint ~= nil
-                                    and reanchorControlData.offsetX ~= nil and reanchorControlData.offsetY ~= nil then
-                                controlToReanchor:ClearAnchors()
-                                controlToReanchor:SetAnchor(reanchorControlData.anchorPoint, reanchorControlData.relativeTo, reanchorControlData.relativePoint, reanchorControlData.offsetX, reanchorControlData.offsetY)
-                            end
+                list = listData.control
+                if list then
+d(">>list found by util.GetListControlForSubfilterBarReanchor")
+                    list:ClearAnchors()
+                    list:SetAnchor(listData.anchorPoint or TOP, listData.relativeTo or anchorTo, listData.relativePoint or BOTTOM, listData.offsetX or 0, listData.offsetY or layoutData.backpackOffsetY)
+                    --Move the inventory's bottom bar more down?
+                    if moveInvBottomBarDown then
+                        --Do not move the bar if the addon PerfectPixel is active as it was moved already
+                        if not PP then
+                            moveInvBottomBarDown:ClearAnchors()
+                            moveInvBottomBarDown:SetAnchor(TOPLEFT, list:GetParent(), BOTTOMLEFT, 0, shiftY)
+                            moveInvBottomBarDown:SetAnchor(BOTTOMRIGHT)
                         end
                     end
-
                 end
             else
+                --Inventory list given
                 list:SetWidth(layoutData.width)
                 list:ClearAnchors()
-                list:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, layoutData.backpackOffsetY + shiftY)
+                local offsetYList = layoutData.backpackOffsetY
+                if p_isCraftingInventoryType == true then
+                    offsetYList = offsetYList + shiftY
+                end
+                list:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYList)
                 list:SetAnchor(BOTTOMRIGHT)
-d(">ZO_ScrollList was changed to offsetY: " .. (layoutData.backpackOffsetY + shiftY) .. ", height: " ..tostring(list:GetHeight()))
+d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
             end
 
+            --Additional controls to reanchor?
+            --Get the Smithing research line horizontal scroll list, and other controls below, and reanchor it e.g.
+            local _, _, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
+            if reanchorData ~= nil then
+                for _, reanchorControlData in ipairs(reanchorData) do
+                    local controlToReanchor = reanchorControlData.control
+                    if controlToReanchor ~= nil then
+                        if reanchorControlData.anchorPoint ~= nil
+                                and reanchorControlData.relativeTo ~= nil and reanchorControlData.relativePoint ~= nil
+                                and reanchorControlData.offsetX ~= nil and reanchorControlData.offsetY ~= nil then
+                            controlToReanchor:ClearAnchors()
+                            controlToReanchor:SetAnchor(reanchorControlData.anchorPoint, reanchorControlData.relativeTo, reanchorControlData.relativePoint, reanchorControlData.offsetX, reanchorControlData.offsetY)
+                        end
+                    end
+                end
+            end
+
+            --Sort header reanchor
             local sortBy = self.sortHeaders or self.sortHeaderGroup
             if sortBy == nil and self.GetDisplayInventoryTable then
                 sortBy = self:GetDisplayInventoryTable(invTypeUpdateListAnchor).sortHeaders
@@ -375,13 +382,17 @@ d(">ZO_ScrollList was changed to offsetY: " .. (layoutData.backpackOffsetY + shi
             if sortBy == nil then return end
             sortBy = sortBy.headerContainer
             sortBy:ClearAnchors()
-            sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, layoutData.sortByOffsetY + shiftY)
-d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
-            --Crafting inventory?
+            local offsetYSortHeader = layoutData.sortByOffsetY
+            --[[
             if p_isCraftingInventoryType == true then
-                --Should some crafting panel control be hidden?
-                util.HideCraftingInventoryControls(invTypeUpdateListAnchor)
+                offsetYSortHeader = offsetYSortHeader + shiftY
             end
+            ]]
+            sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYSortHeader)
+d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
+
+            --Should some inventory controls be hidden?
+            util.HideInventoryControls(invTypeUpdateListAnchor)
         end
         ----------------------------------------------------------------------------------------------------------------
         --ReAnchor other controls so that the subfilter bar will be shown properly
@@ -875,6 +886,40 @@ d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
 --=== SMITHING =========================================================================================================
     --Hook the crafting station
     --SMITHING
+    --Filter changing function for crafting stations and retrait station.
+    --Recognizes if a button like armor/weapons was changed at the crafting station (which is a filter change internally)
+    local function ChangeFilterCrafting(self, filterData)
+        local invType = AF.currentInventoryType
+        local craftingType = GetCraftingType()
+        local filter = self.filterType or self.typeFilter
+        local currentFilter = util.MapCraftingStationFilterType2ItemFilterType(filter, invType, craftingType)
+        --Is the filterType of the current menuBar button a custom addon filter function or filterType?
+        --Then try to resolve the real filtervalue below it
+        local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(invType, currentFilter)
+        if customInventoryFilterButtonsItemType then
+            if AF.settings.debugSpam then d("[AF]ChangeFilterCrafting-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
+        end
+        if AF.settings.debugSpam then
+            d("=====================================================================>")
+            d("[AF]ChangeFilterCrafting, invType: " .. tostring(invType) .. ", craftingType: " .. tostring(craftingType) .. ", filterType/typeFilter: " ..  tostring(filter) .. ", currentFilter: " .. tostring(currentFilter) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType))
+        end
+        --Old subfilterbar(s) was(were) hidden, so check if a new one should be shown now
+        if CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftingType, filter) then return end
+
+        --Update the subfilter bars
+        ThrottledUpdate("ShowSubfilterBar" .. invType .. "_" .. craftingType, 10,
+                ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType)
+
+        local subfilterGroup = AF.subfilterGroups[invType]
+        if not subfilterGroup then return end
+        zo_callLater(function()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 50)
+    end
+
     local function HookSmithingSetMode(self, mode)
         --[[
             --Smithing modes
@@ -922,47 +967,13 @@ d(">sortBy was moved on Y by: " ..tostring(layoutData.sortByOffsetY + shiftY))
             else
                 AF.currentInventoryType = LF_SMITHING_RESEARCH
             end
-            util.HideCraftingInventoryControls(AF.currentInventoryType)
+            util.HideInventoryControls(AF.currentInventoryType)
             --Show the subfilterbar for the research panel now as the function
             --"ChangeFilterCrafting(self, filterData)" will not be called automatically here
             util.ClearResearchPanelCustomFilters()
             ChangeFilterCrafting(self.researchPanel)
         end
         return false
-    end
-
-    --Filter changing function for crafting stations and retrait station.
-    --Recognizes if a button like armor/weapons was changed at the crafting station (which is a filter change internally)
-    local function ChangeFilterCrafting(self, filterData)
-        local invType = AF.currentInventoryType
-        local craftingType = GetCraftingType()
-        local filter = self.filterType or self.typeFilter
-        local currentFilter = util.MapCraftingStationFilterType2ItemFilterType(filter, invType, craftingType)
-        --Is the filterType of the current menuBar button a custom addon filter function or filterType?
-        --Then try to resolve the real filtervalue below it
-        local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(invType, currentFilter)
-        if customInventoryFilterButtonsItemType then
-            if AF.settings.debugSpam then d("[AF]ChangeFilterCrafting-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
-        end
-        if AF.settings.debugSpam then
-            d("=====================================================================>")
-            d("[AF]ChangeFilterCrafting, invType: " .. tostring(invType) .. ", craftingType: " .. tostring(craftingType) .. ", filterType/typeFilter: " ..  tostring(filter) .. ", currentFilter: " .. tostring(currentFilter) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType))
-        end
-        --Old subfilterbar(s) was(were) hidden, so check if a new one should be shown now
-        if CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftingType, filter) then return end
-
-        --Update the subfilter bars
-        ThrottledUpdate("ShowSubfilterBar" .. invType .. "_" .. craftingType, 10,
-                ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType)
-
-        local subfilterGroup = AF.subfilterGroups[invType]
-        if not subfilterGroup then return end
-        zo_callLater(function()
-            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
-            if not currentSubfilterBar then return end
-            ThrottledUpdate("RefreshSubfilterBar" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-                    RefreshSubfilterBar, currentSubfilterBar)
-        end, 50)
     end
 
     --ZO_PreHook(smithingVar.creationPanel,                 "ChangeTypeFilter", changeFilterCraftingNew)
@@ -1420,23 +1431,49 @@ local function SetBankEventVariable(bankType, opened)
     end
 end
 
---Check if other addons are activated and output an error message if they brak AdvancedFilters
-function AF.checkForOtherAddonErrors(eventName, initial)
-    --Check if needed libraries are given -> Chat is activated here so we can see error messages!
-    if AF.dependenciesLoaded == false then AF.loadLibraries(true) end
-
+local function reanchorVanillaUIControls()
     --Vanilla UI's "selected filter label, top left": Hide it
     ZO_PlayerInventoryTabsActive:SetHidden(true)
 
     --Vanilla UI's "search filter bar": Hide it
+    -->Done in EVENT_ADD_ON_LOADED via the change to the layoutData.useSearchFilter = false
+    --But does not really hid it AFTER a filter has changed...
+    --So we need to hide it here "properly again"!
     ZO_PlayerInventorySearchFilters:SetHidden(true)
     --Vanilla UI's "subfilter bar": Hide it
     ZO_PlayerInventorySearchFiltersSubTabs:SetHidden(true)
+
     --Vanilla UI's "search filter search box": Show it and reanchor the text search box to show it above the
     --inventory again, like before API100033
     ZO_PlayerInventorySearchFiltersTextSearch:SetHidden(false)
     ZO_PlayerInventorySearchFiltersTextSearch:ClearAnchors()
     ZO_PlayerInventorySearchFiltersTextSearch:SetAnchor(BOTTOMLEFT, ZO_PlayerInventory, TOPLEFT, 0, (-1 * ZO_PlayerInventorySearchFiltersTextSearch:GetHeight()) - 5)
+end
+
+--Disable the search bar controls (hide them) in some inventory layouts:
+--ZO_InventoryManager:ApplyBackpackLayout e.g.
+--https://github.com/esoui/esoui/blob/5f4f4fa8d40fa9a36aa17225c10b8f1b20c6c978/esoui/ingame/inventory/inventory.lua#L1836
+local function disableVanillaUISearchBarsInLayouts()
+    local defaultInventoryBackpackLayoutData = AF.defaultInventoryBackpackLayoutData
+    local layoutDataFragments = AF.layoutDataFragments
+    for _, fragmentControl in ipairs(layoutDataFragments) do
+        if fragmentControl and fragmentControl.layoutData then
+            fragmentControl.layoutData.useSearchBar = false
+            --Now replace a few values in the default layouts, like the offsets
+            fragmentControl.layoutData.backpackOffsetY  = defaultInventoryBackpackLayoutData.backpackOffsetY
+            fragmentControl.layoutData.sortByOffsetY    = defaultInventoryBackpackLayoutData.sortByOffsetY
+        end
+    end
+    vanillaUIChangesToSearchBarsWereDone = true
+end
+
+--Check if other addons are activated and output an error message if they brak AdvancedFilters
+function AF.checkForOtherAddonErrors(eventName, initial)
+    --Check if needed libraries are given -> Chat is activated here so we can see error messages!
+    if AF.dependenciesLoaded == false then AF.loadLibraries(true) end
+
+    --Reanchor some controls at the vanilla UI
+    reanchorVanillaUIControls()
 
     --Check for other addons
     if not AF.otherAddons then return end
@@ -1447,6 +1484,11 @@ function AF.checkForOtherAddonErrors(eventName, initial)
 end
 
 local function AdvancedFilters_Loaded(eventCode, addonName)
+    --Disable the searchBar of the different inventories
+    if not vanillaUIChangesToSearchBarsWereDone then
+        disableVanillaUISearchBarsInLayouts()
+    end
+
     if addonName == "MultiCraft" then
         AF.otherAddons[addonName] = true
     end
@@ -1496,5 +1538,6 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
         A_F = AF
     end
 end
+
 --Load the addon
 EVENT_MANAGER:RegisterForEvent("AdvancedFilters_Loaded", EVENT_ADD_ON_LOADED, AdvancedFilters_Loaded)

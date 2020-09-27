@@ -222,7 +222,7 @@ function util.GetCraftingInventoryLayoutData(filterType)
     return filterBarCraftingInventoryLayoutData[filterType]
 end
 
-function util.HideCraftingInventoryControls(filterType)
+function util.HideInventoryControls(filterType)
 --d("[AF]util.HideCraftingInventoryControls - filterType: " ..tostring(filterType))
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
     local controlsToHide = filterBarParentControlsToHide[filterType]
@@ -1275,16 +1275,16 @@ end
 function util.GetListControlForSubfilterBarReanchor(inventoryType)
     local listControlsForSubfilterBarReanchor = AF.listControlForSubfilterBarReanchor
     local filterPanelId = util.GetCurrentFilterTypeForInventory(inventoryType)
-    local listControlForSubfilterBarReanchor
     local listControlForSubfilterBarReanchorData = listControlsForSubfilterBarReanchor[filterPanelId]
+    local listData
     local moveInvBottomBarDown = false
     local reanchorData
     if listControlForSubfilterBarReanchorData then
-        listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchorData.control
+        listData = listControlForSubfilterBarReanchorData.listData
         moveInvBottomBarDown = listControlForSubfilterBarReanchorData.moveInvBottomBarDown
         reanchorData = listControlForSubfilterBarReanchorData.reanchorData
     end
-    return listControlForSubfilterBarReanchor, moveInvBottomBarDown, reanchorData
+    return listData, moveInvBottomBarDown, reanchorData
 end
 
 --======================================================================================================================
