@@ -1880,8 +1880,19 @@ local function BuildAddonInformation(filterInformation)
     return addonInformation
 end
 
-function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName)
+function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName, filterTypeWasMappedToNewFilterTypeCategory)
     if filterInformation == nil then return false end
+    filterTypeWasMappedToNewFilterTypeCategory = filterTypeWasMappedToNewFilterTypeCategory or false
+    if not filterTypeWasMappedToNewFilterTypeCategory then
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        --Added with ESO PTS API100033 Markarth
+        --TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+        --TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+        --TODO: properly and the dropdown filters won't be registered to the correct bars!
+        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        filterInformation.filterType = itemFilterCategory
+--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    end
     groupName = groupName or filterTypeToGroupName[filterInformation.filterType] or nil
     if groupName == nil then
         return
@@ -1925,32 +1936,26 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
 end
 
 function AdvancedFilters_RegisterFilter(filterInformationTable)
-
---TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
---TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
---TODO: properly and the dropdown filters won't be registered to the correct bars!
-
---local pluginName = filterInformationTable.callbackTable[1].name or filterInformationTable.submenuName
---zo_callLater(function() d("AdvancedFilters_RegisterFilter: " .. tostring(pluginName)) end, 3000)
+    local pluginName = filterInformationTable.submenuName or (filterInformationTable.callbackTable and filterInformationTable.callbackTable[1] and filterInformationTable.callbackTable[1].name)
     --make sure all necessary information is present
     if filterInformationTable == nil then
-        d("[AdvancedFilters_RegisterFilter]No filter information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No filter information provided. Filter not registered.")
         return
     end
     if filterInformationTable.callbackTable == nil and filterInformationTable.generator == nil then
-        d("[AdvancedFilters_RegisterFilter]No callback information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No callback information provided. Filter not registered.")
         return
     end
     if filterInformationTable.subfilters == nil then
-        d("[AdvancedFilters_RegisterFilter]No subfilter type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No subfilter type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterType == nil then
-        d("[AdvancedFilters_RegisterFilter]No base filter type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No base filter type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.enStrings == nil and filterInformationTable.generator == nil then
-        d("[AdvancedFilters_RegisterFilter]No English strings provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No English strings provided. Filter not registered.")
         return
     end
 
@@ -1959,10 +1964,17 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         --get filter information from the calling addon and insert it into our callback table
         local addonInformation = BuildAddonInformation(filterInformation)
 --        local filterTypeToGroupName = AF.filterTypeNames
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+--Added with ESO PTS API100033 Markarth
+--TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+--TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+--TODO: properly and the dropdown filters won't be registered to the correct bars!
+        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        filterInformation.filterType = itemFilterCategory
+--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         local groupName = filterTypeToGroupName[filterInformation.filterType] or nil
         if groupName == nil then
-            local pluginName = filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name)
-            d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\' - Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
+            d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
             return
         else
             if subfilterCallbacks[groupName] == nil or subfilterCallbacks[groupName].addonDropdownCallbacks == nil then return end
@@ -1970,7 +1982,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
 
         --Check if the same addon information is already in the callback tables for the filterType
         --and remove the old one, before adding the same/newer one again
-        AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName)
+        AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName, true)
 
         --insert addon information
         table.insert(subfilterCallbacks[groupName].addonDropdownCallbacks, addonInformation)
@@ -2017,30 +2029,31 @@ end
 --changes filters as well (e.g. FCOCraftFilter will filter by the bagId to hide/only show bank items at crafting tables)
 --> See function AF.util.RefreshSubfilterBar -> calling function AF.util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters
 function AdvancedFilters_RegisterSubfilterbarRefreshFilter(filterInformationTable)
+    local pluginName = filterInformationTable.filterName
 --d("[AF]AdvancedFilters_RegisterSubfilterbarRefreshFilter " .. tostring(filterInformationTable.filterName))
     --make sure all necessary information is present
     if filterInformationTable == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No filter information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No filter information provided. Filter not registered.")
         return
     end
     if filterInformationTable.inventoryType == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No inventory type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No inventory type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.craftingType == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No crafting type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No crafting type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterPanelId == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No libFilters-2.0 panel Id (LF_ ...) provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No libFilters-3.0 panel Id (LF_ ...) provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterName == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No unique filter name provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No unique filter name provided. Filter not registered.")
         return
     end
     if filterInformationTable.callbackFunction == nil or type(filterInformationTable.callbackFunction) ~= "function" then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No callback function provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No callback function provided. Filter not registered.")
         return
     end
     --Register the filter callback function for each inventory type + each crafting type at the inventory type:
