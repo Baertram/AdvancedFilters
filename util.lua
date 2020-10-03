@@ -225,15 +225,16 @@ function util.GetCraftingInventoryLayoutData(filterType)
 end
 
 function util.HideInventoryControls(filterType)
---d("[AF]util.HideCraftingInventoryControls - filterType: " ..tostring(filterType))
+d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType))
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
     local controlsToHide = filterBarParentControlsToHide[filterType]
     if controlsToHide then
         for _, controlToHide in ipairs(controlsToHide) do
             if controlToHide ~= nil then
-                --if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
+if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
                 if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
                     controlToHide:SetHidden(true)
+d(">>hidden!")
                 end
             end
         end
@@ -948,14 +949,14 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
         end
     elseif isVendorBuyInv == true then
         bagVendorBuy, bagVendorBuyFilterTypes = ZO_StoreManager_GetStoreItems()
-        AF._bagVendorBuy = bagVendorBuy
-        AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
+--AF._bagVendorBuy = bagVendorBuy
+--AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
     else
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
     end
     if AF.settings.debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil)) end
-d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil))
+--d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil))
     --Check if a bank/guild bank/house storage is opened
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
     local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
@@ -970,7 +971,7 @@ d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(on
     local isJunkInvButtonActive         = subfilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
     if AF.settings.debugSpam then d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
-d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems))
+--d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems))
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
     ------------------------------------------------------------------------------------------------------------------------
@@ -996,7 +997,7 @@ d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFe
             bagDataToCheck = bagData
         end
         local itemsFound = 0
-AF._bagDataToCheck = bagDataToCheck
+--AF._bagDataToCheck = bagDataToCheck
         for _, itemData in pairs(bagDataToCheck) do
             breakInventorySlotsLoopNow = false
             local isItemSellable = false
@@ -1225,7 +1226,7 @@ AF._bagDataToCheck = bagDataToCheck
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
                             if isNoCrafting then
                                 currentFilter = inventory.currentFilter
-d(">invType: " ..tostring(realInvType) .. ", currentFilter: " .. tostring(currentFilter))
+--d(">invType: " ..tostring(realInvType) .. ", currentFilter: " .. tostring(currentFilter))
                             else
                                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
                                 --Todo: Thus the filter is always marked as "passed". Is this correct and does it work properly? To test!

@@ -214,46 +214,40 @@ end
 
 --Reanchor & hide some controls at the vanilla UI, like the searchBar and box.
 --Based on the baseControl the controls to change are children
-local function reanchorVanillaUIControls(baseControl)
+local function reanchorAndHideVanillaUIControls(baseControl)
+--d("[AF]reanchorAndHideVanillaUIControls")
     if not baseControl then return end
-    local tabs = GetControl(baseControl, "Tabs")
+    local ZOsControlNames = AF.ZOsControlNames
+    local tabsName = ZOsControlNames.tabs
+    local tabs = GetControl(baseControl, tabsName)
     if tabs then
-        local tabsActive = GetControl(tabs, "Active")
-        if tabsActive then tabsActive:SetHidden(true) end
-    end
-
-    local searchFilters = GetControl(baseControl, "SearchFilters")
-    if searchFilters then
-        searchFilters:SetHidden(true)
-        local searchFiltersSubTabs = GetControl(searchFilters, "SubTabs")
-        if searchFiltersSubTabs then searchFiltersSubTabs:SetHidden(true) end
-
-        local searchFiltersTextSearch = GetControl(searchFilters, "TextSearch")
-        if searchFiltersTextSearch then
-            searchFiltersTextSearch:SetHidden(false)
-            searchFiltersTextSearch:ClearAnchors()
-            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 5)
+        local tabsActiveName = ZOsControlNames.active
+        local tabsActive = GetControl(tabs, tabsActiveName)
+        if tabsActive then
+            --Hide the "All: All" text at the subfilterbar
+            tabsActive:SetHidden(true)
         end
     end
+    local searchFiltersName = ZOsControlNames.searchFilters
+    local searchFilters = GetControl(baseControl, searchFiltersName)
+    if searchFilters then
+        local textSearchName = ZOsControlNames.textSearch
+        local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
+        if searchFiltersTextSearch then
+            searchFiltersTextSearch:ClearAnchors()
+            searchFiltersTextSearch:SetParent(baseControl)
+            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 5)
+            searchFiltersTextSearch:SetHidden(false)
+        end
 
-    --[[
-        --Vanilla UI's "selected filter label, top left": Hide it
-        ZO_PlayerInventoryTabsActive:SetHidden(true)
-
-        --Vanilla UI's "search filter bar": Hide it
-        -->Done in EVENT_ADD_ON_LOADED via the change to the layoutData.useSearchFilter = false
-        --But does not really hid it AFTER a filter has changed...
-        --So we need to hide it here "properly again"!
-        ZO_PlayerInventorySearchFilters:SetHidden(true)
-        --Vanilla UI's "subfilter bar": Hide it
-        ZO_PlayerInventorySearchFiltersSubTabs:SetHidden(true)
-
-        --Vanilla UI's "search filter search box": Show it and reanchor the text search box to show it above the
-        --inventory again, like before API100033
-        ZO_PlayerInventorySearchFiltersTextSearch:SetHidden(false)
-        ZO_PlayerInventorySearchFiltersTextSearch:ClearAnchors()
-        ZO_PlayerInventorySearchFiltersTextSearch:SetAnchor(BOTTOMLEFT, ZO_PlayerInventory, TOPLEFT, 0, (-1 * ZO_PlayerInventorySearchFiltersTextSearch:GetHeight()) - 5)
-    ]]
+        --searchFilters dürfen nicht versteckt werden, da die TextSearch daran hängt
+        searchFilters:SetHidden(true)
+        local subTabsName = ZOsControlNames.subTabs
+        local searchFiltersSubTabs = GetControl(searchFilters, subTabsName)
+        if searchFiltersSubTabs then
+            searchFiltersSubTabs:SetHidden(true)
+        end
+    end
 end
 
 --======================================================================================================================
@@ -343,30 +337,30 @@ local function InitializeHooks()
     --Their parents (e.g. the player inventory or the bank or the crafting smithing station) are defined in file constants.lua in table "filterBarParents"
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType)
         if AF.settings.debugSpam then d(">>-----------------------------------------------\n----------------------------------------------->>") end
-d(">>-----------------------------------------------\n---ShowSubfilterBar---------------->>")
-d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(craftingType) .. ", currentInvType: " ..tostring(currentInvType))
+--d(">>-----------------------------------------------\n---ShowSubfilterBar---------------->>")
+--d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(craftingType) .. ", currentInvType: " ..tostring(currentInvType))
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
-            d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
+--d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
             local invTypeUpdateListAnchor = AF.currentInventoryType
             --Check if the current layoutData (offsets of controls in the inventory) is given
             local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
             if layoutData == nil then
-d(">layoutData was taken from default AF BACKPACK LAYOUT!")
+--d(">layoutData was taken from default AF BACKPACK LAYOUT!")
                 --Standard inv layout
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
             end
-d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
+--d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
             if not layoutData then
                 return
             end
 --TODO: Remove after testing
-AF._layoutData = layoutData
+--AF._layoutData = layoutData
 
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
@@ -374,7 +368,7 @@ AF._layoutData = layoutData
             end
             --No inventory list found: Detect it now (crafting research e.g.)
             if not list then
-d(">no list control found yet")
+--d(">no list control found yet")
                 local listData
                 local moveInvBottomBarDown
                 local anchorTo = (p_subFilterBar and p_subFilterBar.control) or nil
@@ -385,7 +379,7 @@ d(">no list control found yet")
                 --list:SetWidth(layoutData.width)
                 list = listData.control
                 if list then
-d(">>list found by util.GetListControlForSubfilterBarReanchor")
+--d(">>list found by util.GetListControlForSubfilterBarReanchor")
                     list:ClearAnchors()
                     list:SetAnchor(listData.anchorPoint or TOP, listData.relativeTo or anchorTo, listData.relativePoint or BOTTOM, listData.offsetX or 0, listData.offsetY or layoutData.backpackOffsetY)
                     --Move the inventory's bottom bar more down?
@@ -408,7 +402,7 @@ d(">>list found by util.GetListControlForSubfilterBarReanchor")
                 end
                 list:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYList)
                 list:SetAnchor(BOTTOMRIGHT)
-d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
+--d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
             end
 
@@ -444,10 +438,11 @@ d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..t
             end
             ]]
             sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYSortHeader)
-d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
+--d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
 
             --Should some inventory controls be hidden?
-            util.HideInventoryControls(invTypeUpdateListAnchor)
+            -->Called in the fragment callback function for OnShow!
+            --util.HideInventoryControls(invTypeUpdateListAnchor)
         end
         ----------------------------------------------------------------------------------------------------------------
         --ReAnchor other controls so that the subfilter bar will be shown properly
@@ -695,6 +690,7 @@ d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", cra
     --FRAGMENT HOOKS
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing()
+d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType))
             AF.currentInventoryType = inventoryType
             local inventoryControl
 
@@ -737,13 +733,17 @@ d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", cra
             PLAYER_INVENTORY.isListDirty = track(PLAYER_INVENTORY.isListDirty)
 
             --Hide and move some controls
-            if inventoryControl then reanchorVanillaUIControls(inventoryControl) end
+            if inventoryControl then
+                reanchorAndHideVanillaUIControls(inventoryControl)
+            end
         end
 
-        --[[
-            local function onFragmentShown()
-            end
-        ]]
+        local function onFragmentShown(fragment, inventoryType)
+d("[AF]OnFragmentShown - inventoryType: " ..tostring(inventoryType))
+            local filterType = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
+            util.HideInventoryControls(filterType)
+        end
+
         local function onFragmentHiding()
             PLAYER_INVENTORY.isListDirty = untrack(PLAYER_INVENTORY.isListDirty)
             --CraftBag
@@ -759,8 +759,8 @@ d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", cra
             if newState == SCENE_FRAGMENT_SHOWING then
                 AF.fragmentStateHiding[inventoryType] = false
                 onFragmentShowing()
-                --elseif newState == SCENE_FRAGMENT_SHOWN then
-                --onFragmentShown()
+            elseif newState == SCENE_FRAGMENT_SHOWN then
+                onFragmentShown()
             elseif newState == SCENE_FRAGMENT_HIDING then
                 AF.fragmentStateHiding[inventoryType] = true
                 onFragmentHiding()
@@ -1421,6 +1421,8 @@ end
 --Function to adjust/move some ZOs base game, or other addons, controls to fit into AdvancedFilters
 local function AdjustZOsAndOtherAddonsVisibleStuff()
     --Move the "No items" label for an empty subfilter of the inventory a bit to the bottom
+    --Not needed anymore as with API100033 Markarth
+    --[[
     local invEmptyLabelCtrl = ZO_PlayerInventoryEmpty
     if invEmptyLabelCtrl ~= nil then
         local origOnEffectivelyShown = invEmptyLabelCtrl.OnEffectivelyShown
@@ -1444,6 +1446,7 @@ local function AdjustZOsAndOtherAddonsVisibleStuff()
             return retVarOrig
         end
     end
+    ]]
 end
 
 --Set variables in AF global namespace for function util.RefreshSubfilterBar

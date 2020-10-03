@@ -114,7 +114,13 @@ AF.ZOsControlNames = {
     filterDivider           =   "FilterDivider",
     buttonDivider           =   "ButtonDivider",
     searchDivider           =   "SearchDivider",
-    title                   =   "Title"
+    searchFilters           =   "SearchFilters",
+    textSearch              =   "TextSearch",
+    title                   =   "Title",
+    tabs                    =   "Tabs",
+    subTabs                 =   "SubTabs",
+    active                  =   "Active",
+
 }
 local ZOsControlNames = AF.ZOsControlNames
 local filterDividerSuffix = ZOsControlNames.filterDivider
@@ -163,32 +169,30 @@ AF.controlsForChecks = controlsForChecks
 
 --INVENTORIES
 --Inventories and their searchBox controls
-local inventories =
-{
-    [INVENTORY_BACKPACK] =
-    {
-        searchBox = ZO_PlayerInventorySearchBox,
+local inventories = {
+    [INVENTORY_BACKPACK]   = {
+        searchBox = ZO_PlayerInventorySearchFiltersTextSearchBox,
     },
-    [INVENTORY_QUEST_ITEM] =
-    {
-        searchBox = ZO_PlayerInventorySearchBox,
+    [INVENTORY_QUEST_ITEM] = {
+        searchBox = ZO_PlayerInventorySearchFiltersTextSearchBox,
     },
-    [INVENTORY_BANK] =
-    {
-        searchBox = ZO_PlayerBankSearchBox,
+    [INVENTORY_BANK]       = {
+        searchBox = ZO_PlayerBankSearchFiltersTextSearchBox,
     },
-    [INVENTORY_HOUSE_BANK] =
-    {
-        searchBox = ZO_HouseBankSearchBox,
+    [INVENTORY_HOUSE_BANK] = {
+        searchBox = ZO_HouseBankSearchFiltersTextSearchBox,
     },
-    [INVENTORY_GUILD_BANK] =
-    {
-        searchBox = ZO_GuildBankSearchBox,
+    [INVENTORY_GUILD_BANK] = {
+        searchBox = ZO_GuildBankSearchFiltersTextSearchBox,
     },
-    [INVENTORY_CRAFT_BAG] =
-    {
-        searchBox = ZO_CraftBagSearchBox,
+    [INVENTORY_CRAFT_BAG]  = {
+        searchBox = ZO_CraftBagSearchFiltersTextSearchBox,
     },
+    --[[
+    [QUICKSLOT]            = {
+        searchBox = ZO_QuickSlotSearchFiltersTextSearchBox,
+    },
+    ]]
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
@@ -781,23 +785,23 @@ local filterBarParentControlsToHide = {
         --ZO_PlayerInventorySearchDivider
         GetControl(controlsForChecks.inv, searchDividerSuffix),
     },
-    --[[
     [LF_CRAFTBAG]   = {
-        GetControl(controlsForChecks.craftBag.control, searchDividerSuffix),
+        GetControl(controlsForChecks.craftBag, searchDividerSuffix),
     },
     [LF_BANK_WITHDRAW]   = {
-        GetControl(controlsForChecks.bank.control, searchDividerSuffix),
+        GetControl(controlsForChecks.bank, searchDividerSuffix),
     },
     [LF_GUILDBANK_WITHDRAW]   = {
-        GetControl(controlsForChecks.guildBank.control, searchDividerSuffix),
+        GetControl(controlsForChecks.guildBank, searchDividerSuffix),
     },
+    --[[
     [LF_VENDOR_SELL]   = {
-        GetControl(controlsForChecks.storeWindow.control, searchDividerSuffix),
-    },
-    [LF_HOUSE_BANK_WITHDRAW]   = {
-        GetControl(controlsForChecks.houseBank.control, searchDividerSuffix),
+        GetControl(controlsForChecks.storeWindow, searchDividerSuffix),
     },
     ]]
+    [LF_HOUSE_BANK_WITHDRAW]   = {
+        GetControl(controlsForChecks.houseBank, searchDividerSuffix),
+    },
     [LF_SMITHING_DECONSTRUCT]   = {
         --ZO_SmithingTopLevelDeconstructionPanelInventoryButtonDivider
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
