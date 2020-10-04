@@ -237,7 +237,9 @@ local function reanchorAndHideVanillaUIControls(baseControl)
         if searchFiltersTextSearch then
             searchFiltersTextSearch:ClearAnchors()
             searchFiltersTextSearch:SetParent(baseControl)
-            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 5)
+            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 10)
+            searchFiltersTextSearch:SetDimensions(150, 25)
+            searchFiltersTextSearch:SetAlpha(0.45)
             searchFiltersTextSearch:SetHidden(false)
         end
 
