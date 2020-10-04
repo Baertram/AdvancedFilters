@@ -278,6 +278,8 @@ local function InitializeHooks()
             return t[pk][k]
         end,
         __newindex = function(t, k, v)
+            -->This function is called by e.g. LibFilters 3 function SafeUpdateList, which calls
+            -->PLAYER_INVENTORY:UpdateList(INVENTORY_*) (e.g. INVENTORY_BANK)
             --d("*update of element " .. tostring(k) .. " to " .. tostring(v))
 
             --update the tracked table
@@ -507,8 +509,7 @@ local function InitializeHooks()
         --Is the filterType of the current menuBar button a custom addon filter function or filterType?
         local currentFilterToUse = customInventoryFilterButtonsItemType or currentFilter
         if craftingType == nil then craftingType = GetCraftingType() end
-        if AF.settings.debugSpam then d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType)) end
-d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType))
+        if AF.settings.debugSpam then d("[AF]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType)) end
         --[[
             --Guild store?
             if currentFilter == ITEMFILTERTYPE_TRADING_HOUSE then

@@ -187,7 +187,7 @@ local function GetFilterCallbackForStolen(checkOnlyJunk)
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         if IsItemLinkStolen(itemLink) then
-d("[AF]GetFilterCallbackForStolen: " ..itemLink)
+--d("[AF]GetFilterCallbackForStolen: " ..itemLink)
             return true
         end
         return false
