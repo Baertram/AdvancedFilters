@@ -817,6 +817,8 @@ local filterBarParentControlsToHide = {
     },
     [LF_SMITHING_RESEARCH]  = researchFilterBarParentControlsToHide,
     [LF_JEWELRY_RESEARCH]   = researchFilterBarParentControlsToHide,
+    [LF_ENCHANTING_CREATION]    = GetControl(controlsForChecks.enchanting.inventoryControl, buttonDividerSuffix),
+    [LF_ENCHANTING_EXTRACTION]  = GetControl(controlsForChecks.enchanting.inventoryControl, buttonDividerSuffix),
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 
@@ -1319,19 +1321,8 @@ AF.craftingTablePanels = craftingTablePanels
 --Does the crafting table use the BAG_WORN in it's inventory checks?
 local craftingFilterPanelId2UsesBagWorn = {
     --Smithing
-    [LF_SMITHING_REFINE]        = true,
-    [LF_SMITHING_CREATION]      = false,
-    [LF_SMITHING_DECONSTRUCT]   = true,
     [LF_SMITHING_IMPROVEMENT]   = true,
-    [LF_SMITHING_RESEARCH]      = false,
-    [LF_JEWELRY_REFINE]         = false,
-    [LF_JEWELRY_CREATION]       = false,
-    [LF_JEWELRY_DECONSTRUCT]    = true,
     [LF_JEWELRY_IMPROVEMENT]    = true,
-    [LF_JEWELRY_RESEARCH]       = false,
-    --Enchanting
-    [LF_ENCHANTING_CREATION]    = false,
-    [LF_ENCHANTING_EXTRACTION]  = false,
     --Retrait
     [LF_RETRAIT]                = true,
 }

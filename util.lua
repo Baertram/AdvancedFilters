@@ -957,7 +957,8 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             onlyEnableAllSubfilterBarButtons = true
         end
         --Improvement panel: BAG_WORN needs to be checked as well later on!
-        if inventoryType == LF_SMITHING_IMPROVEMENT or inventoryType == LF_JEWELRY_IMPROVEMENT or inventoryType == LF_RETRAIT then
+        local bagWornCheckNeeded = util.GetCraftingPanelUsesBagWorn(inventoryType)
+        if bagWornCheckNeeded == true then
             bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
         end
     elseif isVendorBuyInv == true then
@@ -1296,6 +1297,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             button.texture:SetColor(1, 1, 1, 1)
             button:SetEnabled(true)
             button.clickable = true
+        else
+            --Is the button currently selected but shouldn't be enabled (as no items are filtered below anymore)?
+            --e.g. by equipping the last filtered item: Select the ALL subfilter button then instead
+            --todo
+            if AF.settings.debugSpam then d(">No items left to filter, Enabling the \'All\' button now") end
+            --todo
         end
     end
 end
@@ -1858,7 +1865,7 @@ function util.IsCraftingStationInventoryType(inventoryType)
 end
 
 --Function to return a boolean value if the craftingPanel is using the worn bag ID as well.
---Use the LibFilters filterPanelid as parameter
+--Use the LibFilters filterPanelId as parameter
 function util.GetCraftingPanelUsesBagWorn(libFiltersFilterPanelId)
     local craftingFilterPanelId2UsesBagWorn = AF.craftingFilterPanelId2UsesBagWorn
     local usesBagWorn = craftingFilterPanelId2UsesBagWorn[libFiltersFilterPanelId] or false
