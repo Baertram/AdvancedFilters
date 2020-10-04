@@ -120,13 +120,13 @@ AF.ZOsControlNames = {
     tabs                    =   "Tabs",
     subTabs                 =   "SubTabs",
     active                  =   "Active",
-
+    questItemsOnly          =   "QuestItemsOnly",
 }
 local ZOsControlNames = AF.ZOsControlNames
 local filterDividerSuffix = ZOsControlNames.filterDivider
 local buttonDividerSuffix = ZOsControlNames.buttonDivider
 local searchDividerSuffix = ZOsControlNames.searchDivider
-local titleSuffix = ZOsControlNames.title
+local questItemsOnly      = ZOsControlNames.questItemsOnly
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
@@ -412,6 +412,19 @@ local listControlForSubfilterBarReanchor = {
     ]]
     [LF_SMITHING_RESEARCH]  =   researchListControlForSubfilterBarReanchor,
     [LF_JEWELRY_RESEARCH]   =   researchListControlForSubfilterBarReanchor,
+    [LF_ENCHANTING_CREATION] = {
+        reanchorData            = {
+            {
+                --The "quest only" checkbox and anchored label
+                control         = GetControl(controlsForChecks.enchanting.inventory.control, questItemsOnly),
+                anchorPoint     = TOPLEFT,
+                relativeTo      = controlsForChecks.enchanting.inventory.control,
+                relativePoint   = TOPLEFT,
+                offsetX         = 0,
+                offsetY         = 20,
+            }
+        },
+    },
 }
 AF.listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchor
 
@@ -817,8 +830,12 @@ local filterBarParentControlsToHide = {
     },
     [LF_SMITHING_RESEARCH]  = researchFilterBarParentControlsToHide,
     [LF_JEWELRY_RESEARCH]   = researchFilterBarParentControlsToHide,
-    [LF_ENCHANTING_CREATION]    = GetControl(controlsForChecks.enchanting.inventoryControl, buttonDividerSuffix),
-    [LF_ENCHANTING_EXTRACTION]  = GetControl(controlsForChecks.enchanting.inventoryControl, buttonDividerSuffix),
+    [LF_ENCHANTING_CREATION]    = {
+        GetControl(controlsForChecks.enchanting.inventory.control, buttonDividerSuffix),
+    },
+    [LF_ENCHANTING_EXTRACTION]  = {
+        GetControl(controlsForChecks.enchanting.inventory.control, buttonDividerSuffix),
+    },
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 

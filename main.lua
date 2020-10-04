@@ -745,7 +745,7 @@ local function InitializeHooks()
             --local filterType = util.GetCurrentFilterTypeForInventory(invType)
             --d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
             --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
-            util.HideInventoryControls(nil, 0)
+            util.HideInventoryControls(nil)
         end
 
         local function onFragmentHiding()
@@ -1042,8 +1042,7 @@ local function InitializeHooks()
             util.ClearResearchPanelCustomFilters()
             ChangeFilterCrafting(self.researchPanel)
         end
-        local filterType = util.LibFilters:GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-        util.HideInventoryControls(filterType)
+        util.HideInventoryControls(nil)
         return false
     end
 
@@ -1091,6 +1090,7 @@ local function InitializeHooks()
             d("....................................................>")
             d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tostring(mode))
         end
+d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tostring(mode))
         --[[
             --Enchanting modes
             ENCHANTING_MODE_CREATION = 1
@@ -1103,6 +1103,7 @@ local function InitializeHooks()
         elseif mode == ENCHANTING_MODE_EXTRACTION then
             AF.currentInventoryType = LF_ENCHANTING_EXTRACTION
         end
+        util.HideInventoryControls(nil)
         return false
     end
     --Multicraft addon breaks this addon! Disable it before you can use AdvancedFilters
