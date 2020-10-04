@@ -690,7 +690,7 @@ d("[AF]]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", cra
     --FRAGMENT HOOKS
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing()
-d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType))
+--d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType))
             AF.currentInventoryType = inventoryType
             local inventoryControl
 
@@ -739,11 +739,11 @@ d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType))
         end
 
         local function onFragmentShown()
-d("[AF]OnFragmentShown - inventoryType: " ..tostring(inventoryType))
-            local filterType = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
-            --Not called in OnFragmentSHowing as it would be too early. The controls would just be unhidden
-            --again
-            util.HideInventoryControls(filterType)
+            --local invType = AF.currentInventoryType
+            --local filterType = util.GetCurrentFilterTypeForInventory(invType)
+--d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
+            --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
+            util.HideInventoryControls(nil, 0)
         end
 
         local function onFragmentHiding()
@@ -1035,12 +1035,13 @@ d("[AF]OnFragmentShown - inventoryType: " ..tostring(inventoryType))
             else
                 AF.currentInventoryType = LF_SMITHING_RESEARCH
             end
-            util.HideInventoryControls(AF.currentInventoryType)
             --Show the subfilterbar for the research panel now as the function
             --"ChangeFilterCrafting(self, filterData)" will not be called automatically here
             util.ClearResearchPanelCustomFilters()
             ChangeFilterCrafting(self.researchPanel)
         end
+        local filterType = util.LibFilters:GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+        util.HideInventoryControls(filterType)
         return false
     end
 

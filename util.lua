@@ -138,7 +138,6 @@ function util.GetCurrentFilterTypeForInventory(invType, forLibFiltersRegister)
         end
     --end
     if AF.settings.debugSpam then  d("[AF]util.GetCurrentFilterTypeForInventory - invType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType)) end
-    if not filterType then return end
     return filterType
 end
 
@@ -224,21 +223,34 @@ function util.GetCraftingInventoryLayoutData(filterType)
     return filterBarCraftingInventoryLayoutData[filterType]
 end
 
-function util.HideInventoryControls(filterType)
---d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType) .. ", delay: " ..tostring(delay))
+function util.HideInventoryControls(filterType, delay)
+    delay = delay or 0
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
-    local controlsToHide = filterBarParentControlsToHide[filterType]
-    if controlsToHide then
-        for _, controlToHide in ipairs(controlsToHide) do
-            if controlToHide ~= nil then
---if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
-                if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
-                    controlToHide:SetHidden(true)
---d(">>hidden!")
+    zo_callLater(function()
+        filterType = filterType or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+--d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType).. ", delay: " ..tostring(delay))
+        local controlsToHide = filterBarParentControlsToHide[filterType]
+
+        local function hideControlsNow(p_controlsToHide)
+            for _, controlToHide in ipairs(p_controlsToHide) do
+                if controlToHide ~= nil then
+                    if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
+                    if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
+                        controlToHide:SetHidden(true)
+                        --d(">>hidden!")
+                    --else
+                        --d("<<was already hidden!")
+                    end
+                --else
+                    --d("<control as not found")
                 end
             end
         end
-    end
+        --Hide the controls now
+        if controlsToHide then
+            hideControlsNow(controlsToHide)
+        end
+    end, delay)
 end
 --======================================================================================================================
 -- -^- Inventory layout functions                                                                                  -^-
