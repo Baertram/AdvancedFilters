@@ -738,9 +738,11 @@ d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType))
             end
         end
 
-        local function onFragmentShown(fragment, inventoryType)
+        local function onFragmentShown()
 d("[AF]OnFragmentShown - inventoryType: " ..tostring(inventoryType))
             local filterType = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
+            --Not called in OnFragmentSHowing as it would be too early. The controls would just be unhidden
+            --again
             util.HideInventoryControls(filterType)
         end
 

@@ -788,8 +788,14 @@ local filterBarParentControlsToHide = {
     [LF_CRAFTBAG]   = {
         GetControl(controlsForChecks.craftBag, searchDividerSuffix),
     },
+    [LF_BANK_DEPOSIT]   = {
+        GetControl(controlsForChecks.inv, searchDividerSuffix),
+    },
     [LF_BANK_WITHDRAW]   = {
         GetControl(controlsForChecks.bank, searchDividerSuffix),
+    },
+    [LF_GUILDBANK_DEPOSIT]   = {
+        GetControl(controlsForChecks.inv, searchDividerSuffix),
     },
     [LF_GUILDBANK_WITHDRAW]   = {
         GetControl(controlsForChecks.guildBank, searchDividerSuffix),

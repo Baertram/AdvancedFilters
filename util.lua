@@ -225,16 +225,16 @@ function util.GetCraftingInventoryLayoutData(filterType)
 end
 
 function util.HideInventoryControls(filterType)
-d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType))
+--d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType) .. ", delay: " ..tostring(delay))
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
     local controlsToHide = filterBarParentControlsToHide[filterType]
     if controlsToHide then
         for _, controlToHide in ipairs(controlsToHide) do
             if controlToHide ~= nil then
-if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
+--if controlToHide.GetName then d(">" .. tostring(controlToHide:GetName())) end
                 if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
                     controlToHide:SetHidden(true)
-d(">>hidden!")
+--d(">>hidden!")
                 end
             end
         end
