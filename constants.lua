@@ -784,7 +784,7 @@ local filterBarParents = {
     [inventoryNames[LF_ENCHANTING_CREATION]]    = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
     [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
-    [inventoryNames[LF_RETRAIT]]                = controlsForChecks.retraitControl,
+    [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
 }
 AF.filterBarParents = filterBarParents
 
@@ -835,6 +835,9 @@ local filterBarParentControlsToHide = {
     },
     [LF_ENCHANTING_EXTRACTION]  = {
         GetControl(controlsForChecks.enchanting.inventory.control, buttonDividerSuffix),
+    },
+    [LF_RETRAIT]  = {
+        GetControl(controlsForChecks.retrait.inventory.control, buttonDividerSuffix),
     },
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
