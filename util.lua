@@ -229,14 +229,14 @@ function util.HideInventoryControls(filterType, delay)
     local filterBarParentControlsToHide = AF.filterBarParentControlsToHide
     zo_callLater(function()
         filterType = filterType or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType).. ", delay: " ..tostring(delay))
+--d("[AF]util.HideInventoryControls - filterType: " ..tostring(filterType).. ", delay: " ..tostring(delay))
         local controlsToHide = filterBarParentControlsToHide[filterType]
 
         local function hideControlsNow(p_controlsToHide)
             for _, controlToHide in ipairs(p_controlsToHide) do
                 if controlToHide ~= nil then
                     if AF.settings.debugSpam then if controlToHide.GetName then d(">Trying to hide: " .. tostring(controlToHide:GetName())) end end
-d(">Trying to hide: " .. tostring(controlToHide:GetName()))
+--d(">Trying to hide: " .. tostring(controlToHide:GetName()))
                     if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
                         controlToHide:SetHidden(true)
                         --d(">>hidden!")
