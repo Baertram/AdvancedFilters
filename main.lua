@@ -1090,7 +1090,6 @@ local function InitializeHooks()
             d("....................................................>")
             d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tostring(mode))
         end
-d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tostring(mode))
         --[[
             --Enchanting modes
             ENCHANTING_MODE_CREATION = 1
