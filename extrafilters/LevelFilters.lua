@@ -114,6 +114,7 @@ local filterInformation = {
         ITEMFILTERTYPE_JEWELRY,
     },
     subfilters = {"All",},
+    excludeSubfilters = {"Quest"},
     enStrings = strings,
     deStrings = stringsDE,
     frStrings = strings,

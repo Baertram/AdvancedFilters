@@ -912,6 +912,8 @@ function util.CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftin
 end
 
 --Abort the subfilterbar refresh?
+--e.g. if via the metatables the "old" (currently hiding) subfilterbar will be hidden and a refresh is not needed
+--until it's shown again
 function util.AbortSubfilterRefresh(inventoryType)
     if inventoryType == nil then return true end
     local doAbort = false
@@ -2097,6 +2099,7 @@ end
 --but so called ItemTypeDisplayCategory. So the filter menu button's buttonData.filterType ("currentFilter" used within
 --AF) is the new ItemTypeDisplayCategory and needs to be mapped to the AF itemfilter_type again, in order to let all AF
 --functions AND plugins work properly (as they need the older ITEMFILTER_TYPE_* variables)!
+--[[
 function util.mapItemFilterCategoryToItemFilterType(itemFilterCategory)
     if not itemFilterCategory then return end
     --Map the itemFilterType from currentFIlter to the new itemTypeDisplayCategory, or return the value passed in
@@ -2104,6 +2107,7 @@ function util.mapItemFilterCategoryToItemFilterType(itemFilterCategory)
     local itemDisplayCategoryToItemFilterType = AF.itemDisplayCategoryToItemFilterType
     return itemDisplayCategoryToItemFilterType[itemFilterCategory] or itemFilterCategory
 end
+]]
 
 --Map the itemFilterType to the new ZOs API100033 ItemTypeDisplayCategory
 function util.mapItemFilterTypeToItemFilterCategory(itemFilterType)

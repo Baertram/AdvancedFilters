@@ -55,32 +55,6 @@ AF.otherAddons = {}
 --Preventer veriables
 AF.preventerVars = {}
 
---Mapping for the older ITEMFILTERTYPE_* variables to the new ZOs API100033 ITEM_TYPE_DISPLAY_CATEGORY
---https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L692
-AF.itemDisplayCategoryToItemFilterType = {
-    --Normal Inventory
-    [ITEM_TYPE_DISPLAY_CATEGORY_ALL]            = ITEMFILTERTYPE_ALL,
-    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]        = ITEMFILTERTYPE_WEAPONS,
-    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]          = ITEMFILTERTYPE_ARMOR,
-    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]        = ITEMFILTERTYPE_JEWELRY,
-    [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]     = ITEMFILTERTYPE_CONSUMABLE,
-    [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]       = ITEMFILTERTYPE_CRAFTING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]     = ITEMFILTERTYPE_FURNISHING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]  = ITEMFILTERTYPE_MISCELLANEOUS,
-    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]          = ITEMFILTERTYPE_QUEST,
-    [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]           = ITEMFILTERTYPE_JUNK,
-    --CraftBag
-    [ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING]  = ITEMFILTERTYPE_BLACKSMITHING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING]       = ITEMFILTERTYPE_CLOTHING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_WOODWORKING]    = ITEMFILTERTYPE_WOODWORKING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY]        = ITEMFILTERTYPE_ALCHEMY,
-    [ITEM_TYPE_DISPLAY_CATEGORY_ENCHANTING]     = ITEMFILTERTYPE_ENCHANTING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING]   = ITEMFILTERTYPE_PROVISIONING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]= ITEMFILTERTYPE_JEWELRYCRAFTING,
-    [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL] = ITEMFILTERTYPE_STYLE_MATERIALS,
-    [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM]     = ITEMFILTERTYPE_TRAIT_ITEMS,
-}
-
 --SCENE CHECKS
 --Scene names for the SCENE_MANAGER.currentScene.name check
 local scenesForChecks = {
@@ -248,6 +222,7 @@ AF.maxItemFilterType = counter
 --The names of the inventories. Needed to build the unique subfilter panel names.
 local inventoryNames = {
     [INVENTORY_BACKPACK]        = "PlayerInventory",
+    [INVENTORY_QUEST_ITEM]      = "PlayerInventoryQuest",
     [INVENTORY_BANK]            = "PlayerBank",
     [INVENTORY_GUILD_BANK]      = "GuildBank",
     [INVENTORY_CRAFT_BAG]       = "CraftBag",
@@ -292,6 +267,7 @@ local filterTypeNames = {
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]         = "Consumables",
     [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]           = "Crafting",
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]      = "Miscellaneous",
+    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]              = "Quest",
     [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]               = "Junk",
     [ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING]      = "Blacksmithing",
     [ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING]           = "Clothing",
@@ -430,7 +406,7 @@ AF.listControlForSubfilterBarReanchor = listControlForSubfilterBarReanchor
 
 --There are no subfilter bars active at the following inventory panels. Used for debug messages!
 local subFiltersBarInactive = {
-    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]  = INVENTORY_QUEST_ITEM,  -- Inventory: Quest items
+    --[ITEM_TYPE_DISPLAY_CATEGORY_QUEST]  = INVENTORY_QUEST_ITEM,  -- Inventory: Quest items
     --Custom addons
     [ITEMFILTERTYPE_AF_STOLENFILTER]    = INVENTORY_BACKPACK,
 }
@@ -483,19 +459,11 @@ AF.doNotUpdateInventoriesWithInventoryChangeFilterFunction = doNotUpdateInventor
 --Abort the subfilter bar refresh for the following inventory types
 local abortSubFilterRefreshInventoryTypes = {
     --[INVENTORY_TYPE_VENDOR_BUY]             = true, --Vendor buy
-    [INVENTORY_QUEST_ITEM]                  = true, --Quest items
+    --[INVENTORY_QUEST_ITEM]                  = true, --Quest items
     --Custom addons
     [ITEMFILTERTYPE_AF_STOLENFILTER] = true,
 }
 AF.abortSubFilterRefreshInventoryTypes = abortSubFilterRefreshInventoryTypes
-
---TODO:
---https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua
---All ITEMFILTERTYPE_ variables in the subfilterGroups need to be mapped to
---the new item display categories...
---https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L1227
---ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
--->ITEM_FILTER_UTILS:GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
 
 --The possible subfilter groups for each inventory type, trade skill type and filtertype.
 local subfilterGroups = {
@@ -511,6 +479,7 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
 
             --CUSTOM ADDON TABs
@@ -767,6 +736,7 @@ AF.subfilterGroups = subfilterGroups
 --The filter bar parent controls
 local filterBarParents = {
     [inventoryNames[INVENTORY_BACKPACK]]        = GetControl(controlsForChecks.inv, filterDividerSuffix),
+    [inventoryNames[INVENTORY_QUEST_ITEM]]      = GetControl(controlsForChecks.inv, filterDividerSuffix),
     [inventoryNames[INVENTORY_BANK]]            = GetControl(controlsForChecks.bank, filterDividerSuffix),
     [inventoryNames[INVENTORY_GUILD_BANK]]      = GetControl(controlsForChecks.guildBank, filterDividerSuffix),
     [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
@@ -983,6 +953,9 @@ local subfilterButtonNames = {
         "Vanity", "Trash", "Fence", "Trophy", "Tool", "Bait", "Siege", "SoulGem",
         "Glyphs", AF_CONST_ALL,
     },
+    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = {
+        AF_CONST_ALL,
+    },
     [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {
         "Miscellaneous", "Furnishings", "Materials", "Consumable", "Jewelry", "Armor", "Weapon",
         AF_CONST_ALL,
@@ -1003,7 +976,7 @@ local subfilterButtonNames = {
         "FurnishingMat", "Potency", "Essence", "Aspect", AF_CONST_ALL,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING] = {
-        "FurnishingMat", "Bait", "RareIngredient", "OldIngredient",
+        "FurnishingMat", "Bait", "RareIngredient", --"OldIngredient",
         "DrinkIngredient", "FoodIngredient", AF_CONST_ALL,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {
@@ -1806,3 +1779,33 @@ AF.itemIds = itemIds
 
 --Table where external dropdown filter plugins can register themselves for checks done by other addos
 AF.externalDropdownFilterPlugins = {}
+
+--Mapping for the older ITEMFILTERTYPE_* variables to the new ZOs API100033 ITEM_TYPE_DISPLAY_CATEGORY
+--https://github.com/esoui/esoui/blob/pts6.2/esoui/ingame/inventory/itemfilterutils.lua#L692
+--ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
+-->ITEM_FILTER_UTILS:GetItemTypeDisplayCategoryByItemFilterType(itemFilterType)
+--[[
+AF.itemDisplayCategoryToItemFilterType = {
+    --Normal Inventory
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALL]            = ITEMFILTERTYPE_ALL,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS]        = ITEMFILTERTYPE_WEAPONS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]          = ITEMFILTERTYPE_ARMOR,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]        = ITEMFILTERTYPE_JEWELRY,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE]     = ITEMFILTERTYPE_CONSUMABLE,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING]       = ITEMFILTERTYPE_CRAFTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]     = ITEMFILTERTYPE_FURNISHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS]  = ITEMFILTERTYPE_MISCELLANEOUS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_QUEST]          = ITEMFILTERTYPE_QUEST,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JUNK]           = ITEMFILTERTYPE_JUNK,
+    --CraftBag
+    [ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING]  = ITEMFILTERTYPE_BLACKSMITHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING]       = ITEMFILTERTYPE_CLOTHING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_WOODWORKING]    = ITEMFILTERTYPE_WOODWORKING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY]        = ITEMFILTERTYPE_ALCHEMY,
+    [ITEM_TYPE_DISPLAY_CATEGORY_ENCHANTING]     = ITEMFILTERTYPE_ENCHANTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING]   = ITEMFILTERTYPE_PROVISIONING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]= ITEMFILTERTYPE_JEWELRYCRAFTING,
+    [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL] = ITEMFILTERTYPE_STYLE_MATERIALS,
+    [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM]     = ITEMFILTERTYPE_TRAIT_ITEMS,
+}
+]]

@@ -194,6 +194,7 @@ local function GetFilterCallbackForStolen(checkOnlyJunk)
     end
 end
 
+--[[
 local function GetFilterCallbackForProvisioningIngredient(ingredientType)
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
@@ -329,6 +330,7 @@ local function GetFilterCallbackForProvisioningIngredient(ingredientType)
         return false
     end
 end
+]]
 
 local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
@@ -772,9 +774,20 @@ local subfilterCallbacks = {
         Provisioning = {
             filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}),
             dropdownCallbacks = {
-                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Food")},
-                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Drink")},
-                {name = "OldIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Old")},
+                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
+                    }),
+                },
+                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
+                    })
+                },
                 {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_INGREDIENT_RARE})},
             },
         },
@@ -921,6 +934,14 @@ local subfilterCallbacks = {
                 {name = "Disguise", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DISGUISE})},
                 {name = "Tabard", showIcon=true,   filterCallback = GetFilterCallback({ITEMTYPE_TABARD})},
             },
+        },
+    },
+    --Quest
+    Quest = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
         },
     },
 --=============================================================================================================================================================================================
@@ -1379,15 +1400,21 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
         FoodIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Food"),
+            filterCallback = GetFilterCallbackForSpecializedItemtype({
+                SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
+            }),
             dropdownCallbacks = {},
         },
         DrinkIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Drink"),
-            dropdownCallbacks = {},
-        },
-        OldIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Old"),
+            filterCallback = GetFilterCallbackForSpecializedItemtype({
+                SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
+            }),
             dropdownCallbacks = {},
         },
         RareIngredient = {
@@ -1887,7 +1914,7 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         --Added with ESO PTS API100033 Markarth
         --TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
-        --TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+        --TODO: filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
         --TODO: properly and the dropdown filters won't be registered to the correct bars!
         local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory

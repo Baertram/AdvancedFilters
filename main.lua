@@ -8,8 +8,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-10-04
---Max todos: #39
+--TODO Last updated: 2020-10-19
+--Max todos: #41
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -34,6 +34,9 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#37: 2020-09-28, Bug, Baertram:
 --     Enchanting panel, create: Move the "Quests only" checkbox up
 
+--#40:  2020-10-19: Bug, Baertram:
+--      Quest inventory rows are hidden after opening the junk filter and going back to quests
+--      ZO_PlayerInventoryQuest2Row4 is hidden after switching to junk with AF enabled (PTS markarth) ?
 
 
 ---==========================================================================================================================================================================
@@ -45,6 +48,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
+-- Quest tab got a sub filter bar now (like thte vanilla UI only showing "All" as button), but enables the dropdown box for filter plugins for the panel "Quest".
+
 
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
@@ -67,6 +72,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#36 The subfilter bar buttons get disabled even if there are items in the subfilter's ALL tab
 --#38 Bank withdraw filters are not working, always shows all items
 --#39 At crafting panels: Use checkbox "Include banked items" will not update the currently filtered counters
+--#41 CraftBag -> Provisioner: subfilter buttons of materials (food, drink, none) are disabled even if items are given + changed the filters from old itemIds to specialized_item_types
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -295,13 +301,14 @@ local function InitializeHooks()
             local invType = AF.currentInventoryType
             local currentSubfilterBar = subfilterGroup.currentSubfilterBar
             if not currentSubfilterBar then return end
-            local RefreshSubfilterBarUpdaterName = "RefreshSubfilterBarMetaTable_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name
+            local RefreshSubfilterBarUpdaterName = "MetaTable___RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name
             if AF.settings.debugSpam then d("[AF]Metatable proxy: Calling ThrottledUpdate: " ..tostring(RefreshSubfilterBarUpdaterName)) end
             ThrottledUpdate(RefreshSubfilterBarUpdaterName,
                     10, RefreshSubfilterBar, currentSubfilterBar)
         end,
     }
     --tracking function. Returns a proxy table with our metatable attached.
+    --t is e.g. PLAYER_INVENTORY.isListDirty
     local function track(t)
         local proxy = {}
         proxy[pk] = t
@@ -454,7 +461,7 @@ local function InitializeHooks()
         local function reAnchorIncludeBankedItemsCheckbox(filterPanelId, subFilterBarHeight)
             --d("[AF]reAnchorIncludeBankedItemsCheckbox")
             --FCOCraftFilter enabled? Then do nothing as it will hide the checkbox!
-            if FCOCraftFilter ~= nil then return end
+            --if FCOCraftFilter ~= nil then return end
             --Currently the checkbox is only shown at the crafting panels
             if not util.IsCraftingPanelShown() then return end
             filterPanelId = filterPanelId or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
@@ -611,7 +618,7 @@ local function InitializeHooks()
         end
         local subfilterBar = subfilterBarBase[currentFilterToUse]
         if subfilterBar == nil and AF.subFiltersBarInactive[currentFilterToUse] == nil then
-            --SubfilterBar is nil but maybe we do not need any like at the inventory quest items?
+            --SubfilterBar is nil but maybe we do not need any here at teh given inventory & curerntFilter?
             if currentFilterToUse ~= nil and AF.subFiltersBarInactive[currentFilterToUse] == nil then
                 showChatDebug("ShowSubfilterBar - SubFilterBar missing", "InventoryType: " ..tostring(invType) .. ", craftingType: " ..tostring(craftingType) .. "/" .. util.GetCraftingType() .. ", currentFilter: " .. tostring(currentFilterToUse) .. ", subFilterGroupMissing: " ..tostring(subfilterGroupMissingForInvType) .. ", subfilterBarMissing: " ..tostring(subfilterBarMissing))
                 return
@@ -883,7 +890,8 @@ local function InitializeHooks()
         ]]
         ThrottledUpdate("ShowSubfilterBar" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, currentInvType)
         --end
-        --Update the total count for quest items as there are no epxlicit filterBars available until today!
+        --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added
+        --inventory filters like HarvensStolenFilter or NTakLootAndSteal addons
         local currentFilterToCheck = customInventoryFilterButtonsItemType or currentFilter
         local inactiveSubFilterBarInventoryType = AF.subFiltersBarInactive[currentFilterToCheck] or nil
         if inactiveSubFilterBarInventoryType ~= nil and inactiveSubFilterBarInventoryType ~= false then
