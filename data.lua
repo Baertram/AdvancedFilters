@@ -425,6 +425,15 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
     end
 end
 
+local function GetFilterCallbackForQuestItems()
+    return function(slot, slotIndex)
+        slot = checkCraftingStationSlot(slot, slotIndex)
+        local itemLink = util.GetItemLink(slot)
+        if not itemLink then return false end
+        return true
+    end
+end
+
 --OTHER ADDONS CALLBACK functions
 local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, checkOnlyJunk)
     return function(slot, slotIndex)
@@ -940,7 +949,7 @@ local subfilterCallbacks = {
     Quest = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterCallback = GetFilterCallback(nil),
+            filterCallback = GetFilterCallbackForQuestItems(nil),
             dropdownCallbacks = {},
         },
     },
@@ -1872,8 +1881,9 @@ AF.SubfilterRefreshCallbacks = {}
 ------------------------------------------------------------------------------------------------------------------------
 -- Global addon/plugin API functions
 ---------------------------------------------------------------------------------------------------------------------------
-local function BuildAddonInformation(filterInformation)
+local function BuildAddonInformation(filterInformation, pluginName)
     if filterInformation == nil then return nil end
+    pluginName = pluginName or filterInformation.submenuName or "n/a"
     local addonInformation = {
         submenuName         = filterInformation.submenuName,
         callbackTable       = filterInformation.callbackTable,
@@ -1882,9 +1892,16 @@ local function BuildAddonInformation(filterInformation)
         generator           = filterInformation.generator,
         excludeFilterPanels = filterInformation.excludeFilterPanels,
         onlyGroups          = filterInformation.onlyGroups,
+        excludeGroups       = filterInformation.excludeGroups,
     }
-    --Check the onlyGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
+    --Error if both group parameters are given: "exclude" and "only"
     local onlyGroups = filterInformation.onlyGroups
+    local excludeGroups = filterInformation.excludeGroups
+    if onlyGroups ~= nil and excludeGroups ~= nil then
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-Parameters \'onlyGroups\' and \'excludeGroups\' cannot be used together. Please specify only 1 of them!")
+        return
+    end
+    --Check the onlyGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
     if onlyGroups ~= nil and #onlyGroups > 0 then
         local n2c = normalFilter2CraftingFilter
         local nfNames = normalFilterNames
@@ -1897,6 +1914,25 @@ local function BuildAddonInformation(filterInformation)
                         for craftingFilterName, value in pairs(n2cByName) do
                             if value == true and craftingFilterName ~= nil and craftingFilterName ~= "" then
                                 table.insert(aiOnlyGroups, craftingFilterName)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    --Check the excludeGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
+    elseif excludeGroups ~= nil and #excludeGroups > 0 then
+        local n2c = normalFilter2CraftingFilter
+        local nfNames = normalFilterNames
+        local aiExcludeGroups = addonInformation.excludeGroups
+        if n2c ~= nil and nfNames ~= nil then
+            for idx, filterPanelName in pairs(excludeGroups) do
+                if nfNames[filterPanelName] then
+                    local n2cByName = n2c[filterPanelName]
+                    if n2cByName ~= nil then
+                        for craftingFilterName, value in pairs(n2cByName) do
+                            if value == true and craftingFilterName ~= nil and craftingFilterName ~= "" then
+                                table.insert(aiExcludeGroups, craftingFilterName)
                             end
                         end
                     end
@@ -1989,7 +2025,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
     --Parse the filterInformation now and add the plugin data to the dropdown filters
     local function parseFilterInformation(filterInformation)
         --get filter information from the calling addon and insert it into our callback table
-        local addonInformation = BuildAddonInformation(filterInformation)
+        local addonInformation = BuildAddonInformation(filterInformation, pluginName)
 --        local filterTypeToGroupName = AF.filterTypeNames
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 --Added with ESO PTS API100033 Markarth

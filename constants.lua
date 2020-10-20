@@ -456,6 +456,13 @@ local doNotUpdateInventoriesWithInventoryChangeFilterFunction = {
 AF.doNotUpdateInventoriesWithInventoryChangeFilterFunction = doNotUpdateInventoriesWithInventoryChangeFilterFunction
 ]]
 
+--Some special inventory types which will update the variable AF.currentInventoryType if a check is done (e.g. at
+--activation of a subfilter bar button)
+local specialInventoryTypes = {
+    [INVENTORY_QUEST_ITEM] = true
+}
+AF.specialInventoryTypes = specialInventoryTypes
+
 --Abort the subfilter bar refresh for the following inventory types
 local abortSubFilterRefreshInventoryTypes = {
     --[INVENTORY_TYPE_VENDOR_BUY]             = true, --Vendor buy
@@ -479,7 +486,6 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
 
             --CUSTOM ADDON TABs
@@ -530,6 +536,12 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM] = {},
+        },
+    },
+    --Quest items
+    [INVENTORY_QUEST_ITEM] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = {},
         },
     },
     --Vendor buy -- no standard ZOs inventory type! Self defined in AdvancedFilters with value 900
@@ -1235,6 +1247,9 @@ AF.dropdownCallbackKeys = keys
 
 --INVENTORY TYPES
 local mapInvTypeToInvTypeBefore = {
+    --Inventory + quest
+    [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,
+    [INVENTORY_QUEST_ITEM]      = INVENTORY_BACKPACK,
     --Enchanting
     [LF_ENCHANTING_CREATION]    = LF_ENCHANTING_EXTRACTION,
     [LF_ENCHANTING_EXTRACTION]  = LF_ENCHANTING_CREATION,

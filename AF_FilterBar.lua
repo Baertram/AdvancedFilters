@@ -113,16 +113,21 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         --Invert the dropdown box entry's callback function and call it afterwards
         local function invertDropdownEntryAndCallCallback(skipReset, overrideToInvert)
             skipReset = skipReset or false
-            --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
+            --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used
+            --again, or a dropdown value is reapplied via ActivateButton function
             if not skipReset then
                 util.ResetExternalDropdownFilterPluginsIsFiltering()
             end
-            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
             local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
+            local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
+            if originalCallback == nil then
+                d("[AF]Original callback function of dropdown entry was not found for filterType "..tostring(filterType).."!")
+                return
+            end
+            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
             local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
             local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
             if not currentlySelectedDropdownItem then return end
-            local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
             local filterCallback
 
             if overrideToInvert ~= nil then
@@ -173,6 +178,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 
             util.ApplyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
             self:UpdateLastSelectedDropdownEntries(button, "invertDropdownEntryAndCallCallback")
+            return true
         end
 
         --Select a dropdown entry via it's name
@@ -200,8 +206,12 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 if firstItem.isInverted or entry.isInverted then
                     --Set the first item to "not" inverted, so it will be inverted with the next call to "invertDropdownEntryAndCallCallback"
                     firstItem.isInverted = false
+                    local prevSelectionAtButtonBackup = button.previousDropdownSelection[l_filterPanelIdActive]
                     button.previousDropdownSelection[l_filterPanelIdActive] = firstItem
-                    invertDropdownEntryAndCallCallback(true)
+                    if not invertDropdownEntryAndCallCallback(true) then
+                        firstItem.isInverted = true
+                        button.previousDropdownSelection[l_filterPanelIdActive] = prevSelectionAtButtonBackup
+                    end
                 else
                     button.previousDropdownSelection[l_filterPanelIdActive] = firstItem
 
@@ -587,7 +597,7 @@ function AF_FilterBar:ActivateButton(newButton)
             end
             local iconForDropdownCallbackEntry = ""
             if showIconsInFilterDropdowns and v.showIcon ~= nil and v.showIcon == true then
---d(">v.name: " ..tostring(v.name))
+                --d(">v.name: " ..tostring(v.name))
                 local textureName = textures[v.name] or ""
                 if textureName ~= "" then
                     --Remove the placeholder %s
@@ -666,6 +676,7 @@ function AF_FilterBar:ActivateButton(newButton)
     end
     --------------------------------------------------------------------------------------------------------------------
     local inventoryTypeOfFilterBar = self:GetInventoryType()
+    util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryTypeOfFilterBar)
 
     --Should the subfilterBar be shown?
     if util.CheckIfNoSubfilterBarShouldBeShown(nil, inventoryTypeOfFilterBar) then
@@ -696,7 +707,7 @@ function AF_FilterBar:ActivateButton(newButton)
     newButton:SetEnabled(false)
 
     --refresh filters
-    util.ApplyFilter(newButton, AF_CONST_BUTTON_FILTER, true) --let the filterType be determined in the function AF.util.ApplyFilter
+    util.ApplyFilter(newButton, AF_CONST_BUTTON_FILTER, true, nil, inventoryTypeOfFilterBar) --let the filterType be determined in the function AF.util.ApplyFilter
 
     --set new active button reference
     self.activeButton = newButton
@@ -732,10 +743,11 @@ end
 --Re-Apply the dropdown filter box to the subFilter bar and select the last chosen entry at the given filterPanel
 --if the setting for this is enabled
 function AF_FilterBar:ApplyDropdownSelection(newButton)
---d("[AF]ApplyDropdownSelection")
+    if AF.settings.debugSpam then  d("[AF]FilterBar.ApplyDropdownSelection") end
     newButton = newButton or self:GetCurrentButton()
     if newButton == nil then return end
     local inventoryType = AF.currentInventoryType or self:GetInventoryType()
+    util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryType)
     if inventoryType == nil then return end
     local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
