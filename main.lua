@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-10-20
---Max todos: #42
+--Max todos: #43
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -31,11 +31,9 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
---#37: 2020-09-28, Bug, Baertram:
---     Enchanting panel, create: Move the "Quests only" checkbox up
-
--- 2020-10-20, Bug, Baertram:
---
+-- #43: 2020-10-25, Bug, Baertram:
+--      (Guild)Bank panel: Deposit panel, if opened after last inventory filter was the "quest" button, will throw an error as there is no quest
+--      panel at (Guild)bank withdraw
 
 
 ---==========================================================================================================================================================================
@@ -70,6 +68,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#35 Support the crafting table filters again and reanchor the needed controls
 --#36 The subfilter bar buttons get disabled even if there are items in the subfilter's ALL tab
 --#38 Bank withdraw filters are not working, always shows all items
+--#37 Enchanting panel, create: Move the "Quests only" checkbox up
 --#39 At crafting panels: Use checkbox "Include banked items" will not update the currently filtered counters
 --#40 Quest inventory rows are hidden after opening the junk filter and going back to quests
 --#41 CraftBag -> Provisioner: subfilter buttons of materials (food, drink, none) are disabled even if items are given + changed the filters from old itemIds to specialized_item_types
@@ -701,7 +700,7 @@ local function InitializeHooks()
     --FRAGMENT HOOKS
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing()
-d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invTypeOverride: " ..tostring(AF.currentInventoryTypeOverride))
+--d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invTypeOverride: " ..tostring(AF.currentInventoryTypeOverride))
             --AF.currentInventoryTypeOverride will be set if the inventory's quest item tab was opened before the
             --inventory fragment get's hidden. AF.currentInventoryCurrentFilter will be ITEM_TYPE_DISPLAY_CATEGORY_QUEST
             --(8) in that case!
@@ -713,8 +712,11 @@ d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invT
                 local libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
                 if libFiltersPanelId and
                 (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
+                        libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
                     (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
-                    (TRADE.control and not TRADE.control:IsHidden())
+                    (TRADE.control and not TRADE.control:IsHidden()) or
+                    (SCENE_MANAGER.currentScene.name == "bank") or
+                    (SCENE_MANAGER.currentScene.name == "guildBank")
                 )
                 then
                     AF.currentInventoryTypeOverride = nil
@@ -723,7 +725,7 @@ d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invT
             local currentInventoryTypeOverride = AF.currentInventoryTypeOverride
             AF.currentInventoryType = currentInventoryTypeOverride
             if AF.currentInventoryType == nil then AF.currentInventoryType = inventoryType end
-d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType))
+--d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType))
             local inventoryControl
             local inventoryTypeUpdated = currentInventoryTypeOverride or inventoryType
             AF.currentInventoryTypeOverride = nil
@@ -741,7 +743,7 @@ d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType)
             else
                 -- fragmentType = "Inv"
                 local currentFilter = PLAYER_INVENTORY.inventories[inventoryTypeUpdated].currentFilter
-                d(">>>>>>>currentFilter: " ..tostring(currentFilter))
+--d(">>>>>>>currentFilter: " ..tostring(currentFilter))
                 if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
                     --Ist the currentFilter the quest tab? Then change the currentInventory variable!
                     if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
@@ -804,7 +806,7 @@ d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType)
             else
                 AF.currentInventoryType = INVENTORY_BACKPACK
             end
-d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
+--d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
         end
 
         local function onFragmentStateChange(oldState, newState)
@@ -835,7 +837,7 @@ d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInve
     -->variables to the normal inventory, if you had the CraftBag opened last in the normal inventory.
     -->See github, issue 7:   https://github.com/Randactyl/AdvancedFilters/issues/7
     local function hookScene(scene, filterPanelId)
-        local function onSceneShowing()
+        local function onSceneShowing(p_scene)
             if AF.settings.debugSpam then
                 d("???????????????????????????????????????????????>>>")
                 d("[AF]Scene showing: " .. tostring(SCENE_MANAGER.currentScene.name))
@@ -844,12 +846,16 @@ d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInve
             if  filterPanelId == LF_RETRAIT then
                 AF.currentInventoryType = LF_RETRAIT
             end
+            --Mail Send
+            if p_scene == MAIL_SEND_SCENE then
+                AF.currentInventoryTypeOverride = nil
+            end
         end
         --[[
             local function onSceneShown()
             end
         ]]
-        local function onSceneHiding()
+        local function onSceneHiding(p_scene)
             if AF.settings.debugSpam then
                 d("<<<???????????????????????????????????????????????")
                 d("[AF]Scene hiding: " .. tostring(SCENE_MANAGER.currentScene.name))
@@ -873,11 +879,11 @@ d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInve
 
         local function onSceneStateChange(oldState, newState)
             if newState == SCENE_HIDING then
-                onSceneHiding()
+                onSceneHiding(scene)
                 --elseif newState == SCENE_SHOWN then
                 --onSceneShown()
             elseif newState == SCENE_SHOWING then
-                onSceneShowing()
+                onSceneShowing(scene)
             end
         end
         scene:RegisterCallback("StateChange", onSceneStateChange)
@@ -908,7 +914,7 @@ d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInve
         if currentInvType == INVENTORY_BACKPACK or currentInvType == INVENTORY_QUEST_ITEM then
             AF.currentInventoryCurrentFilter = currentFilter
         end
-d("!!!!!!!!!!!!!!CHANGEFILTER AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
+--d("!!!!!!!!!!!!!!CHANGEFILTER AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
 
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
