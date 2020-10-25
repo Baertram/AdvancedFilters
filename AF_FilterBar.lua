@@ -94,41 +94,52 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         --Get the current LibFilters filterPanelId
         local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
 
-        --Build a new dropdown entry based on given submenu data (mapping filterCallback -> callback func etc.)
+        --Build a new dropdown entry based on given submenu data (mapping filterCallback -> callback func etc.).
+        --Will re-use the existing dropdown entry if not-inverted, else it will create a new copy for the inverted data
         local function buildNewDropdownEntry(currentlySelectedDropdownItem, filterCallback)
             --d("[AF]buildNewDropdownEntry")
             --Build the now new selected item of the dropdown with the inverted data
-            local newSelectedItem = currentlySelectedDropdownItem
+            local newSelectedItem = {}
+            --[[
+            newSelectedItem = ZO_ShallowTableCopy(currentlySelectedDropdownItem)
+            newSelectedItem = currentlySelectedDropdownItem
             newSelectedItem.filterResetAtStart = currentlySelectedDropdownItem.filterResetAtStart  -- For AF.util.ApplyFilter
             newSelectedItem.filterResetAtStartDelay = currentlySelectedDropdownItem.filterResetAtStartDelay  -- For AF.util.ApplyFilter
             --d("[AF]invertFilter at dropdown-filterResetAtStart: " ..tostring(newSelectedItem.filterResetAtStart) .. ", filterResetAtStartDelay: " ..tostring(currentlySelectedDropdownItem.filterResetAtStartDelay))
 
             newSelectedItem.filterStartCallback = currentlySelectedDropdownItem.filterStartCallback -- For AF.util.ApplyFilter
-            newSelectedItem.callback = filterCallback
-            newSelectedItem.filterCallback = filterCallback -- For AF.util.ApplyFilter (as it needs filterCallback and not callback)
             newSelectedItem.filterEndCallback = currentlySelectedDropdownItem.filterEndCallback -- For AF.util.ApplyFilter
+            ]]
+            newSelectedItem.callback = filterCallback
+            newSelectedItem.filterCallback = filterCallback
             return newSelectedItem
         end
 
         --Invert the dropdown box entry's callback function and call it afterwards
         local function invertDropdownEntryAndCallCallback(skipReset, overrideToInvert)
+--d("[AF]invertDropdownEntryAndCallCallback-skipReset: " ..tostring(skipReset) .. ", overrideToInvert: " ..tostring(overrideToInvert))
             skipReset = skipReset or false
             --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used
-            --again, or a dropdown value is reapplied via ActivateButton function
+            --again, or a dropdown value is re-applied via ActivateButton function
+            --[[
             if not skipReset then
                 util.ResetExternalDropdownFilterPluginsIsFiltering()
             end
+            ]]
+--AF._lastFilterButton = button
+            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
             local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
+--d(">[AF]l_filterPanelIdActive: " ..tostring(l_filterPanelIdActive) .. ", filterType: " ..tostring(filterType))
+            local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
+            local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
+            if not currentlySelectedDropdownItem then return end
             local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
             if originalCallback == nil then
                 d("[AF]Original callback function of dropdown entry was not found for filterType "..tostring(filterType).."!")
                 return
             end
-            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-            local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
-            local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
-            if not currentlySelectedDropdownItem then return end
             local filterCallback
+
 
             if overrideToInvert ~= nil then
                 --Use inverted filter callback
@@ -147,11 +158,12 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 end
             end
 
+            --Remove all old <> (unequal) signs
+            currentlySelectedDropdownItem.name = string.gsub(currentlySelectedDropdownItem.name, "≠", "")
+
             --Build the now new selected item of the dropdown with the inverted data
             local newSelectedItem = buildNewDropdownEntry(currentlySelectedDropdownItem, filterCallback)
 
-            --Remove all old <> (unequal) signs
-            currentlySelectedDropdownItem.name = string.gsub(currentlySelectedDropdownItem.name, "≠", "")
             if overrideToInvert ~= nil then
                 --Use inverted filter callback
                 if overrideToInvert == true then
@@ -171,7 +183,9 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     newSelectedItem.name = "≠" .. currentlySelectedDropdownItem.name
                 end
             end
+AF._newSelectedItem = newSelectedItem
             button.previousDropdownSelection[l_filterPanelIdActive] = newSelectedItem
+            comboBox.m_selectedItemData = newSelectedItem
             comboBox.m_selectedItemText:SetText(newSelectedItem.name)
 
             PlaySound(SOUNDS.MENU_BAR_CLICK)
@@ -198,7 +212,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             if entry == AF_CONST_ALL or (entry.name == AF_CONST_ALL or entry.name == util.Localize(SI_ITEMFILTERTYPE0)) then
                 --d("[AF]Reset combobox to ALL")
                 --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
-                util.ResetExternalDropdownFilterPluginsIsFiltering()
+                --util.ResetExternalDropdownFilterPluginsIsFiltering()
                 comboBox:SelectFirstItem()
                 --Get the first entry of the dropdownbox (should be "All")
                 local firstItem = comboBox.m_sortedItems[1]
@@ -752,7 +766,7 @@ function AF_FilterBar:ApplyDropdownSelection(newButton)
     local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
     --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
-    util.ResetExternalDropdownFilterPluginsIsFiltering()
+    --util.ResetExternalDropdownFilterPluginsIsFiltering()
     local currentlySelectedDropDownEntry
     --select the first item if there is no previous selection or the setting to remember the last selection is disabled
     if not AF.settings.rememberFilterDropdownsLastSelection or not newButton.previousDropdownSelection or not newButton.previousDropdownSelection[filterPanelIdActive] then

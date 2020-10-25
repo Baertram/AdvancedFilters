@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-10-20
---Max todos: #43
+--Max todos: #44
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -30,11 +30,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     Right click the dropdown box and ALWAYS show entries "Invert current filter 1-49", "Select all".
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
-
--- #43: 2020-10-25, Bug, Baertram:
---      (Guild)Bank panel: Deposit panel, if opened after last inventory filter was the "quest" button, will throw an error as there is no quest
---      panel at (Guild)bank withdraw
-
 
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -73,6 +68,9 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#40 Quest inventory rows are hidden after opening the junk filter and going back to quests
 --#41 CraftBag -> Provisioner: subfilter buttons of materials (food, drink, none) are disabled even if items are given + changed the filters from old itemIds to specialized_item_types
 --#42 Switching from CraftBag/Mail/Player trade to inventory/the other way around (where the quest tab was the last active one) will show the quest subfilterbar / not show the quest subfilterbar
+--#43 (Guild)Bank panel: Deposit panel, if opened after last inventory filter was the "quest" button, will throw an error as there is no quest filter at banks
+--#44 Inverting the dropdown filters sometimes left the normal filters in the dropdown boxes unfunctional behind
+
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================

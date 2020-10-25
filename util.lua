@@ -1990,6 +1990,7 @@ end
 --======================================================================================================================
 -- -v- Filter plugin for the filterBar dropdown box functions                                                       -v-
 --======================================================================================================================
+--[[
 function util.ResetExternalDropdownFilterPluginsIsFiltering()
     local externalDropdownFilterPlugins = AF.externalDropdownFilterPlugins
     if externalDropdownFilterPlugins then
@@ -2000,6 +2001,7 @@ function util.ResetExternalDropdownFilterPluginsIsFiltering()
         end
     end
 end
+]]
 --======================================================================================================================
 -- -^- Filter plugin for the filterBar dropdown box functions                                                       -^-
 --======================================================================================================================
