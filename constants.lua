@@ -107,6 +107,7 @@ local questItemsOnly      = ZOsControlNames.questItemsOnly
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
+    playerInv               = PLAYER_INVENTORY,
     inv                     = ZO_PlayerInventory,
     invList                 = ZO_PlayerInventoryList,
     bank                    = ZO_PlayerBank,

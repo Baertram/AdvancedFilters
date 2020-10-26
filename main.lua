@@ -8,8 +8,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-10-20
---Max todos: #44
+--TODO Last updated: 2020-10-26
+--Max todos: #46
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -31,6 +31,12 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
+--#45: 2020-10-26: Bug, Baertram:
+--     Fix search box at quickslots
+
+--#46: 2020-10-26: Bug, Baertram:
+--     Fix dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, friendly accompanions)
+
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --  UPDATE INFORMATION: since AF 1.5.4.5 - Current 1.6.0.0
@@ -41,7 +47,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
 -- Quest tab got a sub filter bar now (like thte vanilla UI only showing "All" as button), but enables the dropdown box for filter plugins for the panel "Quest".
-
+-- Quickslots got subfilter bar and dropdown filters now. Collectible do not support dropdown box filters yet and their group names are dynamically generated Strings
+--   starting with QS for quickslot and then numbers: QS<CategoryId>_<CategoryIndex>_<categorySpecialization>
 
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
@@ -107,6 +114,7 @@ user:/AddOns/AdvancedFilters/main.lua:213 attempt o index a nil value, craftingT
 
 --Constants in local variables
 local controlsForChecks = AF.controlsForChecks
+local playerInvVar = controlsForChecks.playerInv
 local smithingBaseVar = controlsForChecks.smithingBaseVar
 local smithingVar = controlsForChecks.smithing
 local enchantingVar = controlsForChecks.enchanting
@@ -173,8 +181,8 @@ local function updateLastBankCurrentFilter(bankInvType)
     --Check if current inventory is a bank withdraw panel
     local isBankInvType = bankInvTypes[bankInvType] or false
     if not isBankInvType then return end
-    if not PLAYER_INVENTORY.inventories or not PLAYER_INVENTORY.inventories[bankInvType] then return end
-    local currentBankFilter = PLAYER_INVENTORY.inventories[bankInvType].currentFilter
+    if not playerInvVar.inventories or not playerInvVar.inventories[bankInvType] then return end
+    local currentBankFilter = playerInvVar.inventories[bankInvType].currentFilter
 --d(">Current bank currentFilter: " ..tostring(currentBankFilter))
     AF.lastCurrentFilter[bankInvType] = currentBankFilter
 end
@@ -268,7 +276,7 @@ local function InitializeHooks()
     --[[
         this is a hacky way of knowing when items go in and out of an inventory.
 
-        t = the tracked table (ZO_InventoryManager.isListDirty/PLAYER_INVENTORY.isListDirty)
+        t = the tracked table (ZO_InventoryManager.isListDirty/playerInvVar.isListDirty)
         k = inventoryType
         v = isDirty
         pk = private key (no two empty tables are the same) where we store t
@@ -286,7 +294,7 @@ local function InitializeHooks()
         end,
         __newindex = function(t, k, v)
             -->This function is called by e.g. LibFilters 3 function SafeUpdateList, which calls
-            -->PLAYER_INVENTORY:UpdateList(INVENTORY_*) (e.g. INVENTORY_BANK)
+            -->playerInvVar:UpdateList(INVENTORY_*) (e.g. INVENTORY_BANK)
             --d("*update of element " .. tostring(k) .. " to " .. tostring(v))
 
             --update the tracked table
@@ -306,7 +314,7 @@ local function InitializeHooks()
         end,
     }
     --tracking function. Returns a proxy table with our metatable attached.
-    --t is e.g. PLAYER_INVENTORY.isListDirty
+    --t is e.g. playerInvVar.isListDirty
     local function track(t)
         local proxy = {}
         proxy[pk] = t
@@ -359,27 +367,26 @@ local function InitializeHooks()
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
             local invTypeUpdateListAnchor = AF.currentInventoryType
+            local isQuickslot = ((self == quickslotVar) or invTypeUpdateListAnchor == LF_QUICKSLOT) or false
+
             --Check if the current layoutData (offsets of controls in the inventory) is given
             local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
             if layoutData == nil then
-                --d(">layoutData was taken from default AF BACKPACK LAYOUT!")
+--d(">layoutData was taken from default AF BACKPACK LAYOUT!")
                 --Standard inv layout
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
             end
-            --d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
+--d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
             if not layoutData then
                 return
             end
-            --TODO: Remove after testing
-            --AF._layoutData = layoutData
-
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
                 list = self.inventories[invTypeUpdateListAnchor].listView
             end
             --No inventory list found: Detect it now (crafting research e.g.)
             if not list then
-                --d(">no list control found yet")
+--d(">no list control found yet")
                 local listData
                 local moveInvBottomBarDown
                 local anchorTo = (p_subFilterBar and p_subFilterBar.control) or nil
@@ -404,14 +411,19 @@ local function InitializeHooks()
                     end
                 end
             else
-                --Inventory list given
+--d(">list was found!")
+                --List given
                 list:SetWidth(layoutData.width)
                 list:ClearAnchors()
                 local offsetYList = layoutData.backpackOffsetY
-                if p_isCraftingInventoryType == true then
+                local anchorVar
+                if p_isCraftingInventoryType == true or isQuickslot == true then
                     offsetYList = offsetYList + shiftY
                 end
-                list:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYList)
+                if isQuickslot then
+                    anchorVar = ZO_QuickSlot
+                end
+                list:SetAnchor(TOPRIGHT, anchorVar, TOPRIGHT, 0, offsetYList)
                 list:SetAnchor(BOTTOMRIGHT)
                 --d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
@@ -442,13 +454,19 @@ local function InitializeHooks()
             if sortBy == nil then return end
             sortBy = sortBy.headerContainer
             sortBy:ClearAnchors()
-            local offsetYSortHeader = layoutData.sortByOffsetY
+            local sortHeaderOffsetY = 0
+            local anchorVar
+            if isQuickslot == true then
+                sortHeaderOffsetY = shiftY
+                anchorVar = ZO_QuickSlot
+            end
+            local offsetYSortHeader = layoutData.sortByOffsetY + sortHeaderOffsetY
             --[[
             if p_isCraftingInventoryType == true then
                 offsetYSortHeader = offsetYSortHeader + shiftY
             end
             ]]
-            sortBy:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, offsetYSortHeader)
+            sortBy:SetAnchor(TOPRIGHT, anchorVar, TOPRIGHT, 0, offsetYSortHeader)
             --d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
 
             --Should some inventory controls be hidden?
@@ -507,7 +525,7 @@ local function InitializeHooks()
 
                 --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
-                local currentCBFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
                 --d(">currentCBFilter: " .. tostring(currentCBFilter))
                 if currentCBFilter == ITEMFILTERTYPE_ALL then
                     --The currentfilter reset, so we need to set it to the last known value again now
@@ -658,10 +676,12 @@ local function InitializeHooks()
             --set proper inventory anchor displacement
             if subfilterBar.inventoryType == INVENTORY_TYPE_VENDOR_BUY then
                 UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar, false)
+            elseif invType == LF_QUICKSLOT then
+                UpdateListAnchors(quickslotVar, 0, nil, false)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             else
-                UpdateListAnchors(PLAYER_INVENTORY, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
+                UpdateListAnchors(playerInvVar, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             end
         else
             --Crafting
@@ -674,16 +694,18 @@ local function InitializeHooks()
             --Update the currentfilter to the inventory so it will be the correct one (e.g. if you change after this "return false" below to the CraftBag and back to the inventory,
             --the currentFilter will be the wrong one from before, and thus the subfilterbar of the before filter wil be shown at this currentFilter).
             --Update the currentFilter to the current inventory
-            UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv)
+            UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv, currentFilterToUse)
             --remove all filters
             util.RemoveAllFilters()
             --set original inventory anchor displacement
             if invType == INVENTORY_TYPE_VENDOR_BUY then
                 UpdateListAnchors(STORE_WINDOW, 0, nil, false)
+            elseif invType == LF_QUICKSLOT then
+                UpdateListAnchors(quickslotVar, 0, nil, false)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, 0, nil, true)
             else
-                UpdateListAnchors(PLAYER_INVENTORY, 0, nil, false)
+                UpdateListAnchors(playerInvVar, 0, nil, false)
             end
             --remove current bar reference
             subfilterGroup.currentSubfilterBar = nil
@@ -760,7 +782,7 @@ local function InitializeHooks()
                     inventoryControl = STORE_WINDOW.control
                 else
                     -- fragmentType = "Inv"
-                    local currentFilter = PLAYER_INVENTORY.inventories[inventoryTypeUpdated].currentFilter
+                    local currentFilter = playerInvVar.inventories[inventoryTypeUpdated].currentFilter
                     --d(">>>>>>>currentFilter: " ..tostring(currentFilter))
                     if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
                         --Ist the currentFilter the quest tab? Then change the currentInventory variable!
@@ -773,7 +795,7 @@ local function InitializeHooks()
 
                     --CraftBag
                     --if inventoryType == INVENTORY_CRAFT_BAG then
-                    --local currentCBFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                    --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
                     --local afCBCurrentFilter = AF.craftBagCurrentFilter
                     --d("[AF]CraftBag fragment showing, currentFilter: " .. tostring(currentCBFilter) .. ", afCBCurrentFilter: " .. tostring(afCBCurrentFilter))
                     --fragmentType = "CraftBag"
@@ -789,12 +811,12 @@ local function InitializeHooks()
                     end
                     ThrottledUpdate("ShowSubfilterBar_" .. inventoryTypeUpdated, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType)
 
-                    inventoryControl = PLAYER_INVENTORY.inventories[inventoryTypeUpdated].filterBar:GetParent()
+                    inventoryControl = playerInvVar.inventories[inventoryTypeUpdated].filterBar:GetParent()
                 end
-                --Call RefreshSubfilterBar via "proxy" metatable function on the inventoryType
-                if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
-                PLAYER_INVENTORY.isListDirty = track(PLAYER_INVENTORY.isListDirty)
             end
+            --Call RefreshSubfilterBar via "proxy" metatable function on the inventoryType
+            if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
+            PLAYER_INVENTORY.isListDirty = track(playerInvVar.isListDirty)
 
             --Hide and move some controls
             if inventoryControl then
@@ -811,10 +833,10 @@ local function InitializeHooks()
         end
 
         local function onFragmentHiding(p_fragment)
-            PLAYER_INVENTORY.isListDirty = untrack(PLAYER_INVENTORY.isListDirty)
+            PLAYER_INVENTORY.isListDirty = untrack(playerInvVar.isListDirty)
             --CraftBag
             if inventoryType == INVENTORY_CRAFT_BAG then
-                AF.craftBagCurrentFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                AF.craftBagCurrentFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
                 if AF.settings.debugSpam then d("[AF]CraftBag fragment hiding, currentFilter: " .. tostring(AF.craftBagCurrentFilter)) end
             end
             --Reset the current inventory type to the normal inventory, or the quest (depending on the currentFilter before craftbag was opened)
@@ -853,7 +875,7 @@ local function InitializeHooks()
 
     --=== SCENES ===========================================================================================================
     --Hook some scenes to register variables as the scenes show/hide.
-    -->Needed to prevent function PLAYER_INVENTORY:ChangeFilter to reset the internal
+    -->Needed to prevent function playerInvVar:ChangeFilter to reset the internal
     -->variables to the normal inventory, if you had the CraftBag opened last in the normal inventory.
     -->See github, issue 7:   https://github.com/Randactyl/AdvancedFilters/issues/7
     local function hookScene(scene, filterPanelId)
@@ -920,7 +942,7 @@ local function InitializeHooks()
     --Recognizes if a button like armor/weapons/material/... was changed at the inventory (which is a filter change internally)
     local function ChangeFilterInventory(self, filterTab)
         AF.currentInventoryTypeOverride = nil
-        --self: PLAYER_INVENTORY, filterTab: PLAYER_INVENTORY.filterTab
+        --self: playerInvVar, filterTab: playerInvVar.filterTab
         local tabInvType = filterTab.inventoryType
         --Special treatment for the "quest" filtertab at the player inventory. The scene says it's inventorytype 1, but
         --the quest button changes it to 2. So the invtype was used from the INVENTORY_FRAGMENT hook before!
@@ -938,7 +960,7 @@ local function InitializeHooks()
 
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
-            d("[AF]PLAYER_INVENTORY:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
+            d("[AF]playerInvVar:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
         end
         --CraftBag
         if currentInvType == INVENTORY_CRAFT_BAG and AF.blockOnInventoryFilterChangedPreHookForCraftBag then
@@ -982,13 +1004,13 @@ local function InitializeHooks()
         end
     end
     -->Throws error message if you open inventory after reloadui:
-    SecurePostHook(PLAYER_INVENTORY, "ChangeFilter", ChangeFilterInventory)
+    SecurePostHook(playerInvVar, "ChangeFilter", ChangeFilterInventory)
 
 
     --=== QUICKLOT =========================================================================================================
     --PreHook the QuickSlotWindow change filter function
     local function ChangeFilterQuickSlot(self, filterData)
-d("[AF]ChangeFilterQuickSlot")
+--d("[AF]ChangeFilterQuickSlot")
         AF.currentInventoryType = LF_QUICKSLOT
         ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, self.currentFilter, nil, nil, LF_QUICKSLOT)
 
@@ -1009,7 +1031,7 @@ d("[AF]ChangeFilterQuickSlot")
         ZO_MainMenuCategoryBarButton1_MouseUp:3: in function '(main chunk)'
         |caaaaaa<Locals> self = ud, button = 1, upInside = T, ctrl = F, alt = F, shift = F, command = F </Locals>|r
     ]]
-    --ZO_PreHook(PLAYER_INVENTORY, "ChangeFilter", ChangeFilterInventory)
+    --ZO_PreHook(playerInvVar, "ChangeFilter", ChangeFilterInventory)
 
 
     --=== VENDOR / STORE ===================================================================================================
@@ -1379,7 +1401,7 @@ d("[AF]ChangeFilterQuickSlot")
 
         function ZO_QuickslotManager:UpdateFreeSlots()
             if AF.settings.debugSpam then d("[AF]ZO_QuickslotManager:UpdateFreeSlots") end
-            local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+            local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
             local numFilteredAndShownItems = #self.list.data
             local freeSlotsShown = numFilteredAndShownItems or 0
             local settings = AF.settings
@@ -1416,7 +1438,7 @@ d("[AF]ChangeFilterQuickSlot")
             local hideItemCount = settings.hideItemCount
 
             local slotsLabel = infoBar:GetNamedChild("FreeSlots")
-            local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+            local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
             local numFilteredAndShownItems = util.getInvItemCount(invType, isCraftingInvType)
             local freeSlotsShown = (numFilteredAndShownItems ~= nil and numFilteredAndShownItems > 0) and numFilteredAndShownItems or 0
             --d(">numUsedSlots: " .. tostring(numUsedSlots) .. ", numSlots: " .. tostring(numSlots) .. ", numFilteredAndShownItems: " .. tostring(numFilteredAndShownItems) ..", freeSlotsShown: " ..tostring(freeSlotsShown))
