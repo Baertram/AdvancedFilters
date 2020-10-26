@@ -42,6 +42,9 @@ local util = AF.util
 
 --Constant for the "All" subfilters
 AF_CONST_ALL                = 'All'
+--Prefixes for filterGroups
+--Quickslot
+AF_QS_PREFIX                =   'QS'
 --Constant for the dropdown filter box LibFilters filter
 AF_CONST_BUTTON_FILTER      = "AF_ButtonFilter"
 AF_CONST_DROPDOWN_FILTER    = "AF_DropdownFilter"
@@ -116,6 +119,7 @@ local controlsForChecks = {
     craftBag                = ZO_CraftBag,
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
+    quickslot               = QUICKSLOT_WINDOW,
     --Keyboard variables
     store                   = STORE_WINDOW,
     smithingBaseVar         = ZO_Smithing,
@@ -162,11 +166,9 @@ local inventories = {
     [INVENTORY_CRAFT_BAG]  = {
         searchBox = ZO_CraftBagSearchFiltersTextSearchBox,
     },
-    --[[
-    [QUICKSLOT]            = {
+    [LF_QUICKSLOT] = {
         searchBox = ZO_QuickSlotSearchFiltersTextSearchBox,
     },
-    ]]
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
@@ -240,7 +242,8 @@ local inventoryNames = {
     [LF_ENCHANTING_CREATION]    = "EnchantingCreation",
     [LF_ENCHANTING_EXTRACTION]  = "EnchantingExtraction",
     [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
-    [LF_RETRAIT]                = "Retrait"
+    [LF_RETRAIT]                = "Retrait",
+    [LF_QUICKSLOT]              = "QuickSlot",
 }
 AF.inventoryNames = inventoryNames
 
@@ -301,6 +304,8 @@ local filterTypeNames = {
     [ITEMFILTERTYPE_AF_RETRAIT_ARMOR]               = "ArmorRetrait",
     [ITEMFILTERTYPE_AF_RETRAIT_WEAPONS]             = "WeaponsRetrait",
     [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY]             = "JewelryRetrait",
+    [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT]        = "QuickSlot",
+    [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT]  = "QuickSlotQuest",
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER]         = "HarvensStolenFilter",
@@ -736,12 +741,20 @@ local subfilterGroups = {
     --Retrait
     [LF_RETRAIT] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL]    = {},
             [ITEMFILTERTYPE_AF_RETRAIT_ARMOR]   = {},
             [ITEMFILTERTYPE_AF_RETRAIT_WEAPONS] = {},
             [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY] = {},
         },
     },
+    --QuickSlots
+    [LF_QUICKSLOT] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL]                  = {}, --ITEMFILTERTYPE_ALL
+            [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT]          = {},
+            [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT]    = {},
+        }
+    }
 }
 AF.subfilterGroups = subfilterGroups
 
@@ -767,6 +780,7 @@ local filterBarParents = {
     [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
+    [inventoryNames[LF_QUICKSLOT]]              = GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
 }
 AF.filterBarParents = filterBarParents
 
@@ -821,6 +835,9 @@ local filterBarParentControlsToHide = {
     [LF_RETRAIT]  = {
         GetControl(controlsForChecks.retrait.inventory.control, buttonDividerSuffix),
     },
+    [LF_QUICKSLOT] = {
+        GetControl(controlsForChecks.quickslot.container, searchDividerSuffix),
+    }
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 
@@ -830,6 +847,7 @@ local layoutDataFragments = {
     BACKPACK_DEFAULT_LAYOUT_FRAGMENT,
     BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
     BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
+    QUICKSLOT_FRAGMENT,
 }
 AF.layoutDataFragments = layoutDataFragments
 
@@ -1016,7 +1034,12 @@ local subfilterButtonNames = {
     [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY] = {
         "Neck", "Ring", AF_CONST_ALL,
     },
-
+    [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT] = {
+        "Poison", "Potion", "Drink", "Food", AF_CONST_ALL,
+    },
+    [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT] = {
+        AF_CONST_ALL,
+    }
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER] = {
@@ -1094,158 +1117,26 @@ local subfilterButtonEntriesNotForDropdownCallback = {
 }
 AF.subfilterButtonEntriesNotForDropdownCallback = subfilterButtonEntriesNotForDropdownCallback
 
---Build the keys for the dropdown callback tables used in AF.util.BuildDropdownCallbacks()
---[[
-local keys = {
-    All = {},
-    Weapons = {
-        "OneHand", "TwoHand", "Bow", "DestructionStaff", "HealStaff",
-    },
-    WeaponsSmithing = {
-        "OneHand", "TwoHand",
-    },
-    WeaponsWoodworking = {
-        "Bow", "DestructionStaff", "HealStaff",
-    },
-    Armor = {
-        "Body", "Shield", --"Vanity", --> Moved to Miscelaneous
-    },
-    ArmorWoodworking = {
-        "Shield",
-    },
-    ArmorSmithing = {
-        "Heavy",
-    },
-    ArmorClothier = {
-        "LightArmor", "Medium",
-    },
-    Consumables = {
-        "Crown", "Food", "Drink", "Recipe", "Potion", "Poison", "Motif", "Writ", "Container", "Repair", "Trophy",
-    },
-    Crafting = {
-        "Blacksmithing", "Clothier", "Woodworking", "Alchemy", "Enchanting", "Provisioning", "JewelryCrafting", "Style", "AllTraits", --"WeaponTrait", "ArmorTrait", "JewelryTrait",
-    },
-    Furnishings = {
-        "CraftingStation", "Light", "Ornamental", "Seating", "TargetDummy",
-    },
-    Miscellaneous = {
-        "Glyphs", "SoulGem", "Siege", "Bait", "Tool", "Trophy", "Fence", "Trash", "Vanity",
-    },
-    Junk = {
-        "Weapon", "Armor", "Jewelry", "Consumable", "Materials", "Furnishings", "Miscellaneous",
-    },
-    Blacksmithing = {
-        "RawMaterial", "RefinedMaterial", "Temper",
-    },
-    Clothing = {
-        "RawMaterial", "RefinedMaterial", "Tannin",
-    },
-    Woodworking = {
-        "RawMaterial", "RefinedMaterial", "Resin",
-    },
-    Alchemy = {
-        "Reagent", "Water", "Oil",
-    },
-    Enchanting = {
-        "Aspect", "Essence", "Potency",
-    },
-    --TODO: Currently disabled as rune filters at the enchanting creation panel on ITEMFILTERTYPE_ base are not possible at the moment
-    --Runes = {
-    --},
-    Glyphs  = {
-        "WeaponGlyph", "ArmorGlyph", "JewelryGlyph",
-    },
-    Provisioning = {
-        "FoodIngredient", "DrinkIngredient", "OldIngredient", "RareIngredient", "Bait",
-    },
-    Style = {
-        "NormalStyle", "RareStyle", "AllianceStyle", "ExoticStyle", "CrownStyle",
-    },
-    Traits = {
-        "ArmorTrait", "WeaponTrait", "JewelryTrait",
-    },
-    Jewelry = {
-        "Neck", "Ring"
-    },
-    JewelryCrafting = {
-        "RawPlating", "RawMaterial", "Plating", "RefinedMaterial",
-    },
-    JewelryCraftingStation = {
-        "Neck", "Ring"
-    },
-    JewelryCraftingStationRefine = {
-        "RawMaterial", "RawPlating", "RawTrait",
-    },
-    RefineSmithing = {
-        "RawMaterial",
-    },
-    RefineClothier = {
-        "RawMaterial",
-    },
-    RefineWoodworking = {
-        "RawMaterial",
-    },
-    CreateArmorSmithing = {
-        "Armor",
-    },
-    CreateWeaponsSmithing = {
-        "OneHand", "TwoHand",
-    },
-    CreateArmorClothier = {
-        "Medium", "LightArmor",
-    },
-    CreateWeaponsWoodworking = {
-        "Bow", "DestructionStaff", "HealStaff",
-    },
-    CreateArmorWoodworking = {
-        "Shield",
-    },
-    CreateJewelryCraftingStation = {
-        "Ring", "Neck",
-    },
-}
-]]
-local keys = {
-    [AF_CONST_ALL] = {},
-}
-
-
---For each entry in subfilterButtonNames:
---Get the "key name" by mapping the subfilterButton key to it's name using filterTypeNames
-for subfilterButtonKey, subfilterButtonData in pairs(subfilterButtonNames) do
-    local dropDownCallbackKeyName = filterTypeNames[subfilterButtonKey] or ""
-    if dropDownCallbackKeyName ~= "" then
-        keys[dropDownCallbackKeyName] = {}
-        local keysDropDownCallbackKeyName = keys[dropDownCallbackKeyName]
-        local doNotAddToDropdownCallbacks = subfilterButtonEntriesNotForDropdownCallback[subfilterButtonKey]
-        local replacementWasAdded = false
-        --Loop over the subfilterButtonData and get each key, except the ALL entry
-        for _, keyName in ipairs(subfilterButtonData) do
-            if keyName ~= AF_CONST_ALL then
-                local doAdd = true
-                if doNotAddToDropdownCallbacks ~= nil then
-                    for _, doNotAddToDropdownCallbackEntry in ipairs(doNotAddToDropdownCallbacks.doNotAdd) do
-                        if keyName == doNotAddToDropdownCallbackEntry then
-                            doAdd = false
-                            break -- end the loop
-                        end
-                    end
-                end
-                if doAdd == true then
-                    table.insert(keysDropDownCallbackKeyName, keyName)
-                else
-                    if not replacementWasAdded and doNotAddToDropdownCallbacks ~= nil and doNotAddToDropdownCallbacks["replaceWith"] ~= nil then
-                        table.insert(keysDropDownCallbackKeyName, doNotAddToDropdownCallbacks["replaceWith"])
-                        replacementWasAdded = true
-                    end
-                end
-            end
-        end
-    end
-end
-AF.dropdownCallbackKeys = keys
-
 --INVENTORY TYPES
+--The following inventoryTypes are LibFilters filterPanelIds!
+local invEqualsLibFilters = {
+    [LF_QUICKSLOT]              = true,
+    [LF_SMITHING_REFINE]        = true,
+    [LF_JEWELRY_REFINE]         = true,
+    [LF_SMITHING_CREATION]      = true,
+    [LF_JEWELRY_CREATION]       = true,
+    [LF_SMITHING_DECONSTRUCT]   = true,
+    [LF_JEWELRY_DECONSTRUCT]    = true,
+    [LF_SMITHING_IMPROVEMENT]   = true,
+    [LF_JEWELRY_IMPROVEMENT]    = true,
+    [LF_SMITHING_RESEARCH]      = true,
+    [LF_JEWELRY_RESEARCH]       = true,
+    [LF_ENCHANTING_CREATION]    = true,
+    [LF_ENCHANTING_EXTRACTION]  = true,
+    [LF_RETRAIT]                = true,
+}
+AF.invEqualsLibFilters = invEqualsLibFilters
+
 local mapInvTypeToInvTypeBefore = {
     --Inventory + quest
     [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,

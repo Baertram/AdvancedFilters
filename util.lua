@@ -136,6 +136,8 @@ function util.GetCurrentFilterTypeForInventory(invType, forLibFiltersRegister)
             filterType = LF_VENDOR_BUY
         elseif util.IsCraftingStationInventoryType(invType) then
             filterType = curInvType
+        elseif util.DoesInventoryTypeEqualLibFiltersType(invType) then
+            filterType = curInvType
         else
             filterType = util.LibFilters:GetCurrentFilterTypeForInventory(invType)
         end
@@ -188,8 +190,33 @@ function util.GetCurrentFilter(invType)
     return currentFilter
 end
 
+function util.GetInvTypeCurrentFilter(invType, currentFilter)
+    local currentFilterToUse
+    --Quickslot
+    if invType == LF_QUICKSLOT then
+        --The currentFilter is a table containing a descriptor which is an itemtype, or there exists another
+        --subtable extraInfo with a collectible category id etc.
+        if type(currentFilter) == "table" then
+            if currentFilter.extraInfo ~= nil then
+                currentFilterToUse = util.getAFQuickSlotCollectibleKey(currentFilter.extraInfo)
+            else
+                --Use the descriptor as currentFilter
+                if currentFilter.descriptor ~= ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+                    currentFilterToUse = AF_QS_PREFIX .. currentFilter.descriptor
+                else
+                    currentFilterToUse = currentFilter.descriptor
+                end
+            end
+        else
+            --Not supported
+            return
+        end
+    end
+    return currentFilterToUse
+end
+
 --Update the currentFilter to the current inventory or crafting inventory
-function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv)
+function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv, currentFilterToUse)
     if AF.settings.debugSpam then d("[AF]util.UpdateCurrentFilter - invType: " .. tostring(invType) .. ", currentFilter: " ..tostring(currentFilter).. ", isCraftingInventoryType: " ..tostring(isCraftingInventoryType)) end
     if invType == nil or currentFilter == nil then return nil end
     isCraftingInventoryType = isCraftingInventoryType or false
@@ -204,6 +231,10 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
         controlsForChecks.store.currentFilter = currentFilter
     elseif isCraftingInventoryType then
         craftingInv.currentFilter = currentFilter
+    elseif invType == LF_QUICKSLOT then
+        --CurrentFilter is a table
+        --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentFilter(invType, currentFilter)
+        AF.controlsForChecks.quickslot.currentFilter = currentFilter
     else
         if not PLAYER_INVENTORY.inventories[invType] then
             if AF.settings.debugSpam then d("<<ABORT[AF]util.UpdateCurrentFilter - invType missing in PLAYER_INVENTORY.inventories!") end
@@ -1923,6 +1954,13 @@ function util.IsCraftingStationInventoryType(inventoryType)
     return retVar
 end
 
+--Is the inventopry type a normal LibFilters filterPanelId?
+function util.DoesInventoryTypeEqualLibFiltersType(inventoryType)
+    local invEqualsLibFilters = AF.invEqualsLibFilters
+    local retVar = invEqualsLibFilters[inventoryType] or false
+    return retVar
+end
+
 --Function to return a boolean value if the craftingPanel is using the worn bag ID as well.
 --Use the LibFilters filterPanelId as parameter
 function util.GetCraftingPanelUsesBagWorn(libFiltersFilterPanelId)
@@ -2147,6 +2185,12 @@ function util.ReApplyDropdownFilter()
     if activeSubfilterBar.ApplyDropdownSelection then
         activeSubfilterBar:ApplyDropdownSelection()
     end
+end
+
+--Create the key from the collectibleData table, used as table key in the subfilterBars at LF_QUICKSLOT and used as
+--currentFilter key
+function util.getAFQuickSlotCollectibleKey(categoryData)
+    return AF_QS_PREFIX..categoryData.categoryId .. "_" .. categoryData.categoryIndex .. "_" .. categoryData.categorySpecialization
 end
 
 --======================================================================================================================

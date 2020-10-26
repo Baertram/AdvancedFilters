@@ -40,6 +40,18 @@ local function checkCraftingStationSlot(slot, slotIndex)
 end
 AF.checkCraftingStationSlot = checkCraftingStationSlot
 
+--QuickSlot
+local function AF_QS_FilterFunctionForQS_ShouldAddItemToSlot(itemData)
+    local itemTypeFilter = QUICKSLOT_WINDOW.currentFilter.extraInfo and QUICKSLOT_WINDOW.currentFilter.extraInfo.AF_QSFilter_ItemTypes
+    if itemTypeFilter then
+        local itemType = GetItemType(itemData.bagId, itemData.slotIndex)
+        if not itemTypeFilter[itemType] then
+            return false
+        end
+    end
+    return true
+end
+
 local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
@@ -424,6 +436,7 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
         return false
     end
 end
+AF.GetFilterCallback = GetFilterCallback
 
 local function GetFilterCallbackForQuestItems()
     return function(slot, slotIndex)
@@ -1617,6 +1630,45 @@ local subfilterCallbacks = {
 --=============================================================================================================================================================================================
 
 --=============================================================================================================================================================================================
+-- -v- QuickSlot                                                                                                     -v-
+--=============================================================================================================================================================================================
+    --QuickSlot - Misc.
+    QuickSlot = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Food = {
+            filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
+            dropdownCallbacks = {},
+        },
+        Drink = {
+            filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
+            dropdownCallbacks = {},
+        },
+        Potion = {
+            filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
+            dropdownCallbacks = {},
+        },
+        Poison = {
+            filterCallback = GetFilterCallback({ITEMTYPE_POISON}),
+            dropdownCallbacks = {},
+        },
+    },
+    QuickSlotQuest = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+    },
+--=============================================================================================================================================================================================
+-- -^- QuickSlot                                                                                                     -^-
+--=============================================================================================================================================================================================
+
+
+--=============================================================================================================================================================================================
 --Not added yet
     --[[
     CreateArmorSmithing = {
@@ -1867,6 +1919,7 @@ local subfilterCallbacks = {
 --Clones of subfilterCallbacks
 subfilterCallbacks.JewelryCraftingStation   = subfilterCallbacks.Jewelry
 subfilterCallbacks.JewelryRetrait           = subfilterCallbacks.Jewelry
+
 --Global variable
 AF.subfilterCallbacks = subfilterCallbacks
 
