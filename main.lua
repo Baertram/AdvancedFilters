@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-10-31
---Max todos: #49
+--Max todos: #50
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -81,7 +81,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#46 Dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, animals, etc.)
 --#47 Fix searchDivider line control showing if you directly open the mail/player2player trade panel before opening the normal inventory before
 --#48 Fix subfilter bars at guild shop "sell" with and w/o LibCommonInventoryFilters (e.g. AwesomeGuildStore)
-
+--#49 Fixed trading house sell panel trying to open a quest subfilterBar if the last active inventory bar was quests and AwesomeGuildStore is active and setup to automatically open the sell tab at the trading house
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -758,24 +758,26 @@ local function InitializeHooks()
                     local sceneNames = AF.scenesForChecks
                     --Check if mail send or player trade are shown
                     local libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
-                    if libFiltersPanelId and
-                            (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
-                                    libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
-                                    libFiltersPanelId == LF_GUILD_STORE_SELL or
-                                    (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
-                                    (TRADE.control and not TRADE.control:IsHidden()) or
-                                    util.IsSceneShown(sceneNames.bank) or
-                                    util.IsSceneShown(sceneNames.guildBank) or
-                                    util.IsSceneShown(sceneNames.tradinghouse)
+--d(">libFiltersPanelId: " ..tostring(libFiltersPanelId))
+                    if ((libFiltersPanelId and (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
+                                libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
+                                libFiltersPanelId == LF_GUILDSTORE_SELL)) or
+                                (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
+                                (TRADE.control and not TRADE.control:IsHidden()) or
+                                util.IsSceneShown(sceneNames.bank) or
+                                util.IsSceneShown(sceneNames.guildBank) or
+                                util.IsSceneShown(sceneNames.tradinghouse) or
+                                (TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL or (TRADING_HOUSE.control and not TRADING_HOUSE.control:IsHidden()))
                             )
                     then
                         AF.currentInventoryTypeOverride = nil
+--d("<<Deleted: AF.currentInventoryTypeOverrid")
                     end
                 end
                 local currentInventoryTypeOverride = AF.currentInventoryTypeOverride
                 AF.currentInventoryType = currentInventoryTypeOverride
                 if AF.currentInventoryType == nil then AF.currentInventoryType = inventoryType end
-                --d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType))
+--d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType))
                 local inventoryTypeUpdated = currentInventoryTypeOverride or inventoryType
                 AF.currentInventoryTypeOverride = nil
 
@@ -798,7 +800,7 @@ local function InitializeHooks()
                         if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
                             AF.currentInventoryType = INVENTORY_QUEST_ITEM
                             inventoryTypeUpdated = INVENTORY_QUEST_ITEM
-                            --d("!!!!!!!!!!!!!!!QUEST - AF.currentInvType = " ..tostring(AF.currentInventoryType))
+--d("!!!!!!!!!!!!!!!QUEST - AF.currentInvType = " ..tostring(AF.currentInventoryType))
                         end
                     end
 
