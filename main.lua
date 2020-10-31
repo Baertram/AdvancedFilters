@@ -368,16 +368,17 @@ local function InitializeHooks()
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
-            --d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
+--d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
             local invTypeUpdateListAnchor = AF.currentInventoryType
-            local isQuickslot = ((self == quickslotVar) or invTypeUpdateListAnchor == LF_QUICKSLOT) or false
+            local isQuickslot = (self == quickslotVar or invTypeUpdateListAnchor == LF_QUICKSLOT) or false
+            local isGuildStoreSell = (self == playerInvVar and TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL) or false
 
             --Check if the current layoutData (offsets of controls in the inventory) is given
             local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
-            if layoutData == nil then
---d(">layoutData was taken from default AF BACKPACK LAYOUT!")
+            if layoutData == nil or  isGuildStoreSell == true then
+--d(">layoutData was taken from default AF BACKPACK LAYOUT!, isGuildStoreSell: " ..tostring(isGuildStoreSell))
                 --Standard inv layout
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
             end
@@ -430,7 +431,7 @@ local function InitializeHooks()
                 end
                 list:SetAnchor(TOPRIGHT, anchorVar, TOPRIGHT, 0, offsetYList)
                 list:SetAnchor(BOTTOMRIGHT)
-                --d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
+--d(">ZO_ScrollList was changed to offsetY: " .. (offsetYList) .. ", height: " ..tostring(list:GetHeight()))
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
             end
 
@@ -472,7 +473,7 @@ local function InitializeHooks()
             end
             ]]
             sortBy:SetAnchor(TOPRIGHT, anchorVar, TOPRIGHT, 0, offsetYSortHeader)
-            --d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
+--d(">sortBy was moved on Y by: " ..tostring(offsetYSortHeader))
 
             --Should some inventory controls be hidden?
             -->Called in the fragment callback function for OnShow!
