@@ -48,7 +48,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 -- -Quickslots got subfilter bar and dropdown filters now. Collectible group names are dynamically generated Strings starting with
 --   QS (for quickslot) and then 3 numbers seperated by _: QS<CategoryId>_<CategoryIndex>_<categorySpecialization>. If you want to add dropdown filters you can spy
 --   the generated strings of the quickslot subfilterbuttons in the table AdvancedFilters.subfilterGroups[27][0] via e.g. merTorchbug or zgoo
---
+-- -Added several more subfilterBar buttons for the quickslot usable items
+-- -Added several more subfilterBar buttons for the quickslot collectibles
 --
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
@@ -735,7 +736,7 @@ local function InitializeHooks()
     --FRAGMENT HOOKS
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing(p_fragment)
-            --d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invTypeOverride: " ..tostring(AF.currentInventoryTypeOverride))
+--d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invTypeOverride: " ..tostring(AF.currentInventoryTypeOverride))
             local doNormalChecks = true
             local inventoryControl
             --Special treatment for qucisklots
@@ -760,10 +761,12 @@ local function InitializeHooks()
                     if libFiltersPanelId and
                             (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
                                     libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
+                                    libFiltersPanelId == LF_GUILD_STORE_SELL or
                                     (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
                                     (TRADE.control and not TRADE.control:IsHidden()) or
-                                    (SCENE_MANAGER.currentScene.name == sceneNames.bank) or
-                                    (SCENE_MANAGER.currentScene.name == sceneNames.guildBank)
+                                    util.IsSceneShown(sceneNames.bank) or
+                                    util.IsSceneShown(sceneNames.guildBank) or
+                                    util.IsSceneShown(sceneNames.tradinghouse)
                             )
                     then
                         AF.currentInventoryTypeOverride = nil

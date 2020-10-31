@@ -68,9 +68,9 @@ local scenesForChecks = {
     fence           = "fence_keyboard"
 }
 AF.scenesForChecks = scenesForChecks
-local sceneNameStoreVendor      = ""
-local sceneNameBankDeposit      = ""
-local sceneNameGuildBankDeposit = ""
+--local sceneNameStoreVendor      = ""
+--local sceneNameBankDeposit      = ""
+--local sceneNameGuildBankDeposit = ""
 
 --FRAGMENT changes
 --The fragment's state is "hiding"= -> For the subfilter bars
