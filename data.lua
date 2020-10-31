@@ -422,14 +422,11 @@ local function GetFilterCallbackForQuestItems()
 end
 
 local function GetFilterCallbackForCollectibles(categoryTypes)
-d("GetFilterCallbackForCollectibles")
-AF._categoryTypes = categoryTypes
     return function(slot, slotIndex)
         if categoryTypes == nil then return true end
         slot = checkCraftingStationSlot(slot, slotIndex)
         --categoryType = COLLECTIBLE_CATEGORY_TYPE_COSTUME .e.g
         local categoryType = slot and slot.categoryType
-d(">GetFilterCallbackForCollectibles, categoryType: " ..tostring(categoryType))
         if not categoryType then return end
         for _, categoryTypeToCompare in ipairs(categoryTypes) do
             if categoryTypeToCompare == categoryType then return true end

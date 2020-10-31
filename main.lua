@@ -514,7 +514,7 @@ local function InitializeHooks()
 
         local invType = currentInvType or AF.currentInventoryType
         local currentFilterToUse
-d(">invType: " ..tostring(invType) .. ", currentInvType: " ..tostring(currentInvType) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType))
+--d(">invType: " ..tostring(invType) .. ", currentInvType: " ..tostring(currentInvType) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType))
         --Check for custom added inventory filter button
         --CraftBag
         if invType == INVENTORY_CRAFT_BAG then
@@ -526,7 +526,7 @@ d(">invType: " ..tostring(invType) .. ", currentInvType: " ..tostring(currentInv
                 --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
                 local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-d(">currentCBFilter: " .. tostring(currentCBFilter))
+--d(">currentCBFilter: " .. tostring(currentCBFilter))
                 if currentCBFilter == ITEMFILTERTYPE_ALL then
                     --The currentfilter reset, so we need to set it to the last known value again now
                     PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter = afCBCurrentFilter
