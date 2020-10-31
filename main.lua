@@ -791,7 +791,7 @@ local function InitializeHooks()
                         if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
                             AF.currentInventoryType = INVENTORY_QUEST_ITEM
                             inventoryTypeUpdated = INVENTORY_QUEST_ITEM
-                            d("!!!!!!!!!!!!!!!QUEST - AF.currentInvType = " ..tostring(AF.currentInventoryType))
+                            --d("!!!!!!!!!!!!!!!QUEST - AF.currentInvType = " ..tostring(AF.currentInventoryType))
                         end
                     end
 
