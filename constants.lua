@@ -795,6 +795,14 @@ local filterBarParentControlsToHide = {
         --ZO_PlayerInventorySearchDivider
         GetControl(controlsForChecks.inv, searchDividerSuffix),
     },
+    [LF_MAIL_SEND]   = {
+        --ZO_PlayerInventorySearchDivider
+        GetControl(controlsForChecks.inv, searchDividerSuffix),
+    },
+    [LF_TRADE]   = {
+        --ZO_PlayerInventorySearchDivider
+        GetControl(controlsForChecks.inv, searchDividerSuffix),
+    },
     [LF_CRAFTBAG]   = {
         GetControl(controlsForChecks.craftBag, searchDividerSuffix),
     },

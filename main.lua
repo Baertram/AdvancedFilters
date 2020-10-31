@@ -8,8 +8,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-10-26
---Max todos: #46
+--TODO Last updated: 2020-10-31
+--Max todos: #47
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -34,9 +34,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#45: 2020-10-26: Bug, Baertram:
 --     Fix search box at quickslots
 
---#46: 2020-10-26: Bug, Baertram:
---     Fix dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, friendly accompanions)
-
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --  UPDATE INFORMATION: since AF 1.5.4.5 - Current 1.6.0.0
@@ -46,10 +43,12 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
--- Quest tab got a sub filter bar now (like thte vanilla UI only showing "All" as button), but enables the dropdown box for filter plugins for the panel "Quest".
--- Quickslots got subfilter bar and dropdown filters now. Collectible do not support dropdown box filters yet and their group names are dynamically generated Strings
---   starting with QS for quickslot and then numbers: QS<CategoryId>_<CategoryIndex>_<categorySpecialization>
-
+-- -Quest tab got a sub filter bar now (like thte vanilla UI only showing "All" as button), but enables the dropdown box for filter plugins for the panel "Quest".
+-- -Quickslots got subfilter bar and dropdown filters now. Collectible group names are dynamically generated Strings starting with
+--   QS (for quickslot) and then 3 numbers seperated by _: QS<CategoryId>_<CategoryIndex>_<categorySpecialization>. If you want to add dropdown filters you can spy
+--   the generated strings of the quickslot subfilterbuttons in the table AdvancedFilters.subfilterGroups[27][0] via e.g. merTorchbug or zgoo
+--
+--
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
 --______________________________________________________________________________________________________________________
@@ -77,6 +76,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#42 Switching from CraftBag/Mail/Player trade to inventory/the other way around (where the quest tab was the last active one) will show the quest subfilterbar / not show the quest subfilterbar
 --#43 (Guild)Bank panel: Deposit panel, if opened after last inventory filter was the "quest" button, will throw an error as there is no quest filter at banks
 --#44 Inverting the dropdown filters sometimes left the normal filters in the dropdown boxes unfunctional behind
+--#46 Dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, animals, etc.)
+--#47 Fix searchDivider line control showing if you directly open the mail/player2player trade panel before opening the normal inventory before
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -826,9 +827,11 @@ local function InitializeHooks()
         end
 
         local function onFragmentShown(p_fragment)
-            --local invType = AF.currentInventoryType
-            --local filterType = util.GetCurrentFilterTypeForInventory(invType)
-            --d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
+            --[[
+                local invType = AF.currentInventoryType
+                local filterType = util.GetCurrentFilterTypeForInventory(invType)
+                d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
+            ]]
             --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
             util.HideInventoryControls(nil)
         end
