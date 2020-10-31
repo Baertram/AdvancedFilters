@@ -9,7 +9,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-10-31
---Max todos: #47
+--Max todos: #49
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -33,6 +33,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 --#45: 2020-10-26: Bug, Baertram:
 --     Fix search box at quickslots
+
 
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -78,6 +79,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#44 Inverting the dropdown filters sometimes left the normal filters in the dropdown boxes unfunctional behind
 --#46 Dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, animals, etc.)
 --#47 Fix searchDivider line control showing if you directly open the mail/player2player trade panel before opening the normal inventory before
+--#48 Fix subfilter bars at guild shop "sell" with and w/o LibCommonInventoryFilters (e.g. AwesomeGuildStore)
+
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -629,12 +632,13 @@ local function InitializeHooks()
             return
         end
         --do nothing if we're in a guild store and regular filters are disabled.
-        if not ZO_TradingHouse:IsHidden()
-        --and util.libCIF._guildStoreSellFiltersDisabled
-        then
+        --LibCommonInventoryFilters is not used anymore!
+        --[[
+        if not ZO_TradingHouse:IsHidden() and (util.libCIF and util.libCIF._guildStoreSellFiltersDisabled) then
             if AF.settings.debugSpam then d("<<ABORT: Trading house libCIF:guildSToreSellFiltersDisabled!") end
             return
         end
+        ]]
 
         --Get the new subFilterBar to show
         local subfilterBarBase = subfilterGroup[craftingType]
@@ -1657,10 +1661,10 @@ end
 
 --Add dnymic entries to the subfilterGroups
 local function createAdditionalSubFilterGroups()
-    --LF_QUICKSLOT
     local collectibleDataKeyToSubFilterBars = AF.collectibleDataKeyToSubFilterBars
     local collectibleDataKeyToCategoryTypes = AF.collectibleDataKeyToCategoryTypes
 
+    --LF_QUICKSLOT
     --Add QuickSlot collectible categories subtables for subfilter button bars
     for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator() do
         if DoesCollectibleCategoryContainSlottableCollectibles(categoryIndex) then
@@ -1756,6 +1760,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
 
     EVENT_MANAGER:UnregisterForEvent(AF.name .. "_Loaded", EVENT_ADD_ON_LOADED)
 
+    --Create additional subfilterButtonBars for dynamic content like the quickslot collectible filters
     createAdditionalSubFilterGroups()
     createDropdownBoxCallbackFunctionKeys()
 

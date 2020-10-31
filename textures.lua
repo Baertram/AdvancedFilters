@@ -180,6 +180,15 @@ local textures = {
     RecallStone = "/esoui/art/icons/rune_a.dds",
 
     Costume     = "/esoui/art/characterwindow/gearslot_costume.dds",
+    BodyMarking = "/esoui/art/characterwindow/gearslot_costume.dds",
+    JewelryPiercing = "/esoui/art/characterwindow/gearslot_costume.dds",
+    HeadMarking = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Facial  = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Hair    = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Hat = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Skin    = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Polymorph   = "/esoui/art/characterwindow/gearslot_costume.dds",
+    Personality = "/esoui/art/characterwindow/gearslot_costume.dds",
 }
 
 --ALCHEMY

@@ -44,7 +44,7 @@ local util = AF.util
 AF_CONST_ALL                = 'All'
 --Prefixes for filterGroups
 --Quickslot
-AF_QS_PREFIX                =   'QS'
+AF_QS_PREFIX                = 'QS'
 --Constant for the dropdown filter box LibFilters filter
 AF_CONST_BUTTON_FILTER      = "AF_ButtonFilter"
 AF_CONST_DROPDOWN_FILTER    = "AF_DropdownFilter"
@@ -818,6 +818,9 @@ local filterBarParentControlsToHide = {
     [LF_GUILDBANK_WITHDRAW]   = {
         GetControl(controlsForChecks.guildBank, searchDividerSuffix),
     },
+    [LF_GUILDSTORE_SELL]   = {
+        GetControl(controlsForChecks.guildStoreSellBackpack, searchDividerSuffix),
+    },
     --[[
     [LF_VENDOR_SELL]   = {
         GetControl(controlsForChecks.storeWindow, searchDividerSuffix),
@@ -1044,7 +1047,8 @@ local subfilterButtonNames = {
         "Neck", "Ring", AF_CONST_ALL,
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT] = {
-        "Potion", "Drink", "Food", AF_CONST_ALL,
+        "Trophy", "Repair", "Siege", "Scroll", "Potion", "Food", "Drink", "Crown",
+        AF_CONST_ALL,
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT] = {
         AF_CONST_ALL,
@@ -1069,16 +1073,42 @@ AF.collectibleDataKeyToSubFilterBars = {
 
     --Outfits
     [AF_QS_PREFIX.."13_3_0"] = {
-        "Costume", AF_CONST_ALL
+      "BodyMarking", "JewelryPiercing", "HeadMarking", "Facial", "Hair", "Hat", "Skin",
+      "Polymorph", "Personality", "Costume", AF_CONST_ALL
     }
 }
+--[[
+COLLECTIBLE_CATEGORY_TYPE_COSTUME = 4
+COLLECTIBLE_CATEGORY_TYPE_PERSONALITY = 9
+COLLECTIBLE_CATEGORY_TYPE_SKIN = 11
+COLLECTIBLE_CATEGORY_TYPE_HAT = 10
+COLLECTIBLE_CATEGORY_TYPE_POLYMORPH = 12
+COLLECTIBLE_CATEGORY_TYPE_HAIR = 13
+COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS = 14
+COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY = 15
+COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY = 16
+COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING = 17
+COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING = 18
+COLLECTIBLE_CATEGORY_TYPE_ABILITY_SKIN = 23
+COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE = 24
+]]
+
 --The categoryTypes of the collectibles in the subfilter bars. Used in function createAdditionalSubFilterGroups in file
 --main.lua to specify what the GetFilterCallbackForCollectibles function in data.lua should filter as categories at this
 --subfilterbar
 AF.collectibleDataKeyToCategoryTypes = {
     --Outfits
     [AF_QS_PREFIX.."13_3_0"] = {
-        ["Costume"] = {COLLECTIBLE_CATEGORY_TYPE_COSTUME},
+        ["BodyMarking"]         = {COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING},
+        ["JewelryPiercing"]     = {COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY},
+        ["HeadMarking"]         = {COLLECTIBLE_CATEGORY_TYPE_HEAD_MARKING},
+        ["Facial"]              = {COLLECTIBLE_CATEGORY_TYPE_FACIAL_HAIR_HORNS, COLLECTIBLE_CATEGORY_TYPE_FACIAL_ACCESSORY},
+        ["Hair"]                = {COLLECTIBLE_CATEGORY_TYPE_HAIR},
+        ["Hat"]                 = {COLLECTIBLE_CATEGORY_TYPE_HAT},
+        ["Skin"]                = {COLLECTIBLE_CATEGORY_TYPE_SKIN},
+        ["Polymorph"]           = {COLLECTIBLE_CATEGORY_TYPE_POLYMORPH},
+        ["Personality"]         = {COLLECTIBLE_CATEGORY_TYPE_PERSONALITY},
+        ["Costume"]             = {COLLECTIBLE_CATEGORY_TYPE_COSTUME},
     }
 }
 

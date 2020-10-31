@@ -42,5 +42,16 @@ local strings = {
     errorOtherAddonsMulticraft = afPrefixError .. "Ein anderes AddOn stört \'" .. afPrefixNormal .. "\' -> BITTE DEAKTIVIER DAS FOLGENDE AddOn: \'MultiCraft\'!",
     errorOtherAddonsMulticraftLong = "BITTE DEAKTIVIERE DAS ADDON \'MultiCraft\'! " .. afPrefixNormal .. " funktioniert nicht wenn dieses AddOn aktiviert ist. \'Multicraft\' wurde außerdem durch die ZOs eigene Multi-Craft Handwerks UI ersetzt und wird daher nicht mehr benötigt!"
 }
+--QuickSlots
+strings.BodyMarking = "Körper"
+strings.JewelryPiercing  = strings.Jewelry
+strings.HeadMarking = strings.Head
+strings.Facial = "Gesicht"
+strings.Hair = "Haar"
+strings.Hat = "Hut"
+strings.Skin = "Haut"
+strings.Polymorph = "Verwandlung"
+strings.Personality = "Persönlichkeit"
+
 setmetatable(strings, {__index = enStrings})
 AdvancedFilters.strings = strings

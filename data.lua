@@ -1656,18 +1656,53 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
-        Food = {
-            filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
-            dropdownCallbacks = {},
-        },
         Drink = {
             filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
+            dropdownCallbacks = {},
+        },
+        Food = {
+            filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
             dropdownCallbacks = {},
         },
         Potion = {
             filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
             dropdownCallbacks = {},
         },
+        Siege = {
+            filterCallback = GetFilterCallback({ITEMTYPE_SIEGE}),
+            dropdownCallbacks = {},
+        },
+        Scroll = {
+            filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL}),
+            dropdownCallbacks = {},
+        },
+        Repair = {
+            filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_GROUP_REPAIR}),
+            dropdownCallbacks = {},
+        },
+        Trophy = {
+            filterCallback = GetFilterCallbackForTrophy(),
+            dropdownCallbacks = {
+                {name = "KeyFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT})},
+                {name = "RecipeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT})},
+                {name = "Scroll", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL})},
+                {name = "TreasureMaps", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP})},
+                {name = "SurveyReport", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SURVEY_REPORT})},
+                {name = "CollectibleFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_COLLECTIBLE_FRAGMENT})},
+                {name = "Key", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY})},
+                {name = "MaterialUpgrader", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_MATERIAL_UPGRADER})},
+                {name = "RuneboxFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT})},
+                {name = "Toy", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TOY})},
+                {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
+                {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
+                {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
+            },
+        },
+        Crown = {
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            dropdownCallbacks = {},
+        },
+
     },
     QuickSlotQuest = {
         addonDropdownCallbacks = {},
