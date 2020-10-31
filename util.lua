@@ -1423,7 +1423,7 @@ end
 --Apply the LiFilters filter to the inventory now
 function util.ApplyFilter(button, filterTag, requestUpdate, filterType, inventoryTypeOfFilterBar)
     local debugSpam = AF.settings.debugSpam
-
+--AF._lastClickedSubFilterBarButton = button
     local currentInvType    = inventoryTypeOfFilterBar or AF.currentInventoryType
     if debugSpam then d("----->[AF]ApplyFilter for " .. tostring(filterTag) .. " for filterType " .. tostring(filterType) .. " and inventoryType " .. tostring(currentInvType) .. ", requestUpdate: " ..tostring(requestUpdate)) end
     local LibFilters        = util.LibFilters

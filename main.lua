@@ -514,7 +514,7 @@ local function InitializeHooks()
 
         local invType = currentInvType or AF.currentInventoryType
         local currentFilterToUse
-
+d(">invType: " ..tostring(invType) .. ", currentInvType: " ..tostring(currentInvType) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType))
         --Check for custom added inventory filter button
         --CraftBag
         if invType == INVENTORY_CRAFT_BAG then
@@ -526,13 +526,14 @@ local function InitializeHooks()
                 --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
                 local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-                --d(">currentCBFilter: " .. tostring(currentCBFilter))
+d(">currentCBFilter: " .. tostring(currentCBFilter))
                 if currentCBFilter == ITEMFILTERTYPE_ALL then
                     --The currentfilter reset, so we need to set it to the last known value again now
                     PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter = afCBCurrentFilter
                     currentFilter = afCBCurrentFilter
                 end
             end
+            currentFilterToUse = currentFilter
         elseif invType == LF_QUICKSLOT then
             --Quickslots
             --Get the currentFilter
@@ -543,7 +544,7 @@ local function InitializeHooks()
             currentFilterToUse = customInventoryFilterButtonsItemType or currentFilter
         end
         if craftingType == nil then craftingType = GetCraftingType() end
-        if AF.settings.debugSpam then d("[AF]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType)) end
+        if AF.settings.debugSpam then d("[AF]ShowSubfilterBar - currentFilter: " .. tostring(currentFilter) .. ", currentFilterToUse: " ..tostring(currentFilterToUse) .. ", craftingType: " .. tostring(craftingType) .. ", invType: " .. tostring(invType) .. ", customInventoryFilterButtonsItemType: " ..tostring(customInventoryFilterButtonsItemType)) end
         --[[
             --Guild store?
             if currentFilter == ITEMFILTERTYPE_TRADING_HOUSE then
@@ -1654,20 +1655,43 @@ end
 --Add dnymic entries to the subfilterGroups
 local function createAdditionalSubFilterGroups()
     --LF_QUICKSLOT
+    local collectibleDataKeyToSubFilterBars = AF.collectibleDataKeyToSubFilterBars
+    local collectibleDataKeyToCategoryTypes = AF.collectibleDataKeyToCategoryTypes
+
     --Add QuickSlot collectible categories subtables for subfilter button bars
     for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator() do
         if DoesCollectibleCategoryContainSlottableCollectibles(categoryIndex) then
             local collectibleDataKeyForAF = util.getAFQuickSlotCollectibleKey(categoryData)
             AF.subfilterGroups[LF_QUICKSLOT][CRAFTING_TYPE_INVALID][collectibleDataKeyForAF] = {}
-            AF.subfilterButtonNames[collectibleDataKeyForAF] = { AF_CONST_ALL }
+            AF.subfilterButtonNames[collectibleDataKeyForAF] = collectibleDataKeyToSubFilterBars[collectibleDataKeyForAF]
+            AF.subfilterButtonNames[collectibleDataKeyForAF] = AF.subfilterButtonNames[collectibleDataKeyForAF] or { AF_CONST_ALL }
             AF.filterTypeNames[collectibleDataKeyForAF] = collectibleDataKeyForAF
-            AF.subfilterCallbacks[collectibleDataKeyForAF] = {
-                addonDropdownCallbacks = {},
-                [AF_CONST_ALL] = {
-                    filterCallback     = AF.GetFilterCallback(nil),
-                    dropdownCallbacks   = {},
-                },
-            }
+            local subfilterButtonNamesForCollectibleData = AF.subfilterButtonNames[collectibleDataKeyForAF]
+            if #subfilterButtonNamesForCollectibleData > 1 then
+                AF.subfilterCallbacks[collectibleDataKeyForAF] = {
+                    addonDropdownCallbacks = {},
+                }
+                for _, subfilterButtonNameForCollectibleData in ipairs(subfilterButtonNamesForCollectibleData) do
+                    d(">>subfilterButtonNameForCollectibleData: " ..tostring(subfilterButtonNameForCollectibleData))
+                    local categoryTypes
+                    if subfilterButtonNameForCollectibleData ~= AF_CONST_ALL then
+                        categoryTypes = collectibleDataKeyToCategoryTypes[collectibleDataKeyForAF][subfilterButtonNameForCollectibleData]
+                        categoryTypes = categoryTypes or {}
+                    end
+                    AF.subfilterCallbacks[collectibleDataKeyForAF][subfilterButtonNameForCollectibleData] = {
+                        filterCallback      = AF.GetFilterCallbackForCollectibles(categoryTypes),
+                        dropdownCallbacks   = {},
+                    }
+                end
+            else
+                AF.subfilterCallbacks[collectibleDataKeyForAF] = {
+                    addonDropdownCallbacks = {},
+                    [AF_CONST_ALL] = {
+                        filterCallback      = AF.GetFilterCallbackForCollectibles(),
+                        dropdownCallbacks   = {},
+                    },
+                }
+            end
         end
     end
 end

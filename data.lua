@@ -34,6 +34,7 @@ end
 --inventory row and prepare the slot variable then properly for the filter functions
 local function checkCraftingStationSlot(slot, slotIndex)
     if util.prepareSlot and slotIndex ~= nil and type(slot) ~= "table" then
+        --Slot is the bagId!
         slot = util.prepareSlot(slot, slotIndex)
     end
     return slot
@@ -41,6 +42,7 @@ end
 AF.checkCraftingStationSlot = checkCraftingStationSlot
 
 --QuickSlot
+--[[
 local function AF_QS_FilterFunctionForQS_ShouldAddItemToSlot(itemData)
     local itemTypeFilter = QUICKSLOT_WINDOW.currentFilter.extraInfo and QUICKSLOT_WINDOW.currentFilter.extraInfo.AF_QSFilter_ItemTypes
     if itemTypeFilter then
@@ -51,6 +53,7 @@ local function AF_QS_FilterFunctionForQS_ShouldAddItemToSlot(itemData)
     end
     return true
 end
+]]
 
 local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
@@ -409,6 +412,33 @@ local function GetFilterCallbackForSpecializedItemtype(sSpecializedItemTypes, ch
     end
 end
 
+local function GetFilterCallbackForQuestItems()
+    return function(slot, slotIndex)
+        slot = checkCraftingStationSlot(slot, slotIndex)
+        local itemLink = util.GetItemLink(slot)
+        if not itemLink then return false end
+        return true
+    end
+end
+
+local function GetFilterCallbackForCollectibles(categoryTypes)
+d("GetFilterCallbackForCollectibles")
+AF._categoryTypes = categoryTypes
+    return function(slot, slotIndex)
+        if categoryTypes == nil then return true end
+        slot = checkCraftingStationSlot(slot, slotIndex)
+        --categoryType = COLLECTIBLE_CATEGORY_TYPE_COSTUME .e.g
+        local categoryType = slot and slot.categoryType
+d(">GetFilterCallbackForCollectibles, categoryType: " ..tostring(categoryType))
+        if not categoryType then return end
+        for _, categoryTypeToCompare in ipairs(categoryTypes) do
+            if categoryTypeToCompare == categoryType then return true end
+        end
+        return false
+    end
+end
+AF.GetFilterCallbackForCollectibles = GetFilterCallbackForCollectibles
+
 local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
@@ -436,22 +466,13 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
         return false
     end
 end
-AF.GetFilterCallback = GetFilterCallback
 
-local function GetFilterCallbackForQuestItems()
-    return function(slot, slotIndex)
-        slot = checkCraftingStationSlot(slot, slotIndex)
-        local itemLink = util.GetItemLink(slot)
-        if not itemLink then return false end
-        return true
-    end
-end
 
 --OTHER ADDONS CALLBACK functions
+--[[
 local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, checkOnlyJunk)
     return function(slot, slotIndex)
         return true
-        --[[
         if AF.settings.debugSpam then d("Other addons filter callback func") end
         if not itemFilterTypeOfTheOtherAddon then return end
         local invType = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
@@ -472,10 +493,9 @@ local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, che
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         --Return the original callback function result
         return origCallbackResult
-        ]]
     end
 end
-
+]]
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Subfilter callback setup table
@@ -1649,10 +1669,6 @@ local subfilterCallbacks = {
         },
         Potion = {
             filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
-            dropdownCallbacks = {},
-        },
-        Poison = {
-            filterCallback = GetFilterCallback({ITEMTYPE_POISON}),
             dropdownCallbacks = {},
         },
     },

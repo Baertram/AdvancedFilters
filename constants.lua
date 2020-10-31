@@ -1036,7 +1036,7 @@ local subfilterButtonNames = {
         "Neck", "Ring", AF_CONST_ALL,
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT] = {
-        "Poison", "Potion", "Drink", "Food", AF_CONST_ALL,
+        "Potion", "Drink", "Food", AF_CONST_ALL,
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT] = {
         AF_CONST_ALL,
@@ -1048,6 +1048,33 @@ local subfilterButtonNames = {
     }
     ]]
 }
+
+--Dynamic subfilterBar entries, e.g. quickslot -> the collectible subfilterBars. Used in function createAdditionalSubFilterGroups
+--in file main.lua
+AF.collectibleDataKeyToSubFilterBars = {
+    --[Quickslot, dynamically created collectibles subfilterBars]
+    --The ones not listed here with the key (see function util.getAFQuickSlotCollectibleKey(categoryData)) will just get
+    --1 subfilterBar with AF_CONST_ALL!
+    --
+    --All others will get the listed bars here. Be sure to also define the categoryTypes below in AF.collectibleDataKeyToCategoryTypes
+    --for the same key so they will filter the correct collectible cetegoyTypes!
+
+    --Outfits
+    [AF_QS_PREFIX.."13_3_0"] = {
+        "Costume", AF_CONST_ALL
+    }
+}
+--The categoryTypes of the collectibles in the subfilter bars. Used in function createAdditionalSubFilterGroups in file
+--main.lua to specify what the GetFilterCallbackForCollectibles function in data.lua should filter as categories at this
+--subfilterbar
+AF.collectibleDataKeyToCategoryTypes = {
+    --Outfits
+    [AF_QS_PREFIX.."13_3_0"] = {
+        ["Costume"] = {COLLECTIBLE_CATEGORY_TYPE_COSTUME},
+    }
+}
+
+
 --Exclude some of the buttons at an inventory type, craft type, and filter type?
 --If you add entries be sure to add the other ones, sharing the same AF.subfilterCallbacks[groupName][subfilterName]
 --as well!

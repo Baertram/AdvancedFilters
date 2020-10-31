@@ -178,6 +178,8 @@ local textures = {
 
     --Recall stones
     RecallStone = "/esoui/art/icons/rune_a.dds",
+
+    Costume     = "/esoui/art/characterwindow/gearslot_costume.dds",
 }
 
 --ALCHEMY
