@@ -181,7 +181,8 @@ function util.GetCurrentFilter(invType)
         currentFilter = craftingInv.currentFilter
     else
         --Get the player inventory for the inventory type
-        local playerInv = PLAYER_INVENTORY.inventories[invType]
+        local playerInvVar = controlsForChecks.playerInv
+        local playerInv = playerInvVar.inventories[invType]
         if not playerInv then return end
         --Get the currentFilter of the inventory
         currentFilter = playerInv.currentFilter
@@ -236,11 +237,12 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
         --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentFilter(invType, currentFilter)
         AF.controlsForChecks.quickslot.currentFilter = currentFilter
     else
-        if not PLAYER_INVENTORY.inventories[invType] then
+        local playerInvVar = controlsForChecks.playerInv
+        if not playerInvVar.inventories[invType] then
             if AF.settings.debugSpam then d("<<ABORT[AF]util.UpdateCurrentFilter - invType missing in PLAYER_INVENTORY.inventories!") end
             return false
         end
-        PLAYER_INVENTORY.inventories[invType].currentFilter = currentFilter
+        playerInvVar.inventories[invType].currentFilter = currentFilter
     end
 end
 
@@ -248,7 +250,8 @@ end
 function AF.util.GetActiveInventoryFilterBarButtonData(invType)
     if AF.settings.debugSpam then d("[AF]GetActiveInventoryFilterBarButtonData-invType: "..tostring(invType)) end
     if not invType then return end
-    local playerInv = PLAYER_INVENTORY.inventories[invType]
+    local playerInvVar = controlsForChecks.playerInv
+    local playerInv = playerInvVar.inventories[invType]
     if not playerInv then return end
     local filterBar = playerInv.filterBar
     if not filterBar then return end
@@ -767,8 +770,16 @@ function util.getInvItemCount(freeSlotType, isCraftingInvType)
     if invType == nil then return nil end
     isCraftingInvType = isCraftingInvType or util.IsCraftingStationInventoryType(invType)
     if not isCraftingInvType then
-        if PLAYER_INVENTORY.inventories[invType] == nil then return nil end
-        local invListViewData = PLAYER_INVENTORY.inventories[invType].listView.data
+        local invListViewData
+        if invType == LF_QUICKSLOT then
+            local quickslotVar = controlsForChecks.quickslot
+            if quickslotVar == nil then return nil end
+            invListViewData = quickslotVar.list.data
+        else
+            local playerInvVar = controlsForChecks.playerInv
+            if playerInvVar.inventories[invType] == nil then return nil end
+            invListViewData = playerInvVar.inventories[invType].listView.data
+        end
         if invListViewData then
             itemCount = #invListViewData
         end
@@ -792,9 +803,15 @@ function util.updateInventoryInfoBarCountLabel(invType, isCraftingInvType, isCal
     --Update the count of shown/filtered items in the inventory FreeSlots label
     if invType ~= nil then
         if not isCraftingInvType then
-            --Call the update function for the player inventories
-            if PLAYER_INVENTORY.inventories ~= nil and PLAYER_INVENTORY.inventories[invType] ~= nil then
-                PLAYER_INVENTORY:UpdateFreeSlots(invType)
+            if invType == LF_QUICKSLOT then
+                local quickslotVar = controlsForChecks.quickslot
+                ThrottledUpdate("RefreshItemCount_Quickslots", 50, quickslotVar.UpdateFreeSlots, quickslotVar)
+            else
+                local playerInvVar = controlsForChecks.playerInv
+                --Call the update function for the player inventories
+                if playerInvVar.inventories ~= nil and playerInvVar.inventories[invType] ~= nil then
+                    playerInvVar:UpdateFreeSlots(invType)
+                end
             end
         else
             --Call the update function for the crafting tables inventories now, see file "main.lua"
@@ -1310,6 +1327,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     --Check if filters apply to the subfilter and change the color of the subfilter button
     for _, button in ipairs(subfilterBar.subfilterButtons) do
         if AF.settings.debugSpam then d(">==============================>\nButtonName: " .. tostring(button.name)) end
+        local playerInvVar = controlsForChecks.playerInv
         if onlyEnableAllSubfilterBarButtons == true or not grayOutSubFiltersWithNoItems then
             doEnableSubFilterButtonAgain = true
         else
@@ -1329,7 +1347,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     for _, realInvType in pairs(realInvTypes) do
                         if breakInventorySlotsLoopNow then break end
                         breakInventorySlotsLoopNow = false
-                        inventory = PLAYER_INVENTORY.inventories[realInvType]
+                        inventory = playerInvVar.inventories[realInvType]
                         if inventory ~= nil and inventory.slots ~= nil then
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
                             if isNoCrafting then

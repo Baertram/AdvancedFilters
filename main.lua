@@ -1402,6 +1402,15 @@ local function InitializeHooks()
 
         function ZO_QuickslotManager:UpdateFreeSlots()
             if AF.settings.debugSpam then d("[AF]ZO_QuickslotManager:UpdateFreeSlots") end
+            --[[
+                local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+                if numUsedSlots < numSlots then
+                    self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots))
+                else
+                    self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
+                end
+            ]]
+
             local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
             local numFilteredAndShownItems = #self.list.data
             local freeSlotsShown = numFilteredAndShownItems or 0
