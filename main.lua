@@ -1675,7 +1675,7 @@ local function createAdditionalSubFilterGroups()
                     addonDropdownCallbacks = {},
                 }
                 for _, subfilterButtonNameForCollectibleData in ipairs(subfilterButtonNamesForCollectibleData) do
-                    d(">>subfilterButtonNameForCollectibleData: " ..tostring(subfilterButtonNameForCollectibleData))
+                    --d(">>subfilterButtonNameForCollectibleData: " ..tostring(subfilterButtonNameForCollectibleData))
                     local categoryTypes
                     if subfilterButtonNameForCollectibleData ~= AF_CONST_ALL then
                         categoryTypes = collectibleDataKeyToCategoryTypes[collectibleDataKeyForAF][subfilterButtonNameForCollectibleData]
