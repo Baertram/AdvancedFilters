@@ -64,6 +64,8 @@ function util.ThrottledUpdate(callbackName, timer, callback, ...)
     end
     local function Update()
         if AF.settings.debugSpam then d("--->[AF]ThrottledUpdate, callbackName: " ..tostring(callbackName)) end
+ --d("--->[AF]ThrottledUpdate, callbackName: " ..tostring(callbackName))
+
         EVENT_MANAGER:UnregisterForUpdate(callbackName)
         if args then
             callback(unpack(args))

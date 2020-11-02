@@ -1,6 +1,8 @@
 AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
-
+local firstOpened
+local firstOpenedIsBank = false
+local changeFilterCallsAfterFirstOpenWasBank = 0
 local vanillaUIChangesToSearchBarsWereDone = false
 AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 
@@ -34,8 +36,10 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#45: 2020-10-26: Bug, Baertram:
 --     Fix search box at quickslots
 
-
----==========================================================================================================================================================================
+--#50: 2020-10-31: Bug, Baertram:
+--     Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
+--
+--==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --  UPDATE INFORMATION: since AF 1.5.4.5 - Current 1.6.0.0
 --______________________________________________________________________________________________________________________
@@ -236,6 +240,7 @@ local function reanchorAndHideVanillaUIControls(baseControl)
     local tabsName = ZOsControlNames.tabs
     local tabs = GetControl(baseControl, tabsName)
     if tabs then
+--d(">Found tabs")
         local tabsActiveName = ZOsControlNames.active
         local tabsActive = GetControl(tabs, tabsActiveName)
         if tabsActive then
@@ -246,6 +251,7 @@ local function reanchorAndHideVanillaUIControls(baseControl)
     local searchFiltersName = ZOsControlNames.searchFilters
     local searchFilters = GetControl(baseControl, searchFiltersName)
     if searchFilters then
+--d(">Found searchFilters")
         local textSearchName = ZOsControlNames.textSearch
         local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
         if searchFiltersTextSearch then
@@ -361,8 +367,8 @@ local function InitializeHooks()
     --Their parents (e.g. the player inventory or the bank or the crafting smithing station) are defined in file constants.lua in table "filterBarParents"
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType)
         if AF.settings.debugSpam then d(">>-----------------------------------------------\n----------------------------------------------->>") end
-        --d(">>-----------------------------------------------\n---ShowSubfilterBar---------------->>")
-        --d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(craftingType) .. ", currentInvType: " ..tostring(currentInvType))
+--d(">>-----------------------------------------------\n---ShowSubfilterBar---------------->>")
+--d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(craftingType) .. ", customInventoryFilterButtonsItemType: " .. tostring(customInventoryFilterButtonsItemType) ..", currentInvType: " ..tostring(currentInvType))
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
@@ -740,12 +746,14 @@ local function InitializeHooks()
 --d("[AF]OnFragmentShowing - inventoryType: " ..tostring(inventoryType) .. ", invTypeOverride: " ..tostring(AF.currentInventoryTypeOverride))
             local doNormalChecks = true
             local inventoryControl
+            local inventoryTypeUpdated
             --Special treatment for qucisklots
             if p_fragment == QUICKSLOT_FRAGMENT and inventoryType == LF_QUICKSLOT then
                 doNormalChecks = false
                 AF.currentInventoryTypeOverride = nil
                 AF.currentInventoryType = LF_QUICKSLOT
                 inventoryControl = quickslotVar.container
+                inventoryTypeUpdated = LF_QUICKSLOT
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
             end
             if doNormalChecks == true then
@@ -778,8 +786,8 @@ local function InitializeHooks()
                 local currentInventoryTypeOverride = AF.currentInventoryTypeOverride
                 AF.currentInventoryType = currentInventoryTypeOverride
                 if AF.currentInventoryType == nil then AF.currentInventoryType = inventoryType end
---d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType))
-                local inventoryTypeUpdated = currentInventoryTypeOverride or inventoryType
+--d("!!!!!!!!!!!!!!!!!!!!AF.currentInvType = " ..tostring(AF.currentInventoryType) .. " / invType: " ..tostring(inventoryType).. "/override: " ..tostring(currentInventoryTypeOverride))
+                inventoryTypeUpdated = currentInventoryTypeOverride or inventoryType
                 AF.currentInventoryTypeOverride = nil
 
                 if inventoryType == INVENTORY_TYPE_VENDOR_BUY then
@@ -795,7 +803,7 @@ local function InitializeHooks()
                 else
                     -- fragmentType = "Inv"
                     local currentFilter = playerInvVar.inventories[inventoryTypeUpdated].currentFilter
-                    --d(">>>>>>>currentFilter: " ..tostring(currentFilter))
+--d(">>>>>>>currentFilter: " ..tostring(currentFilter) .. "; inventoryTypeUpdated: " ..tostring(inventoryTypeUpdated))
                     if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
                         --Ist the currentFilter the quest tab? Then change the currentInventory variable!
                         if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
@@ -821,6 +829,7 @@ local function InitializeHooks()
                     if customInventoryFilterButtonsItemType then
                         if AF.settings.debugSpam then d("[AF]ChangeFilterCrafting-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
                     end
+--d(">>>ThrottledUpdate -> ShowSubfilterBar_"..tostring(inventoryTypeUpdated))
                     ThrottledUpdate("ShowSubfilterBar_" .. inventoryTypeUpdated, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType)
 
                     inventoryControl = playerInvVar.inventories[inventoryTypeUpdated].filterBar:GetParent()
@@ -834,6 +843,21 @@ local function InitializeHooks()
             if inventoryControl then
                 reanchorAndHideVanillaUIControls(inventoryControl)
             end
+
+            --Was anything else opened before a bank was opened?
+            --Workaround to supress 2x Inventory ChangeFilter as the inventoryType detected would be the normal inv and
+            --not the bank -> error messages occur
+            if firstOpened == nil then
+--d(">>>>FirstOpened is set")
+                firstOpened = inventoryTypeUpdated
+                local bankInvTypes = AF.bankInvTypes
+                --Check if current inventory is a bank withdraw panel
+                local isBankInvType = bankInvTypes[inventoryTypeUpdated] or false
+                if isBankInvType then
+--d(">>>>>>FirstOpenedIsBank: true")
+                    firstOpenedIsBank = true
+                end
+            end
         end
 
         local function onFragmentShown(p_fragment)
@@ -842,6 +866,7 @@ local function InitializeHooks()
                 local filterType = util.GetCurrentFilterTypeForInventory(invType)
                 d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
             ]]
+--d("[AF]OnFragmentShown")
             --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
             util.HideInventoryControls(nil)
         end
@@ -958,6 +983,19 @@ local function InitializeHooks()
         AF.currentInventoryTypeOverride = nil
         --self: playerInvVar, filterTab: playerInvVar.filterTab
         local tabInvType = filterTab.inventoryType
+        --Was anything else opened before a bank was opened?
+        --if not: Supress 2x changefilter as it will be the normal inventory changefilter (Why ever this happens!) and not the Bank ones
+        if firstOpened ~= nil then
+            if firstOpenedIsBank == true then
+--d("<<ChangeFilterInventory aborted due to bank was first opened!")
+                changeFilterCallsAfterFirstOpenWasBank = changeFilterCallsAfterFirstOpenWasBank +1
+                if changeFilterCallsAfterFirstOpenWasBank <= 2 then
+                    return
+                else
+                    firstOpenedIsBank = false
+                end
+            end
+        end
         --Special treatment for the "quest" filtertab at the player inventory. The scene says it's inventorytype 1, but
         --the quest button changes it to 2. So the invtype was used from the INVENTORY_FRAGMENT hook before!
         -->Now as the quest tab is supported switch it to the normal tab's inventory again
@@ -995,6 +1033,7 @@ local function InitializeHooks()
         local shouldNotUpdateWithInventoryChangeFilterFunc = doNotUpdateInventoriesWithInventoryChangeFilterFunction[currentInvType] or false
         if not shouldNotUpdateWithInventoryChangeFilterFunc then
         ]]
+--d(">>ThrottledUpdate - ChangeFilterInventory, currentInvType: " ..tostring(currentInvType))
         ThrottledUpdate("ShowSubfilterBar_" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, currentInvType)
         --end
         --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added

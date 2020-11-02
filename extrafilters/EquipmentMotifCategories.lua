@@ -33,15 +33,15 @@ local strings = {
 local stringsDE = {
     ["MotifCategories"] = "Motiv Kategorien",
 }
-stringsDE = setmetatable(strings, {__index = strings})
+stringsDE = setmetatable(stringsDE, {__index = strings})
 local stringsES = {
     ["MotifCategories"] = "Diseños por categoría",
 }
-stringsES = setmetatable(strings, {__index = strings})
+stringsES = setmetatable(stringsES, {__index = strings})
 local stringsFR = {
     ["MotifCategories"] = "Catégories de motifs",
 }
-stringsFR = setmetatable(strings, {__index = strings})
+stringsFR = setmetatable(stringsFR, {__index = strings})
 
 local filterInformation = {
     submenuName = "MotifCategories",
