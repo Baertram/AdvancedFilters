@@ -14,7 +14,7 @@ function AF.loadLibraries(calledFromEventPlayerActivated)
     local libMissingString = strings.errorLibraryMissing
 
     --LibCommonInventoryFilters
-    util.libCIF = LibCIF
+    --util.libCIF = LibCIF
     ------------------------------------------------------------------------------------------------------------------------
     --LibFilters-3.0
     util.LibFilters = LibFilters3

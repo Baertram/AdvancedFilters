@@ -34,11 +34,26 @@ end
 --inventory row and prepare the slot variable then properly for the filter functions
 local function checkCraftingStationSlot(slot, slotIndex)
     if util.prepareSlot and slotIndex ~= nil and type(slot) ~= "table" then
+        --Slot is the bagId!
         slot = util.prepareSlot(slot, slotIndex)
     end
     return slot
 end
 AF.checkCraftingStationSlot = checkCraftingStationSlot
+
+--QuickSlot
+--[[
+local function AF_QS_FilterFunctionForQS_ShouldAddItemToSlot(itemData)
+    local itemTypeFilter = QUICKSLOT_WINDOW.currentFilter.extraInfo and QUICKSLOT_WINDOW.currentFilter.extraInfo.AF_QSFilter_ItemTypes
+    if itemTypeFilter then
+        local itemType = GetItemType(itemData.bagId, itemData.slotIndex)
+        if not itemTypeFilter[itemType] then
+            return false
+        end
+    end
+    return true
+end
+]]
 
 local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
@@ -187,13 +202,14 @@ local function GetFilterCallbackForStolen(checkOnlyJunk)
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
         if IsItemLinkStolen(itemLink) then
-d("[AF]GetFilterCallbackForStolen: " ..itemLink)
+--d("[AF]GetFilterCallbackForStolen: " ..itemLink)
             return true
         end
         return false
     end
 end
 
+--[[
 local function GetFilterCallbackForProvisioningIngredient(ingredientType)
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
@@ -329,6 +345,7 @@ local function GetFilterCallbackForProvisioningIngredient(ingredientType)
         return false
     end
 end
+]]
 
 local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
@@ -395,6 +412,30 @@ local function GetFilterCallbackForSpecializedItemtype(sSpecializedItemTypes, ch
     end
 end
 
+local function GetFilterCallbackForQuestItems()
+    return function(slot, slotIndex)
+        slot = checkCraftingStationSlot(slot, slotIndex)
+        local itemLink = util.GetItemLink(slot)
+        if not itemLink then return false end
+        return true
+    end
+end
+
+local function GetFilterCallbackForCollectibles(categoryTypes)
+    return function(slot, slotIndex)
+        if categoryTypes == nil then return true end
+        slot = checkCraftingStationSlot(slot, slotIndex)
+        --categoryType = COLLECTIBLE_CATEGORY_TYPE_COSTUME .e.g
+        local categoryType = slot and slot.categoryType
+        if not categoryType then return end
+        for _, categoryTypeToCompare in ipairs(categoryTypes) do
+            if categoryTypeToCompare == categoryType then return true end
+        end
+        return false
+    end
+end
+AF.GetFilterCallbackForCollectibles = GetFilterCallbackForCollectibles
+
 local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
@@ -423,11 +464,12 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds)
     end
 end
 
+
 --OTHER ADDONS CALLBACK functions
+--[[
 local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, checkOnlyJunk)
     return function(slot, slotIndex)
         return true
-        --[[
         if AF.settings.debugSpam then d("Other addons filter callback func") end
         if not itemFilterTypeOfTheOtherAddon then return end
         local invType = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
@@ -448,10 +490,9 @@ local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, che
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         --Return the original callback function result
         return origCallbackResult
-        ]]
     end
 end
-
+]]
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Subfilter callback setup table
@@ -772,9 +813,20 @@ local subfilterCallbacks = {
         Provisioning = {
             filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}),
             dropdownCallbacks = {
-                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Food")},
-                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Drink")},
-                {name = "OldIngredient", showIcon=true, filterCallback = GetFilterCallbackForProvisioningIngredient("Old")},
+                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
+                    }),
+                },
+                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
+                        SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
+                    })
+                },
                 {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_INGREDIENT_RARE})},
             },
         },
@@ -921,6 +973,14 @@ local subfilterCallbacks = {
                 {name = "Disguise", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DISGUISE})},
                 {name = "Tabard", showIcon=true,   filterCallback = GetFilterCallback({ITEMTYPE_TABARD})},
             },
+        },
+    },
+    --Quest
+    Quest = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallbackForQuestItems(nil),
+            dropdownCallbacks = {},
         },
     },
 --=============================================================================================================================================================================================
@@ -1379,15 +1439,21 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
         FoodIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Food"),
+            filterCallback = GetFilterCallbackForSpecializedItemtype({
+                SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
+            }),
             dropdownCallbacks = {},
         },
         DrinkIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Drink"),
-            dropdownCallbacks = {},
-        },
-        OldIngredient = {
-            filterCallback = GetFilterCallbackForProvisioningIngredient("Old"),
+            filterCallback = GetFilterCallbackForSpecializedItemtype({
+                SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
+                SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
+            }),
             dropdownCallbacks = {},
         },
         RareIngredient = {
@@ -1579,6 +1645,76 @@ local subfilterCallbacks = {
 --=============================================================================================================================================================================================
 -- -^- Retrait                                                                                                       -^-
 --=============================================================================================================================================================================================
+
+--=============================================================================================================================================================================================
+-- -v- QuickSlot                                                                                                     -v-
+--=============================================================================================================================================================================================
+    --QuickSlot - Misc.
+    QuickSlot = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+        Drink = {
+            filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
+            dropdownCallbacks = {},
+        },
+        Food = {
+            filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
+            dropdownCallbacks = {},
+        },
+        Potion = {
+            filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
+            dropdownCallbacks = {},
+        },
+        Siege = {
+            filterCallback = GetFilterCallback({ITEMTYPE_SIEGE}),
+            dropdownCallbacks = {},
+        },
+        Scroll = {
+            filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL}),
+            dropdownCallbacks = {},
+        },
+        Repair = {
+            filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_GROUP_REPAIR}),
+            dropdownCallbacks = {},
+        },
+        Trophy = {
+            filterCallback = GetFilterCallbackForTrophy(),
+            dropdownCallbacks = {
+                {name = "KeyFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT})},
+                {name = "RecipeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RECIPE_FRAGMENT})},
+                {name = "Scroll", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL})},
+                {name = "TreasureMaps", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP})},
+                {name = "SurveyReport", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SURVEY_REPORT})},
+                {name = "CollectibleFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_COLLECTIBLE_FRAGMENT})},
+                {name = "Key", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_KEY})},
+                {name = "MaterialUpgrader", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_MATERIAL_UPGRADER})},
+                {name = "RuneboxFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_RUNEBOX_FRAGMENT})},
+                {name = "Toy", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_TOY})},
+                {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
+                {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
+                {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
+            },
+        },
+        Crown = {
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            dropdownCallbacks = {},
+        },
+
+    },
+    QuickSlotQuest = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {},
+        },
+    },
+--=============================================================================================================================================================================================
+-- -^- QuickSlot                                                                                                     -^-
+--=============================================================================================================================================================================================
+
 
 --=============================================================================================================================================================================================
 --Not added yet
@@ -1831,6 +1967,7 @@ local subfilterCallbacks = {
 --Clones of subfilterCallbacks
 subfilterCallbacks.JewelryCraftingStation   = subfilterCallbacks.Jewelry
 subfilterCallbacks.JewelryRetrait           = subfilterCallbacks.Jewelry
+
 --Global variable
 AF.subfilterCallbacks = subfilterCallbacks
 
@@ -1845,8 +1982,9 @@ AF.SubfilterRefreshCallbacks = {}
 ------------------------------------------------------------------------------------------------------------------------
 -- Global addon/plugin API functions
 ---------------------------------------------------------------------------------------------------------------------------
-local function BuildAddonInformation(filterInformation)
+local function BuildAddonInformation(filterInformation, pluginName)
     if filterInformation == nil then return nil end
+    pluginName = pluginName or filterInformation.submenuName or "n/a"
     local addonInformation = {
         submenuName         = filterInformation.submenuName,
         callbackTable       = filterInformation.callbackTable,
@@ -1855,9 +1993,16 @@ local function BuildAddonInformation(filterInformation)
         generator           = filterInformation.generator,
         excludeFilterPanels = filterInformation.excludeFilterPanels,
         onlyGroups          = filterInformation.onlyGroups,
+        excludeGroups       = filterInformation.excludeGroups,
     }
-    --Check the onlyGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
+    --Error if both group parameters are given: "exclude" and "only"
     local onlyGroups = filterInformation.onlyGroups
+    local excludeGroups = filterInformation.excludeGroups
+    if onlyGroups ~= nil and excludeGroups ~= nil then
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-Parameters \'onlyGroups\' and \'excludeGroups\' cannot be used together. Please specify only 1 of them!")
+        return
+    end
+    --Check the onlyGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
     if onlyGroups ~= nil and #onlyGroups > 0 then
         local n2c = normalFilter2CraftingFilter
         local nfNames = normalFilterNames
@@ -1876,12 +2021,42 @@ local function BuildAddonInformation(filterInformation)
                 end
             end
         end
+    --Check the excludeGroups table for entries like Armor or Weapons and split them up into the normal armor + crafting armor filters (same for weapons)
+    elseif excludeGroups ~= nil and #excludeGroups > 0 then
+        local n2c = normalFilter2CraftingFilter
+        local nfNames = normalFilterNames
+        local aiExcludeGroups = addonInformation.excludeGroups
+        if n2c ~= nil and nfNames ~= nil then
+            for idx, filterPanelName in pairs(excludeGroups) do
+                if nfNames[filterPanelName] then
+                    local n2cByName = n2c[filterPanelName]
+                    if n2cByName ~= nil then
+                        for craftingFilterName, value in pairs(n2cByName) do
+                            if value == true and craftingFilterName ~= nil and craftingFilterName ~= "" then
+                                table.insert(aiExcludeGroups, craftingFilterName)
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
     return addonInformation
 end
 
-function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName)
+function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName, filterTypeWasMappedToNewFilterTypeCategory)
     if filterInformation == nil then return false end
+    filterTypeWasMappedToNewFilterTypeCategory = filterTypeWasMappedToNewFilterTypeCategory or false
+    if not filterTypeWasMappedToNewFilterTypeCategory then
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        --Added with ESO PTS API100033 Markarth
+        --TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+        --TODO: filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
+        --TODO: properly and the dropdown filters won't be registered to the correct bars!
+        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        filterInformation.filterType = itemFilterCategory
+--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    end
     groupName = groupName or filterTypeToGroupName[filterInformation.filterType] or nil
     if groupName == nil then
         return
@@ -1925,38 +2100,45 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
 end
 
 function AdvancedFilters_RegisterFilter(filterInformationTable)
---local pluginName = filterInformationTable.callbackTable[1].name or filterInformationTable.submenuName
---zo_callLater(function() d("AdvancedFilters_RegisterFilter: " .. tostring(pluginName)) end, 3000)
+    local pluginName = filterInformationTable.submenuName or (filterInformationTable.callbackTable and filterInformationTable.callbackTable[1] and filterInformationTable.callbackTable[1].name)
     --make sure all necessary information is present
     if filterInformationTable == nil then
-        d("[AdvancedFilters_RegisterFilter]No filter information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No filter information provided. Filter not registered.")
         return
     end
     if filterInformationTable.callbackTable == nil and filterInformationTable.generator == nil then
-        d("[AdvancedFilters_RegisterFilter]No callback information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No callback information provided. Filter not registered.")
         return
     end
     if filterInformationTable.subfilters == nil then
-        d("[AdvancedFilters_RegisterFilter]No subfilter type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No subfilter type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterType == nil then
-        d("[AdvancedFilters_RegisterFilter]No base filter type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No base filter type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.enStrings == nil and filterInformationTable.generator == nil then
-        d("[AdvancedFilters_RegisterFilter]No English strings provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No English strings provided. Filter not registered.")
         return
     end
 
     --Parse the filterInformation now and add the plugin data to the dropdown filters
     local function parseFilterInformation(filterInformation)
         --get filter information from the calling addon and insert it into our callback table
-        local addonInformation = BuildAddonInformation(filterInformation)
+        local addonInformation = BuildAddonInformation(filterInformation, pluginName)
 --        local filterTypeToGroupName = AF.filterTypeNames
+-->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+--Added with ESO PTS API100033 Markarth
+--TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+--TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+--TODO: properly and the dropdown filters won't be registered to the correct bars!
+        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        filterInformation.filterType = itemFilterCategory
+--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         local groupName = filterTypeToGroupName[filterInformation.filterType] or nil
         if groupName == nil then
-            d("[AdvancedFilters_RegisterFilter]Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
+            d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-Given \"filterType\" " .. tostring(filterInformation.filterType) .. " in the plugin's filterInformation is not known within the addon.\nPlease see file \"constants.lua\", table \"filterTypeNames\" for valid filterTypes!\nFilter not registered.")
             return
         else
             if subfilterCallbacks[groupName] == nil or subfilterCallbacks[groupName].addonDropdownCallbacks == nil then return end
@@ -1964,7 +2146,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
 
         --Check if the same addon information is already in the callback tables for the filterType
         --and remove the old one, before adding the same/newer one again
-        AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName)
+        AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName, true)
 
         --insert addon information
         table.insert(subfilterCallbacks[groupName].addonDropdownCallbacks, addonInformation)
@@ -2011,30 +2193,31 @@ end
 --changes filters as well (e.g. FCOCraftFilter will filter by the bagId to hide/only show bank items at crafting tables)
 --> See function AF.util.RefreshSubfilterBar -> calling function AF.util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters
 function AdvancedFilters_RegisterSubfilterbarRefreshFilter(filterInformationTable)
+    local pluginName = filterInformationTable.filterName
 --d("[AF]AdvancedFilters_RegisterSubfilterbarRefreshFilter " .. tostring(filterInformationTable.filterName))
     --make sure all necessary information is present
     if filterInformationTable == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No filter information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No filter information provided. Filter not registered.")
         return
     end
     if filterInformationTable.inventoryType == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No inventory type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No inventory type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.craftingType == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No crafting type information provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No crafting type information provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterPanelId == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No libFilters-2.0 panel Id (LF_ ...) provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No libFilters-3.0 panel Id (LF_ ...) provided. Filter not registered.")
         return
     end
     if filterInformationTable.filterName == nil then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No unique filter name provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No unique filter name provided. Filter not registered.")
         return
     end
     if filterInformationTable.callbackFunction == nil or type(filterInformationTable.callbackFunction) ~= "function" then
-        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]No callback function provided. Filter not registered.")
+        d("[AdvancedFilters_RegisterSubfilterbarRefreshFilter]Plugin: \'"..tostring(pluginName).."\'-No callback function provided. Filter not registered.")
         return
     end
     --Register the filter callback function for each inventory type + each crafting type at the inventory type:

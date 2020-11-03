@@ -221,6 +221,17 @@ local strings = {
 
 strings.Vanity = strings.Disguise
 
+--QuickSlots
+strings.BodyMarking = "Body"
+strings.JewelryPiercing  = strings.Jewelry
+strings.HeadMarking = strings.Head
+strings.Facial = "Facial"
+strings.Hair = "Hair"
+strings.Hat = "Hat"
+strings.Skin = "Skin"
+strings.Polymorph = "Polymorph"
+strings.Personality = "Personality"
+
 local light = " (" .. util.Localize(SI_ARMORTYPE1) .. ")"
 local medium = " (" .. util.Localize(SI_ARMORTYPE2) .. ")"
 strings.Head_Light = strings.Head .. light

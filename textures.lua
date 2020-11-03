@@ -178,6 +178,18 @@ local textures = {
 
     --Recall stones
     RecallStone = "/esoui/art/icons/rune_a.dds",
+
+    --TODO
+    Costume         = "AdvancedFilters/assets/apparel/clothing_%s.dds",
+    BodyMarking     = "AdvancedFilters/assets/collectibles/body_%s.dds",
+    JewelryPiercing = "AdvancedFilters/assets/apparel/jewelry_%s.dds",
+    HeadMarking     = "EsoUI/Art/TradingHouse/Tradinghouse_Apparel_Head_%s.dds",
+    Facial          = "AdvancedFilters/assets/apparel/vanity_%s.dds",
+    Hair            = "/esoui/art/icons/justice_stolen_hair_001.dds", --TODO
+    Hat             = "AdvancedFilters/assets/collectibles/hat_%s.dds",
+    Skin            = "/esoui/art/icons/skin_infernaceepidermis.dds", --TODO
+    Polymorph       = "/esoui/art/icons/container_sealed_polymorph_001.dds", --TODO
+    Personality     = "/esoui/art/emotes/emotes_indexicon_personality_%s.dds",
 }
 
 --ALCHEMY
