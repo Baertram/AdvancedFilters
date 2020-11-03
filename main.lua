@@ -11,7 +11,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2020-10-31
---Max todos: #50
+--Max todos: #51
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -41,7 +41,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.5.4.5 - Current 1.6.0.0
+--  UPDATE INFORMATION: since AF 1.6.0.0 - Current 1.6.0.1 - Changed 2020-11-03
 --______________________________________________________________________________________________________________________
 
 
@@ -63,29 +63,13 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
+--Icons for quickslot collectibles were added
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#34 Make AF compatible with ZOs PTS 100033 changes: Inventory filters were added to the vanilla UI.
---    Unfortunately Vendor Buy is currently not supported as ZOs did not change the menu bar buttons to use their new
---    constants yet, and the valus would not fit in the exisitng AF tables (would overwrite given ones of the normal
---    inventories). Building 2 tables and using them would be too much effort and error causing, so this is disabled
---    until ZOs updates the vendor buy panelt o their new constants as well.
---#35 Support the crafting table filters again and reanchor the needed controls
---#36 The subfilter bar buttons get disabled even if there are items in the subfilter's ALL tab
---#38 Bank withdraw filters are not working, always shows all items
---#37 Enchanting panel, create: Move the "Quests only" checkbox up
---#39 At crafting panels: Use checkbox "Include banked items" will not update the currently filtered counters
---#40 Quest inventory rows are hidden after opening the junk filter and going back to quests
---#41 CraftBag -> Provisioner: subfilter buttons of materials (food, drink, none) are disabled even if items are given + changed the filters from old itemIds to specialized_item_types
---#42 Switching from CraftBag/Mail/Player trade to inventory/the other way around (where the quest tab was the last active one) will show the quest subfilterbar / not show the quest subfilterbar
---#43 (Guild)Bank panel: Deposit panel, if opened after last inventory filter was the "quest" button, will throw an error as there is no quest filter at banks
---#44 Inverting the dropdown filters sometimes left the normal filters in the dropdown boxes unfunctional behind
---#46 Dropdown filter callback functions working at quickslot's collectible category buttons (e.g. helpers, animals, etc.)
---#47 Fix searchDivider line control showing if you directly open the mail/player2player trade panel before opening the normal inventory before
---#48 Fix subfilter bars at guild shop "sell" with and w/o LibCommonInventoryFilters (e.g. AwesomeGuildStore)
---#49 Fixed trading house sell panel trying to open a quest subfilterBar if the last active inventory bar was quests and AwesomeGuildStore is active and setup to automatically open the sell tab at the trading house
+-- #51 Votans Search Box support was re-added
+
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -258,12 +242,11 @@ local function reanchorAndHideVanillaUIControls(baseControl)
             searchFiltersTextSearch:ClearAnchors()
             searchFiltersTextSearch:SetParent(baseControl)
             searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 10)
-            searchFiltersTextSearch:SetDimensions(150, 25)
-            searchFiltersTextSearch:SetAlpha(0.45)
-            searchFiltersTextSearch:SetHidden(false)
+            if not VotanSearchBox_SavedVariables then
+                searchFiltersTextSearch:SetDimensions(150, 25)
+                searchFiltersTextSearch:SetAlpha(0.45)
+            end
         end
-
-        --searchFilters dürfen nicht versteckt werden, da die TextSearch daran hängt
         searchFilters:SetHidden(true)
         local subTabsName = ZOsControlNames.subTabs
         local searchFiltersSubTabs = GetControl(searchFilters, subTabsName)
