@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.1"
+AF.version = "1.6.0.2"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -342,7 +342,24 @@ AF.normalFilter2CraftingFilter = normalFilter2CraftingFilter
 --SUBFILTER BARS
 --The list controls for the reanchoring of subfilter bars
 local reanchorDataSmithingResearch = {
-    --The timer icon at the top left edge at the SMITHING reasearch panel
+    {
+        --The research line list in total was anchored to the include banked checkbox
+        control         = ZO_SmithingTopLevelResearchPanelResearchLineList,
+        anchorPoint     = TOP,
+        relativeTo      = ZO_SmithingTopLevelResearchPanelButtonDivider,
+        relativePoint   = BOTTOM,
+        offsetX         = 0,
+        offsetY         = 45,--subFilter bar height + 5 space
+    },
+    {
+        --The research line list in total was anchored to the include banked checkbox
+        control         = ZO_SmithingTopLevelResearchPanelResearchLineListList,
+        anchorPoint     = TOP,
+        relativeTo      = ZO_SmithingTopLevelResearchPanelResearchLineList,
+        relativePoint   = TOP,
+        offsetX         = 0,
+        offsetY         = 30,
+    },
     {
         --The researching text at the top left edge at the SMITHING reasearch panel
         control         = ZO_SmithingTopLevelResearchPanelNumResearching,
@@ -864,14 +881,15 @@ local layoutDataFragments = {
 AF.layoutDataFragments = layoutDataFragments
 
 --The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
---2020-09-24: https://github.com/esoui/esoui/blob/c47af79c7c51681ae315d4f9a6d70d9e965ad514/esoui/ingame/inventory/backpacklayouts.lua#L6
-local AF_defaultInventoryBackpackLayoutData = {
+--for some of the panels, e.g. ENCHANTING
+--2020-11-23:
+local AF_modifiedInventoryBackpackLayoutData = {
     --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-    width = 565,
-    backpackOffsetY = 96,
+    --width = 565,
+    backpackOffsetY = 96, --original is 136 in BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
     --inventoryTopOffsetY = -20,
     --inventoryBottomOffsetY = -30,
-    sortByOffsetY = 102,
+    --sortByOffsetY = 0,
     --emptyLabelOffsetY = 100,
     --sortByHeaderWidth = 576,
     --sortByNameWidth = 241,
@@ -881,7 +899,7 @@ local AF_defaultInventoryBackpackLayoutData = {
 local AF_smithingResearchLayoutData = {
     --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
     --width = 565,
-    backpackOffsetY = 0,
+    --backpackOffsetY = 0,
     --inventoryTopOffsetY = -20,
     --inventoryBottomOffsetY = -30,
     --sortByOffsetY = 0,
@@ -892,19 +910,13 @@ local AF_smithingResearchLayoutData = {
     --hideCurrencyInfo = false,
 }
 local filterBarCraftingInventoryLayoutData = {
-    [LF_SMITHING_REFINE]        = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_DECONSTRUCT]   = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_IMPROVEMENT]   = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_RESEARCH]      = AF_smithingResearchLayoutData,
-    [LF_JEWELRY_REFINE]         = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_DECONSTRUCT]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_IMPROVEMENT]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_RESEARCH]       = AF_smithingResearchLayoutData,
-    [LF_ENCHANTING_CREATION]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_ENCHANTING_EXTRACTION]  = AF_defaultInventoryBackpackLayoutData,
-    [LF_RETRAIT]                = AF_defaultInventoryBackpackLayoutData,
+    [LF_ENCHANTING_CREATION]    = AF_modifiedInventoryBackpackLayoutData,
+    [LF_ENCHANTING_EXTRACTION]  = AF_modifiedInventoryBackpackLayoutData,
+    [LF_SMITHING_REFINE]        = AF_modifiedInventoryBackpackLayoutData,
+    [LF_JEWELRY_REFINE]         = AF_modifiedInventoryBackpackLayoutData,
+    --[LF_SMITHING_RESEARCH]      = AF_smithingResearchLayoutData,
+    --[LF_JEWELRY_RESEARCH]       = AF_smithingResearchLayoutData,
 }
-AF.defaultInventoryBackpackLayoutData = AF_defaultInventoryBackpackLayoutData
 AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
 
 --SUBFILTER BAR BUTTONS

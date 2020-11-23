@@ -125,7 +125,7 @@ local UpdateCurrentFilter                   = util.UpdateCurrentFilter
 local GetInventoryFromCraftingPanel         = util.GetInventoryFromCraftingPanel
 local IsCraftingStationInventoryType        = util.IsCraftingStationInventoryType
 local IsCraftingPanelShown                  = util.IsCraftingPanelShown
-local mapCurrentFilterItemFilterCategoryToItemFilterType = util.mapCurrentFilterItemFilterCategoryToItemFilterType
+--local mapCurrentFilterItemFilterCategoryToItemFilterType = util.mapCurrentFilterItemFilterCategoryToItemFilterType
 
 local function delayedCall(delay, functionToCall, params)
     if functionToCall then
@@ -222,6 +222,13 @@ local function reanchorAndHideVanillaUIControls(baseControl)
     if not baseControl then return end
     local ZOsControlNames = AF.ZOsControlNames
     local tabsName = ZOsControlNames.tabs
+    local searchDividerName = ZOsControlNames.searchDivider
+    --SearchDivider
+    local searchDivider = GetControl(baseControl, searchDividerName)
+    if searchDivider then
+        searchDivider:SetHidden(true)
+    end
+    --Tabs
     local tabs = GetControl(baseControl, tabsName)
     if tabs then
 --d(">Found tabs")
@@ -232,10 +239,12 @@ local function reanchorAndHideVanillaUIControls(baseControl)
             tabsActive:SetHidden(true)
         end
     end
+    --Search filters
     local searchFiltersName = ZOsControlNames.searchFilters
     local searchFilters = GetControl(baseControl, searchFiltersName)
     if searchFilters then
 --d(">Found searchFilters")
+        --Text search box
         local textSearchName = ZOsControlNames.textSearch
         local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
         if searchFiltersTextSearch then
@@ -248,6 +257,7 @@ local function reanchorAndHideVanillaUIControls(baseControl)
             end
         end
         searchFilters:SetHidden(true)
+        --Search filters sub tab buttons
         local subTabsName = ZOsControlNames.subTabs
         local searchFiltersSubTabs = GetControl(searchFilters, subTabsName)
         if searchFiltersSubTabs then
@@ -265,6 +275,13 @@ local function InitializeHooks()
     AF.currentInventoryCurrentFilter = 0
 
     AF.blockOnInventoryFilterChangedPreHookForCraftBag = false
+
+    --Workaround for the "last opened filter" at the inventories so that closing the inv will not clear the last selected filter
+    --Thanks to code65536! for the idea
+    ZO_BackpackLayoutFragment.Hide = function(self)
+        --PLAYER_INVENTORY:ApplyBackpackLayout(DEFAULT_BACKPACK_LAYOUT_DATA) -> This will reset the last selected filter
+        self:OnHidden()
+    end
 
     --TABLE TRACKER
     --[[
@@ -349,7 +366,7 @@ local function InitializeHooks()
     --The filter contents and their callback functions (see top of file data.lua) for each content of the subfilter bar are defined in file data.lua in the table "AF.subfilterCallbacks"
     --Their parents (e.g. the player inventory or the bank or the crafting smithing station) are defined in file constants.lua in table "filterBarParents"
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType)
-        if AF.settings.debugSpam then d(">>-----------------------------------------------\n----------------------------------------------->>") end
+        if AF.settings.debugSpam then d(">>----- SHOW SUBFILTER BAR -----\n----------------------------------------------->>") end
 --d(">>-----------------------------------------------\n---ShowSubfilterBar---------------->>")
 --d(">currentFilter: " ..tostring(currentFilter) .. ", craftingType: " ..tostring(craftingType) .. ", customInventoryFilterButtonsItemType: " .. tostring(customInventoryFilterButtonsItemType) ..", currentInvType: " ..tostring(currentInvType))
         ----------------------------------------------------------------------------------------------------------------
@@ -357,6 +374,7 @@ local function InitializeHooks()
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
+--d("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[")
 --d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
@@ -365,16 +383,29 @@ local function InitializeHooks()
             local isGuildStoreSell = (self == playerInvVar and TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL) or false
 
             --Check if the current layoutData (offsets of controls in the inventory) is given
-            local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
-            if layoutData == nil or  isGuildStoreSell == true then
+            --local layoutData = (p_isCraftingInventoryType == true and util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)) or self.appliedLayout
+            local layoutData = self.appliedLayout
+            if layoutData == nil or isGuildStoreSell == true then
+                --Check if the layoutData or any offsets for the list are stored in AF internal constants
 --d(">layoutData was taken from default AF BACKPACK LAYOUT!, isGuildStoreSell: " ..tostring(isGuildStoreSell))
                 --Standard inv layout
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
+                local additionalLayoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
+                if additionalLayoutData ~= nil then
+                    for key,value in pairs(additionalLayoutData) do
+                        layoutData[key] = value
+                    end
+--d(">>Overwrote some layoutData settings with additional layoutdata")
+                end
             end
 --d(">>invTypeUpdateListAnchor: " ..tostring(invTypeUpdateListAnchor) .. "-layoutData.backpackOffsetY: " ..tostring(layoutData.backpackOffsetY) .. ", sortByOffsetY: " ..tostring(layoutData.sortByOffsetY) .. ", width: " .. tostring(layoutData.width))
             if not layoutData then
                 return
             end
+
+            --For debugging
+            AF.currentayoutData = layoutData
+
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
                 list = self.inventories[invTypeUpdateListAnchor].listView
@@ -424,6 +455,11 @@ local function InitializeHooks()
                 ZO_ScrollList_SetHeight(list, list:GetHeight())
             end
 
+            --For debugging
+            if list then
+                AF.currentList = list
+            end
+
             --Additional controls to reanchor?
             --Get the Smithing research line horizontal scroll list, and other controls below, and reanchor it e.g.
             local _, _, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
@@ -467,6 +503,7 @@ local function InitializeHooks()
             --Should some inventory controls be hidden?
             -->Called in the fragment callback function for OnShow!
             --util.HideInventoryControls(invTypeUpdateListAnchor)
+--d("]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]")
         end
         ----------------------------------------------------------------------------------------------------------------
         --ReAnchor other controls so that the subfilter bar will be shown properly
@@ -665,6 +702,11 @@ local function InitializeHooks()
             if AF.settings.debugSpam then d(">subfilterBar exists, name: " .. tostring(subfilterBar.control:GetName()) .. ",  inventoryType: " ..tostring(subfilterBar.inventoryType)) end
             --Update the currentFilter to the current inventory
             UpdateCurrentFilter(subfilterBar.inventoryType, currentFilter, isCraftingInventoryType, craftingInv, currentFilterToUse)
+
+            --For debugging
+            AF.currentSubfilterBar = subfilterBar
+
+--d(">>>subfilterBar.inventoryType: " ..tostring(subfilterBar.inventoryType))
             --activate current subfilter bar's button -> Will also update the filter dropdown box!
             subfilterBar:ActivateButton(subfilterBar:GetCurrentButton())
             --show the new subfilter bar
@@ -688,6 +730,7 @@ local function InitializeHooks()
                     craftingInv = GetInventoryFromCraftingPanel(invType)
                 end
             end
+            if AF.settings.debugSpam then d(">>New subfilterBar was NOT found, isCraftingPanel: " ..tostring(IsCraftingPanelShown())) end
             --Update the currentfilter to the inventory so it will be the correct one (e.g. if you change after this "return false" below to the CraftBag and back to the inventory,
             --the currentFilter will be the wrong one from before, and thus the subfilterbar of the before filter wil be shown at this currentFilter).
             --Update the currentFilter to the current inventory
@@ -822,8 +865,11 @@ local function InitializeHooks()
             if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
             PLAYER_INVENTORY.isListDirty = track(playerInvVar.isListDirty)
 
-            --Hide and move some controls
             if inventoryControl then
+                --For debugging
+                AF.currentInventoryControl = inventoryControl
+
+                --Hide and move some controls like subfilter bar divider lines etc.
                 reanchorAndHideVanillaUIControls(inventoryControl)
             end
 

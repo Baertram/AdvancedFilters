@@ -37,7 +37,10 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     local settings = AF.settings
     if settings.debugSpam then d("=============================================\n[AF]AF_FilterBarInitialize - inventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames)) end
     --get upper anchor position for subfilter bar
-    local _,_,_,_,_,offsetY = ZO_PlayerInventorySortBy:GetAnchor()
+    --Fix for patch 6.2.7 2020-11-23 ZOs added their own subFilter bars with Markarth patch and thus the subfilterbars are
+    --movin the inventory sort header down.
+    --local _,_,_,_,_,offsetY = ZO_PlayerInventorySortBy:GetAnchor()
+    local offsetY = 0
 
     --parent for the subfilter bar control
     local parents = AF.filterBarParents
