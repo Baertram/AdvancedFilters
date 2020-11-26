@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-10-31
---Max todos: #51
+--TODO Last updated: 2020-11-26
+--Max todos: #52
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -39,21 +39,27 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --#50: 2020-10-31: Bug, Baertram:
 --     Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
 --
+
+--#51: 2020-11-26: Bug, Baertram:
+--     GuildStore / QuickSlot layout sometimes moves the sort header above the list's 1st row, bu you need to have been
+--     to a crafting table before, as it seems.
+--
+
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.0 - Current 1.6.0.1 - Changed 2020-11-03
+--  UPDATE INFORMATION: since AF 1.6.0.2 - Current 1.6.0.3 - Changed 2020-11-26
 --______________________________________________________________________________________________________________________
 
 
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
--- -Quest tab got a sub filter bar now (like thte vanilla UI only showing "All" as button), but enables the dropdown box for filter plugins for the panel "Quest".
--- -Quickslots got subfilter bar and dropdown filters now. Collectible group names are dynamically generated Strings starting with
---   QS (for quickslot) and then 3 numbers seperated by _: QS<CategoryId>_<CategoryIndex>_<categorySpecialization>. If you want to add dropdown filters you can spy
---   the generated strings of the quickslot subfilterbuttons in the table AdvancedFilters.subfilterGroups[27][0] via e.g. merTorchbug or zgoo
--- -Added several more subfilterBar buttons for the quickslot usable items
--- -Added several more subfilterBar buttons for the quickslot collectibles
+--
+--
+--
+--
+--
+--
 --
 --______________________________________________________________________________________________________________________
 --                                              ADDED ON REQUEST
@@ -63,12 +69,12 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
---Icons for quickslot collectibles were added
+--
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
--- #51 Votans Search Box support was re-added
+--
 
 
 ---==========================================================================================================================================================================
@@ -374,7 +380,7 @@ local function InitializeHooks()
         ----------------------------------------------------------------------------------------------------------------
         --Update the y offsetts in pixels for the subfilter bar, so it is shown below the parent's filter buttons
         local function UpdateListAnchors(self, shiftY, p_subFilterBar, p_isCraftingInventoryType)
---d("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[")
+--d("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[")
 --d("[AF]UpdateListAnchors shiftY: " .. tostring(shiftY))
             if AF.settings.debugSpam then d(">UpdateListAnchors - shiftY: " .. tostring(shiftY)) end
             if self == nil then return end
@@ -392,9 +398,11 @@ local function InitializeHooks()
                 layoutData = BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
                 local additionalLayoutData = util.GetCraftingInventoryLayoutData(invTypeUpdateListAnchor)
                 if additionalLayoutData ~= nil then
+                    local layoutDataCopy = ZO_ShallowTableCopy(layoutData)
                     for key,value in pairs(additionalLayoutData) do
-                        layoutData[key] = value
+                        layoutDataCopy[key] = value
                     end
+                    layoutData = layoutDataCopy
 --d(">>Overwrote some layoutData settings with additional layoutdata")
                 end
             end
@@ -464,6 +472,7 @@ local function InitializeHooks()
             --Get the Smithing research line horizontal scroll list, and other controls below, and reanchor it e.g.
             local _, _, reanchorData = util.GetListControlForSubfilterBarReanchor(invTypeUpdateListAnchor)
             if reanchorData ~= nil then
+--d(">>>ReAnchor data was found!")
                 for _, reanchorControlData in ipairs(reanchorData) do
                     local controlToReanchor = reanchorControlData.control
                     if controlToReanchor ~= nil then
@@ -775,6 +784,7 @@ local function InitializeHooks()
             local inventoryTypeUpdated
             --Special treatment for qucisklots
             if p_fragment == QUICKSLOT_FRAGMENT and inventoryType == LF_QUICKSLOT then
+--d(">quickslots")
                 doNormalChecks = false
                 AF.currentInventoryTypeOverride = nil
                 AF.currentInventoryType = LF_QUICKSLOT
@@ -1016,7 +1026,7 @@ local function InitializeHooks()
         --if not: Supress 2x changefilter as it will be the normal inventory changefilter (Why ever this happens!) and not the Bank ones
         if firstOpened ~= nil then
             if firstOpenedIsBank == true then
---d("<<ChangeFilterInventory aborted due to bank was first opened!")
+d("<<ChangeFilterInventory aborted due to bank was first opened!")
                 changeFilterCallsAfterFirstOpenWasBank = changeFilterCallsAfterFirstOpenWasBank +1
                 if changeFilterCallsAfterFirstOpenWasBank <= 2 then
                     return
@@ -1037,7 +1047,7 @@ local function InitializeHooks()
         if currentInvType == INVENTORY_BACKPACK or currentInvType == INVENTORY_QUEST_ITEM then
             AF.currentInventoryCurrentFilter = currentFilter
         end
---d("!!!!!!!!!!!!!!CHANGEFILTER AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
+d("!!!!!!!!!!!!!!CHANGEFILTER AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
 
         if AF.settings.debugSpam then
             d("===========================================================================================================>")
@@ -1062,7 +1072,7 @@ local function InitializeHooks()
         local shouldNotUpdateWithInventoryChangeFilterFunc = doNotUpdateInventoriesWithInventoryChangeFilterFunction[currentInvType] or false
         if not shouldNotUpdateWithInventoryChangeFilterFunc then
         ]]
---d(">>ThrottledUpdate - ChangeFilterInventory, currentInvType: " ..tostring(currentInvType))
+d(">>ThrottledUpdate - ChangeFilterInventory, currentInvType: " ..tostring(currentInvType))
         ThrottledUpdate("ShowSubfilterBar_" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, currentInvType)
         --end
         --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added
@@ -1070,6 +1080,7 @@ local function InitializeHooks()
         local currentFilterToCheck = customInventoryFilterButtonsItemType or currentFilter
         local inactiveSubFilterBarInventoryType = AF.subFiltersBarInactive[currentFilterToCheck] or nil
         if inactiveSubFilterBarInventoryType ~= nil and inactiveSubFilterBarInventoryType ~= false then
+d(">inactiveSubFilterBarInventoryType: " ..tostring(inactiveSubFilterBarInventoryType) .. ", curInvType: " .. tostring(currentInvType) .. ", tabInvType: " ..tostring(tabInvType) .. ", currentFilterToCheck: " ..tostring(currentFilterToCheck))
             if AF.settings.debugSpam then d(">inactiveSubFilterBarInventoryType: " ..tostring(inactiveSubFilterBarInventoryType) .. ", curInvType: " .. tostring(currentInvType) .. ", tabInvType: " ..tostring(tabInvType) .. ", currentFilterToCheck: " ..tostring(currentFilterToCheck)) end
             --Compare the inventory tab's inventoryType with the inactive inventoryType, and
             --set the inventory to update accordingly
