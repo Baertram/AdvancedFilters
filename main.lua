@@ -40,11 +40,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
 --
 
---#51: 2020-11-26: Bug, Baertram:
---     GuildStore / QuickSlot layout sometimes moves the sort header above the list's 1st row, bu you need to have been
---     to a crafting table before, as it seems.
---
-
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --  UPDATE INFORMATION: since AF 1.6.0.2 - Current 1.6.0.3 - Changed 2020-11-26
@@ -74,7 +69,9 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---
+--#51: Layouts of e.g. quickslot, guild store fixed (only was wrong after you had interacted with a crafting table e.g.)
+--#52: Fence / Launder will not show an error anymore if you had the quest tab last opened in your invenory as you talk
+--     to the fence
 
 
 ---==========================================================================================================================================================================
@@ -803,20 +800,22 @@ local function InitializeHooks()
                     local sceneNames = AF.scenesForChecks
                     --Check if mail send or player trade are shown
                     local libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
---d(">libFiltersPanelId: " ..tostring(libFiltersPanelId))
+d(">libFiltersPanelId: " ..tostring(libFiltersPanelId))
                     if ((libFiltersPanelId and (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
                                 libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
-                                libFiltersPanelId == LF_GUILDSTORE_SELL)) or
+                                libFiltersPanelId == LF_GUILDSTORE_SELL or
+                                libFiltersPanelId == LF_FENCE_SELL or libFiltersPanelId == LF_FENCE_LAUNDER )) or
                                 (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
                                 (TRADE.control and not TRADE.control:IsHidden()) or
                                 util.IsSceneShown(sceneNames.bank) or
                                 util.IsSceneShown(sceneNames.guildBank) or
                                 util.IsSceneShown(sceneNames.tradinghouse) or
-                                (TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL or (TRADING_HOUSE.control and not TRADING_HOUSE.control:IsHidden()))
+                                (TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL or (TRADING_HOUSE.control and not TRADING_HOUSE.control:IsHidden())) or
+                                util.IsSceneShown(sceneNames.fence)
                             )
                     then
                         AF.currentInventoryTypeOverride = nil
---d("<<Deleted: AF.currentInventoryTypeOverrid")
+d("<<Deleted: AF.currentInventoryTypeOverrid")
                     end
                 end
                 local currentInventoryTypeOverride = AF.currentInventoryTypeOverride
