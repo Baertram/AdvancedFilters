@@ -206,7 +206,11 @@ local strings = {
     lamShowDropdownLastSelectedEntries = "Show filter dropdown selection history",
     lamShowDropdownLastSelectedEntriesTT = "Right click the filter dropdown box to show a list of the last 10 selected dropdown entries below the standard context menu entries. Click an history entry to select it again (if the current subfilterbar's dropdown box provides this entry as the history is created cross-subfilterbars)!",
     lamDebugOutput = "Debug",
+    lamDebugOutputTT = "Shows some debug messages into the chat/DebugLogViewer UI.",
     lamDebugSpamOutput = "Debug Spam",
+    lamDebugSpamOutputTT = "Attention: This will spam your chat/DebugLogViewer UI with a lot of messages from AdvancedFilters. Only enable this if you were told to do so!",
+    lamDebugSpamExcludeRefreshSubfilterBar = "Exclude RefreshSubfilterBar",
+    lamDebugSpamExcludeDropdownBoxFilters = "Exclude Dropdownbox filters",
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",

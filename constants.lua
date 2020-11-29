@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.3"
+AF.version = "1.6.0.4"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -16,7 +16,9 @@ AF.clientLang = GetCVar("language.2")
 
 --SavedVariables default settings
 AF.defaultSettings = {
-    debugSpam                               = false, --Only for addon dev!
+    debugSpam                               = false,
+    debugSpamExcludeRefreshSubfilterBar     = true,
+    debugSpamExcludeDropdownBoxFilters      = true,
     doDebugOutput                           = false,
     hideItemCount                           = false,
     itemCountLabelColor = {
@@ -883,41 +885,23 @@ AF.layoutDataFragments = layoutDataFragments
 --The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
 --for some of the panels, e.g. ENCHANTING
 --2020-11-23:
-local AF_modifiedInventoryBackpackLayoutData = {
+local AF_modifiedInventoryBackpackLayoutDataForQuickslot = {
     --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
     --width = 565,
-    backpackOffsetY = 96, --original is 136 in BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
+    backpackOffsetY = 136, --original is 136 in BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
     --inventoryTopOffsetY = -20,
     --inventoryBottomOffsetY = -30,
-    --sortByOffsetY = 0,
+    sortByOffsetY = 96,
     --emptyLabelOffsetY = 100,
     --sortByHeaderWidth = 576,
     --sortByNameWidth = 241,
     --hideBankInfo = true,
     --hideCurrencyInfo = false,
 }
-local AF_smithingResearchLayoutData = {
-    --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-    --width = 565,
-    --backpackOffsetY = 0,
-    --inventoryTopOffsetY = -20,
-    --inventoryBottomOffsetY = -30,
-    --sortByOffsetY = 0,
-    --emptyLabelOffsetY = 100,
-    --sortByHeaderWidth = 576,
-    --sortByNameWidth = 241,
-    --hideBankInfo = true,
-    --hideCurrencyInfo = false,
+local filterBarAlternativeInventoryLayoutData = {
+    [LF_QUICKSLOT]         = AF_modifiedInventoryBackpackLayoutDataForQuickslot,
 }
-local filterBarCraftingInventoryLayoutData = {
-    [LF_ENCHANTING_CREATION]    = AF_modifiedInventoryBackpackLayoutData,
-    [LF_ENCHANTING_EXTRACTION]  = AF_modifiedInventoryBackpackLayoutData,
-    [LF_SMITHING_REFINE]        = AF_modifiedInventoryBackpackLayoutData,
-    [LF_JEWELRY_REFINE]         = AF_modifiedInventoryBackpackLayoutData,
-    --[LF_SMITHING_RESEARCH]      = AF_smithingResearchLayoutData,
-    --[LF_JEWELRY_RESEARCH]       = AF_smithingResearchLayoutData,
-}
-AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
+AF.filterBarAlternativeInventoryLayoutData = filterBarAlternativeInventoryLayoutData
 
 --SUBFILTER BAR BUTTONS
 --The subfilter bars button names

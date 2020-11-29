@@ -268,10 +268,10 @@ end
 --======================================================================================================================
 -- -v- Inventory layout functions                                                                                  -v-
 --======================================================================================================================
-function util.GetCraftingInventoryLayoutData(filterType)
---d("[AF]util.GetCraftingInventoryLayoutData - filterType: " ..tostring(filterType))
-    local filterBarCraftingInventoryLayoutData = AF.filterBarCraftingInventoryLayoutData
-    return filterBarCraftingInventoryLayoutData[filterType]
+function util.GetAlternativeInventoryLayoutData(filterType)
+--d("[AF]util.GetAlternativeInventoryLayoutData - filterType: " ..tostring(filterType))
+    local filterBarInventoryLayoutData = AF.filterBarAlternativeInventoryLayoutData
+    return filterBarInventoryLayoutData[filterType]
 end
 
 function util.HideInventoryControls(filterType, delay)
@@ -421,10 +421,12 @@ end
 
 --Build the subfilterBar's dropdown box filter callback tables and functions
 function util.BuildDropdownCallbacks(groupName, subfilterName)
-    local doDebugOutput = AF.settings.doDebugOutput
+    local settings = AF.settings
+    local debugSpam = settings.debugSpam
+    local debugSpamExcludeDropdownBoxFilters = settings.debugSpamExcludeDropdownBoxFilters
     local subfilterNameOrig = subfilterName
     if groupName == "Armor" and (subfilterName == "Heavy" or subfilterName == "Medium" or subfilterName == "LightArmor" or subfilterName == "Clothing") then subfilterName = "Body" end
-    if doDebugOutput or AF.settings.debugSpam then d("=========================\n[AF]]BuildDropdownCallbacks - groupName: " .. tostring(groupName) .. ", subfilterName: " .. tostring(subfilterName) .. ", subFilterNameOrig: " ..tostring(subfilterNameOrig) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType)) end
+    if debugSpam then d("=========================\n[AF]]BuildDropdownCallbacks - groupName: " .. tostring(groupName) .. ", subfilterName: " .. tostring(subfilterName) .. ", subFilterNameOrig: " ..tostring(subfilterNameOrig) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType)) end
     local callbackTable = {}
     local keys = AF.dropdownCallbackKeys
     local craftBagFilterGroups = AF.craftBagFilterGroups
@@ -439,9 +441,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
         subfilterNameLocal = subfilterNameLocal or subfilterNameLocal
         isBaseAdvancedFiltersSubmenu = isBaseAdvancedFiltersSubmenu or false
 
-		if doDebugOutput or AF.settings.debugSpam then d(">[AF]insertAddonOrBaseAdvancedFiltersSubmenu-groupName: " ..tostring(groupNameLocal) .. ", subfilterNameLocal: " ..tostring(subfilterNameLocal) .. ", isBaseAdvancedFiltersSubmenu: " .. tostring(isBaseAdvancedFiltersSubmenu)) end
-
-        if AF.settings.doDebugOutput then
+		if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">[AF]insertAddonOrBaseAdvancedFiltersSubmenu-groupName: " ..tostring(groupNameLocal) .. ", subfilterNameLocal: " ..tostring(subfilterNameLocal) .. ", isBaseAdvancedFiltersSubmenu: " .. tostring(isBaseAdvancedFiltersSubmenu))
             AF._addonTableBuildDropdownCallbacks = AF._addonTableBuildDropdownCallbacks or {}
             table.insert(AF._addonTableBuildDropdownCallbacks, addonTable)
         end
@@ -453,7 +453,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
         else
             addonName = addonTable.callbackTable[1].name
         end
-        --if doDebugOutput or AF.settings.debugSpam then d("->insertAddon addonName: '" .. tostring(addonName) .."', groupNameLocal: '" .. tostring(groupNameLocal) .. "', subfilterNameLocal: '" .. tostring(subfilterNameLocal).. "'") end
+        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("->insertAddon addonName: '" .. tostring(addonName) .."', groupNameLocal: '" .. tostring(groupNameLocal) .. "', subfilterNameLocal: '" .. tostring(subfilterNameLocal).. "'") end
 
         --generate information if necessary
         if addonTable.generator then
@@ -468,19 +468,19 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
 
         --Is the addon filter not to be shown at some libFilter panels?
         if addonTable.excludeFilterPanels ~= nil then
-            --if doDebugOutput or AF.settings.debugSpam then d(">>excludeFilterPanels: Yes") end
+            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>excludeFilterPanels: Yes") end
             if type(addonTable.excludeFilterPanels) == "table" then
                 for _, filterPanelToExclude in pairs(addonTable.excludeFilterPanels) do
                     if invOrFilterType == filterPanelToExclude then
-                        --if doDebugOutput or AF.settings.debugSpam then d(">>>insertAddon - filterPanelToExclude: " ..tostring(filterPanelToExclude)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>>insertAddon - filterPanelToExclude: " ..tostring(filterPanelToExclude)) end
                         return
                     else
-                        --if doDebugOutput or AF.settings.debugSpam then d(">>>insertAddon - filterPanelToExclude: " ..tostring(filterPanelToExclude) .. " <> filterType: "..tostring(invOrFilterType)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>>insertAddon - filterPanelToExclude: " ..tostring(filterPanelToExclude) .. " <> filterType: "..tostring(invOrFilterType)) end
                     end
                 end
             else
                 if invOrFilterType == addonTable.excludeFilterPanels then
-                    --if doDebugOutput or AF.settings.debugSpam then d(">>>insertAddon - filterPanelToExclude: " ..tostring(addonTable.excludeFilterPanels)) end
+                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>>insertAddon - filterPanelToExclude: " ..tostring(addonTable.excludeFilterPanels)) end
                     return
                 end
             end
@@ -488,7 +488,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
 
         --Do not add the entries if the group name specified "to be excluded" are the given ones
         if groupNameLocal ~= AF_CONST_ALL and addonTable.excludeGroups ~= nil then
-            if doDebugOutput or AF.settings.debugSpam then d(">>excludeGroups: Yes") end
+            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>excludeGroups: Yes") end
             if type(addonTable.excludeGroups) == "table" then
                 local notAllowedGroupNameLocals = {}
                 for _, groupNameLocalToCheck in pairs(addonTable.excludeGroups) do
@@ -501,7 +501,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                     notAllowedGroupNameLocals[groupNameLocalToCheck] = true
                 end
                 if notAllowedGroupNameLocals[groupNameLocal] then
-                    if doDebugOutput or AF.settings.debugSpam then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(groupNameLocal)) end
+                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(groupNameLocal)) end
                     return
                 end
             else
@@ -512,13 +512,13 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                         notAllowedGroupNameLocals[craftBagGroup] = true
                     end
                     if notAllowedGroupNameLocals[groupNameLocal] then
-                        if doDebugOutput or AF.settings.debugSpam then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(groupNameLocal)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(groupNameLocal)) end
                         return
                     end
 
                 else
                     if groupNameLocal == addonTable.excludeGroups then
-                        if doDebugOutput or AF.settings.debugSpam then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(addonTable.excludeGroups)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("<--[EXCLUDE]insertAddon - excludeGroups, excluded group: " ..tostring(addonTable.excludeGroups)) end
                         return
                     end
                 end
@@ -527,7 +527,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
 
         --Only add the entries if the group name specified "to be used" are the given ones
         if groupNameLocal ~= AF_CONST_ALL and addonTable.onlyGroups ~= nil then
-            if doDebugOutput or AF.settings.debugSpam then d(">>onlyGroups: Yes") end
+            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>onlyGroups: Yes") end
             if type(addonTable.onlyGroups) == "table" then
                 local allowedgroupNameLocals = {}
                 for _, groupNameLocalToCheck in pairs(addonTable.onlyGroups) do
@@ -540,7 +540,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                     allowedgroupNameLocals[groupNameLocalToCheck] = true
                 end
                 if not allowedgroupNameLocals[groupNameLocal] then
-                    if doDebugOutput or AF.settings.debugSpam then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(groupNameLocal)) end
+                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(groupNameLocal)) end
                     return
                 end
             else
@@ -551,13 +551,13 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                         allowedgroupNameLocals[craftBagGroup] = true
                     end
                     if not allowedgroupNameLocals[groupNameLocal] then
-                        if doDebugOutput or AF.settings.debugSpam then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(groupNameLocal)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(groupNameLocal)) end
                         return
                     end
 
                 else
                     if groupNameLocal ~= addonTable.onlyGroups then
-                        if doDebugOutput or AF.settings.debugSpam then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(addonTable.onlyGroups)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("-->insertAddon - onlyGroups, not allowed group: " ..tostring(addonTable.onlyGroups)) end
                         return
                     end
                 end
@@ -566,19 +566,19 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
 
         --Should any subfilter be excluded?
         if addonTable.excludeSubfilters ~= nil then
-            --if doDebugOutput or AF.settings.debugSpam then d(">>excludeSubfilters: Yes") end
+            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">>excludeSubfilters: Yes") end
             if type(addonTable.excludeSubfilters) == "table" then
                 for _, subfilterNameLocalToExclude in pairs(addonTable.excludeSubfilters) do
                     if subfilterNameOrig == subfilterNameLocalToExclude or subfilterNameLocal == subfilterNameLocalToExclude then
-                        if doDebugOutput or AF.settings.debugSpam then d("<---[EXCLUDE]insertAddon - excludeSubfilters: " ..tostring(subfilterNameLocalToExclude)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("<---[EXCLUDE]insertAddon - excludeSubfilters: " ..tostring(subfilterNameLocalToExclude)) end
                         return
                     else
-                        if doDebugOutput or AF.settings.debugSpam then d("--->[INCLUDE]insertAddon - excludeSubfilters '" ..tostring(subfilterNameLocalToExclude) .. "' <> ' " ..tostring(subfilterNameOrig) .. "/" .. tostring(subfilterNameLocal)) end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("--->[INCLUDE]insertAddon - excludeSubfilters '" ..tostring(subfilterNameLocalToExclude) .. "' <> ' " ..tostring(subfilterNameOrig) .. "/" .. tostring(subfilterNameLocal)) end
                     end
                 end
             else
                 if subfilterNameOrig == addonTable.excludeSubfilters or subfilterNameLocal == addonTable.excludeSubfilters then
-                    if doDebugOutput or AF.settings.debugSpam then d("<---[EXCLUDE]insertAddon - excludeSubfilters: " ..tostring(subfilterNameLocal)) end
+                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("<---[EXCLUDE]insertAddon - excludeSubfilters: " ..tostring(subfilterNameLocal)) end
                     return
                 end
             end
@@ -605,12 +605,12 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                 for _, callbackTableEntry in ipairs(callbackTable) do
                     if callbackTableEntry.submenuName then
                         if callbackTableEntry.submenuName == compareName then
-                            if doDebugOutput or AF.settings.debugSpam then d(">Duplicate submenu entry: " .. tostring(callbackTableEntry.submenuName)) end
+                            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Duplicate submenu entry: " .. tostring(callbackTableEntry.submenuName)) end
                             return
                         end
                     else
                         if callbackTableEntry.name and callbackTableEntry.name == compareName then
-                            if doDebugOutput or AF.settings.debugSpam then d(">Duplicate entry: " .. tostring(callbackTableEntry.name)) end
+                            if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Duplicate entry: " .. tostring(callbackTableEntry.name)) end
                             return
                         end
                     end
@@ -659,7 +659,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
             if groupNameOfKeys == nil then
                 d("[AdvancedFilters] ERROR - util.BuildDropdownCallbacks-GroupName is missing in keys: " ..tostring(groupName) .. ". Please contact the author of ".. tostring(AF.name) .. " at the website in the settings menu (link can be found at the top of the settings page)!")
                 return
-                --elseif AF.settings.debugSpam then d("[AF]util.BuildDropdownCallbacks-GroupName: " ..tostring(groupName))
+                elseif AF.settings.debugSpam and not debugSpamExcludeDropdownBoxFilters then d("[AF]util.BuildDropdownCallbacks-GroupName: " ..tostring(groupName))
             end
             --insert all default AdvancedFilters filters for each subfilter (see file data.lua -> table AF.subfilterCallbacks)
             for _, subfilterNameLoop in ipairs(groupNameOfKeys) do
@@ -688,7 +688,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
             --insert all filters provided by plugins / other addons
             --but check if the current panel should show the addon filters for "all" too
             if util.checkIfPanelShouldShowAddonAllDropdownFilters(invOrFilterType) then
-                if doDebugOutput or AF.settings.debugSpam then d(">add addon dropdown filters to group's '" .. tostring(groupName) .."' 'ALL' filters") end
+                if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">add addon dropdown filters to group's '" .. tostring(groupName) .."' 'ALL' filters") end
                 for _, addonTable in ipairs(subfilterCallbacks[groupName].addonDropdownCallbacks) do
                     insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
                 end
@@ -715,7 +715,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
                 --scan addon to see if it applies to given subfilter
                 for _, subfilter in ipairs(addonTable.subfilters) do
                     if subfilter == subfilterName or subfilter == AF_CONST_ALL then
-                        if doDebugOutput or AF.settings.debugSpam then d(">add addon dropdown filters to group's '" .. tostring(groupName) .."' subFilter \'" ..tostring(subfilter) .."\'") end
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">add addon dropdown filters to group's '" .. tostring(groupName) .."' subFilter \'" ..tostring(subfilter) .."\'") end
                         --add addon filters to the dropdown boxes at the subfilterName
                         insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
                     end
@@ -727,7 +727,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
     --insert global addon filters
     --but check if the current panel should show the addon filters for "all" too
     if util.checkIfPanelShouldShowAddonAllDropdownFilters(invOrFilterType) then
-        if AF.settings.debugSpam then d(">show addon dropdown 'ALL' filters") end
+        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">show addon dropdown 'ALL' filters") end
         for _, addonTable in ipairs(subfilterCallbacks.All.addonDropdownCallbacks) do
             insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
         end
@@ -982,7 +982,8 @@ end
 --Should the subfilter bar not be shown?
 --e.g. ALWAYS do not show if special itemfilterType OR if the current inventory was closed again (automatic bank closing)
 function util.CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftingType, filter)
-    if AF.debug or AF.settings.debugSpam then
+    local debugSpam = AF.settings.debugSpam
+    if AF.debug or debugSpam then
         d("[AF]util.CheckIfNoSubfilterBarShouldBeShown - currentFilter: " .. tostring(currentFilter) .. ", invType: " ..tostring(invType) .. ", craftingType: " ..tostring(craftingType) .. ", filter: " .. tostring(filter))
     end
     local doAbort = false
@@ -1010,7 +1011,7 @@ function util.CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftin
             end
         end
     end
-    if AF.settings.debugSpam then d("[AF]util.CheckIfNoSubfilterBarShouldBeShown - doAbort: " .. tostring(doAbort) .." /currentFilter: " ..tostring(currentFilter) .. ", invType: " ..tostring(invType) .. ", filterTypeToUse: " ..tostring(filterTypeToUse) .. ", fragmentStateHiding: " ..tostring(AF.fragmentStateHiding[invType]) .. ", isBanking: " ..tostring(PLAYER_INVENTORY:IsBanking())) end
+    if debugSpam then d("[AF]util.CheckIfNoSubfilterBarShouldBeShown - doAbort: " .. tostring(doAbort) .." /currentFilter: " ..tostring(currentFilter) .. ", invType: " ..tostring(invType) .. ", filterTypeToUse: " ..tostring(filterTypeToUse) .. ", fragmentStateHiding: " ..tostring(AF.fragmentStateHiding[invType]) .. ", isBanking: " ..tostring(PLAYER_INVENTORY:IsBanking())) end
     --if AF.settings.debugSpam then d("[AF]util.CheckIfNoSubfilterBarShouldBeShown - currentFilter: " ..tostring(currentFilter) .. ", invType: " ..tostring(invType) .. ", abort: " ..tostring(doAbort)) end
     return doAbort
 end
@@ -1033,6 +1034,9 @@ end
 --Refresh the subfilter button bar and disable non-given/non-matching subfilter buttons ("grey-out" the buttons)
 function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     calledFromExternalAddonName = calledFromExternalAddonName or ""
+    local settings = AF.settings
+    local debugSpam = settings.debugSpam
+    local debugSpamExcludeRefreshSubfilterBar = settings.debugSpamExcludeRefreshSubfilterBar
     local inventoryType = subfilterBar.inventoryType
     local craftingType = util.GetCraftingType()
     local isNoCrafting = not util.IsCraftingPanelShown()
@@ -1042,14 +1046,14 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local bagWornItemCache
     local bagVendorBuy
     local bagVendorBuyFilterTypes
-    if AF.settings.debugSpam then
+    if debugSpam then
         d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tostring(calledFromExternalAddonName) .. ", invType: " .. tostring(inventoryType) .. ", subfilterBar: " ..tostring(subfilterBar.name) .. ", craftingType: " .. tostring(craftingType) .. ", isNoCrafting: " .. tostring(isNoCrafting))
+        AF._currentSubfilterBarAtRefreshCheck = subfilterBar
     end
-    --AF._currentSubfilterBarAtRefreshCheck = subfilterBar
 
     --Setting to gray out the buttons is enbaled?
-    local grayOutSubFiltersWithNoItems  = AF.settings.grayOutSubFiltersWithNoItems
+    local grayOutSubFiltersWithNoItems  = settings.grayOutSubFiltersWithNoItems
     --Reactivate all subfilterbar buttons if they were disabled
     local abortSubfilterBarRefresh = util.AbortSubfilterRefresh(inventoryType)
     local onlyEnableAllSubfilterBarButtons = false
@@ -1070,14 +1074,15 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
         end
     elseif isVendorBuyInv == true then
         bagVendorBuy, bagVendorBuyFilterTypes = ZO_StoreManager_GetStoreItems()
---AF._bagVendorBuy = bagVendorBuy
---AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
+        if debugSpam then
+            AF._bagVendorBuy = bagVendorBuy
+            AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
+        end
     else
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
     end
-    if AF.settings.debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil)) end
---d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil))
+    if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil)) end
     --Check if a bank/guild bank/house storage is opened
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
     local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
@@ -1091,8 +1096,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local isRetraitStation              = util.IsRetraitPanelShown()
     local isJunkInvButtonActive         = subfilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
-    if AF.settings.debugSpam then d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
---d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems))
+    if debugSpam then d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
     ------------------------------------------------------------------------------------------------------------------------
@@ -1100,7 +1104,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     ------------------------------------------------------------------------------------------------------------------------
     --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
     local function checkBagContentsNow(bag, bagData, realInvType, button)
-        if AF.settings.debugSpam then d(">checkBagContentsNow: " ..tostring(button.name)) end
+        if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">checkBagContentsNow: " ..tostring(button.name)) end
         doEnableSubFilterButtonAgain = false
         breakInventorySlotsLoopNow = false
 
@@ -1119,7 +1123,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
         end
         local itemsFound = 0
         --AF._bagDataToCheck = bagDataToCheck
-        if AF.settings.debugSpam then d(">currentFilter: " ..tostring(currentFilter)) end
+        if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">currentFilter: " ..tostring(currentFilter)) end
         for _, itemData in pairs(bagDataToCheck) do
             breakInventorySlotsLoopNow = false
             local isItemSellable = false
@@ -1141,7 +1145,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                         or (util.IsItemFilterTypeInItemFilterData(itemData, currentFilter)))
                         and otherAddonUsesFilters
                 --[[
-                if AF.settings.debugSpam then
+                if debugSpam and not debugSpamExcludeRefreshSubfilterBar then
                     local itemlink
                     if isVendorBuy then
                         itemlink = GetStoreItemLink(itemData.slotIndex)
@@ -1328,7 +1332,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
 
     --Check if filters apply to the subfilter and change the color of the subfilter button
     for _, button in ipairs(subfilterBar.subfilterButtons) do
-        if AF.settings.debugSpam then d(">==============================>\nButtonName: " .. tostring(button.name)) end
+        if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">==============================>\nButtonName: " .. tostring(button.name)) end
         local playerInvVar = controlsForChecks.playerInv
         if onlyEnableAllSubfilterBarButtons == true or not grayOutSubFiltersWithNoItems then
             doEnableSubFilterButtonAgain = true
@@ -1339,7 +1343,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                 breakInventorySlotsLoopNow = false
                 --Disable button first (May be enabled further down again if checks allow it)
                 if button.clickable then
-                    if AF.settings.debugSpam then d(">disabling button: " ..tostring(button.name)) end
+                    if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">disabling button: " ..tostring(button.name)) end
                     button.texture:SetColor(.3, .3, .3, .9)
                     button:SetEnabled(false)
                     button.clickable = false
@@ -1401,7 +1405,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
         end
         --Enable the subfilter button again now?
         if doEnableSubFilterButtonAgain == true then
-            if AF.settings.debugSpam then d(">Enabling button again: " .. tostring(button.name)) end
+            if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">Enabling button again: " .. tostring(button.name)) end
             button.texture:SetColor(1, 1, 1, 1)
             button:SetEnabled(true)
             button.clickable = true
@@ -1409,7 +1413,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             --Is the button currently selected but shouldn't be enabled (as no items are filtered below anymore)?
             --e.g. by equipping the last filtered item: Select the ALL subfilter button then instead
             --todo
-            if AF.settings.debugSpam then d(">No items left to filter, Enabling the \'All\' button now") end
+            if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">No items left to filter, Enabling the \'All\' button now") end
             --todo
         end
     end
@@ -1443,9 +1447,12 @@ end
 --Apply the LiFilters filter to the inventory now
 function util.ApplyFilter(button, filterTag, requestUpdate, filterType, inventoryTypeOfFilterBar)
     local debugSpam = AF.settings.debugSpam
---AF._lastClickedSubFilterBarButton = button
+    if debugSpam then
+        d("[AF]ApplyFilter_VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+        AF._lastClickedSubFilterBarButton = button
+    end
     local currentInvType    = inventoryTypeOfFilterBar or AF.currentInventoryType
-    if debugSpam then d("----->[AF]ApplyFilter for " .. tostring(filterTag) .. " for filterType " .. tostring(filterType) .. " and inventoryType " .. tostring(currentInvType) .. ", requestUpdate: " ..tostring(requestUpdate)) end
+    if debugSpam then d(">FilterTag: " .. tostring(filterTag) .. " for filterType " .. tostring(filterType) .. " and inventoryType " .. tostring(currentInvType) .. ", requestUpdate: " ..tostring(requestUpdate)) end
     local LibFilters        = util.LibFilters
     local callback          = button.filterCallback
     local filterTypeToUse   = filterType or util.GetCurrentFilterTypeForInventory(currentInvType, true)
@@ -1540,6 +1547,10 @@ function util.ApplyFilter(button, filterTag, requestUpdate, filterType, inventor
             end
         end, 50)
     end, delay)
+    if debugSpam then
+        d("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        AF._lastClickedSubFilterBarButton = button
+    end
 end
 
 --Remove all registered filters of buttons and dropdown boxes and update the inventory

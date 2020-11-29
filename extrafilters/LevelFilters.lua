@@ -23,7 +23,11 @@ local function GetFilterCallbackForLevel(minLevel, maxLevel)
         if cp > 0 then
             level = level + cp
         end
-        return false or ((level >= minLevel) and (level <= maxLevel))
+        if maxLevel ~= nil then
+            return ((level >= minLevel) and (level <= maxLevel)) or false
+        else
+            return (level == minLevel) or false
+        end
     end
 end
 
@@ -39,6 +43,7 @@ local fullLevelDropdownCallbacks = {
     {name = "31-40", filterCallback = GetFilterCallbackForLevel(31, 40)},
     {name = "41-50", filterCallback = GetFilterCallbackForLevel(41, 50)},
     {name = "1-49",  filterCallback = GetFilterCallbackForLevel(1, 49)},
+    {name = "cp10-160", filterCallback = GetFilterCallbackForLevel(60, 210)},
     {name = "cp10-20", filterCallback = GetFilterCallbackForLevel(60, 70)},
     {name = "cp30-40", filterCallback = GetFilterCallbackForLevel(80, 90)},
     {name = "cp50-60", filterCallback = GetFilterCallbackForLevel(100, 110)},
@@ -46,8 +51,9 @@ local fullLevelDropdownCallbacks = {
     {name = "cp90-100", filterCallback = GetFilterCallbackForLevel(140, 150)},
     {name = "cp110-120", filterCallback = GetFilterCallbackForLevel(160, 170)},
     {name = "cp130-140", filterCallback = GetFilterCallbackForLevel(180, 190)},
+    {name = "cp150", filterCallback = GetFilterCallbackForLevel(200, nil)},
     {name = "cp150-160", filterCallback = GetFilterCallbackForLevel(200, 210)},
-    {name = "cp10-160", filterCallback = GetFilterCallbackForLevel(60, 210)},
+    {name = "cp160", filterCallback = GetFilterCallbackForLevel(210, nil)},
 }
 
 --[[----------------------------------------------------------------------------
@@ -67,6 +73,7 @@ local strings = {
     ["31-40"] = "31-40",
     ["41-50"] = "41-50",
     ["1-49"]  = "1-49",
+    ["cp10-160"] = cpIcon .. "10-160",
     ["cp10-20"] = cpIcon .. "10-20",
     ["cp30-40"] = cpIcon .. "30-40",
     ["cp50-60"] = cpIcon .. "50-60",
@@ -74,8 +81,9 @@ local strings = {
     ["cp90-100"] = cpIcon .. "90-100",
     ["cp110-120"] = cpIcon .. "110-120",
     ["cp130-140"] = cpIcon .. "130-140",
+    ["cp150"] = cpIcon .. "150",
     ["cp150-160"] = cpIcon .. "150-160",
-    ["cp10-160"] = cpIcon .. "10-160",
+    ["cp160"] = cpIcon .. "160",
 }
 local stringsDE = {
     --Remember to provide a string for your submenu if using one (see below).
