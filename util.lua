@@ -861,6 +861,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     --if AF.settings.debugSpam then d("[AF]IsFilterPanelShown: " ..tostring(libFiltersFilterPanelId)) end
     if libFiltersFilterPanelId == nil then return false end
     local controlInventory = controlsForChecks.invList
+    local controlMailSend = controlsForChecks.mailSend
     local controlVendorBuy = controlsForChecks.storeWindow
     local controlVendorBuyback = controlsForChecks.buyBackList
     local controlVendorRepair = controlsForChecks.repairWindow
@@ -868,6 +869,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     local controlGuildBankDeposit = controlsForChecks.guildBankBackpack
     local controlGuildStoreSell = controlsForChecks.guildStoreSellBackpack
     local controlsFence = controlsForChecks.fence
+    local controlsTrade = controlsForChecks.trade
     local scenesForChecks = AF.scenesForChecks
     local sceneNameStoreVendor = scenesForChecks.storeVendor
     local sceneNameBankDeposit = scenesForChecks.bank
@@ -875,6 +877,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     local sceneNameGuildStoreSell = scenesForChecks.guildStoreSell
     local sceneNameFence = scenesForChecks.fence
     local filterPanelId2TrueControl = {
+        [LF_MAIL_SEND]          = function() return not controlMailSend.control:IsHidden() or false end,
         [LF_VENDOR_BUY]         = function() return not controlVendorBuy:IsHidden() and controlInventory:IsHidden() and controlVendorBuyback:IsHidden() and controlVendorRepair:IsHidden() or false end,
         [LF_VENDOR_SELL]        = function() return controlVendorBuy:IsHidden() and not controlInventory:IsHidden() and controlVendorBuyback:IsHidden() and controlVendorRepair:IsHidden() or false end,
         [LF_VENDOR_BUYBACK]     = function() return controlVendorBuy:IsHidden() and controlInventory:IsHidden() and not controlVendorBuyback:IsHidden() and controlVendorRepair:IsHidden() or false end,
@@ -885,6 +888,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
         [LF_GUILDSTORE_SELL]    = controlGuildStoreSell,
         [LF_FENCE_SELL]         = function() return (not controlsFence.control:IsHidden() and controlsFence.mode == ZO_MODE_STORE_SELL_STOLEN) or false end,
         [LF_FENCE_LAUNDER]      = function() return (not controlsFence.control:IsHidden() and controlsFence.mode == ZO_MODE_STORE_LAUNDER) or false end,
+        [LF_TRADE]              = function() return (not controlsTrade.control:IsHidden()) or false end,
     }
     local filterPanelId2FalseControl = {
         [LF_BANK_DEPOSIT]       = controlBankDeposit,
@@ -966,6 +970,38 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     return true
 end
 
+function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
+    if not subFilterBar or not inventoryType then return end
+    local isMailSendPanel               = util.IsFilterPanelShown(LF_MAIL_SEND) or false
+    local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
+    local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
+    local isFencePanel                  = util.IsFilterPanelShown(LF_FENCE_SELL) or false
+    local isLaunderPanel                = util.IsFilterPanelShown(LF_FENCE_LAUNDER) or false
+    local isBankDepositPanel            = AF.bankOpened and util.IsFilterPanelShown(LF_BANK_DEPOSIT) or false
+    local isGuildBankDepositPanel       = AF.guildBankOpened  and util.IsFilterPanelShown(LF_GUILDBANK_DEPOSIT) or false
+    local isHouseBankDepositPanel       = AF.houseBankOpened  and util.IsFilterPanelShown(LF_HOUSE_BANK_DEPOSIT) or false
+    local isGuildStoreSellPanel         = util.IsFilterPanelShown(LF_GUILDSTORE_SELL) or false
+    local isRetraitStation              = util.IsRetraitPanelShown()
+    local isJunkInvButtonActive         = subFilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
+    local isTrade                       = util.IsFilterPanelShown(LF_TRADE) or false
+    local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
+    return {
+        libFiltersPanelId = libFiltersPanelId,
+        isMailSendPanel = isMailSendPanel,
+        isVendorBuy = isVendorBuy,
+        isVendorPanel = isVendorPanel,
+        isFencePanel = isFencePanel,
+        isLaunderPanel = isLaunderPanel,
+        isBankDepositPanel = isBankDepositPanel,
+        isGuildBankDepositPanel = isGuildBankDepositPanel,
+        isHouseBankDepositPanel = isHouseBankDepositPanel,
+        isGuildStoreSellPanel = isGuildStoreSellPanel,
+        isRetraitStation = isRetraitStation,
+        isJunkInvButtonActive = isJunkInvButtonActive,
+        isTrade = isTrade
+    }
+end
+
 --Check if the craftbag is shown as the groupName at the craftbag is different than non-craftbag
 --e.g. the groupName "Alchemy" is the normal groupName "Crafting" with subfilterName "Alchemy"
 function util.IsCraftBagShown()
@@ -1015,6 +1051,7 @@ function util.CheckIfNoSubfilterBarShouldBeShown(currentFilter, invType, craftin
     --if AF.settings.debugSpam then d("[AF]util.CheckIfNoSubfilterBarShouldBeShown - currentFilter: " ..tostring(currentFilter) .. ", invType: " ..tostring(invType) .. ", abort: " ..tostring(doAbort)) end
     return doAbort
 end
+
 
 --Abort the subfilterbar refresh?
 --e.g. if via the metatables the "old" (currently hiding) subfilterbar will be hidden and a refresh is not needed
@@ -1084,6 +1121,8 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     end
     if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tostring(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tostring((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tostring((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tostring(subfilterBar) .. ", bagWornToo?: " ..tostring(bagWornItemCache ~= nil)) end
     --Check if a bank/guild bank/house storage is opened
+--[[
+    local isMailSendPanel               = util.IsFilterPanelShown(LF_MAIL_SEND) or false
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
     local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
     local isFencePanel                  = util.IsFilterPanelShown(LF_FENCE_SELL) or false
@@ -1096,7 +1135,23 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local isRetraitStation              = util.IsRetraitPanelShown()
     local isJunkInvButtonActive         = subfilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
-    if debugSpam then d(">isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
+]]
+    local subFilterBarFilterInfo = util.GetSubFilterBarsFilterTypeInfo(subfilterBar, inventoryType)
+    local libFiltersPanelId             = subFilterBarFilterInfo.libFiltersPanelId
+    local isMailSendPanel               = subFilterBarFilterInfo.isMailSendPanel
+    local isVendorBuy                   = subFilterBarFilterInfo.isVendorBuy
+    local isVendorPanel                 = subFilterBarFilterInfo.isVendorPanel
+    local isFencePanel                  = subFilterBarFilterInfo.isFencePanel
+    local isLaunderPanel                = subFilterBarFilterInfo.isLaunderPanel
+    local isBankDepositPanel            = subFilterBarFilterInfo.isBankDepositPanel
+    local isGuildBankDepositPanel       = subFilterBarFilterInfo.isGuildBankDepositPanel
+    local isHouseBankDepositPanel       = subFilterBarFilterInfo.isHouseBankDepositPanel
+    local isABankDepositPanel           = (subFilterBarFilterInfo.isBankDepositPanel or subFilterBarFilterInfo.isGuildBankDepositPanel or subFilterBarFilterInfo.isHouseBankDepositPanel) or false
+    local isGuildStoreSellPanel         = subFilterBarFilterInfo.isGuildStoreSellPanel
+    local isRetraitStation              = subFilterBarFilterInfo.isRetraitStation
+    local isJunkInvButtonActive         = subFilterBarFilterInfo.isJunkInvButtonActive
+
+    if debugSpam then d(">isMailSend: " ..tostring(isMailSendPanel) .. ", isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
     ------------------------------------------------------------------------------------------------------------------------
@@ -1218,11 +1273,11 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                         ]]
                     end
                     --Check if item is stolen (crafting or banks)
-                    if isABankDepositPanel or isVendorPanel or not isNoCrafting or isGuildStoreSellPanel or isFencePanel or isLaunderPanel then
+                    if isABankDepositPanel or isVendorPanel or not isNoCrafting or isGuildStoreSellPanel or isFencePanel or isLaunderPanel or isMailSendPanel then
                         isItemStolen = IsItemStolen(itemData.bagId, itemData.slotIndex)
                     end
                     --Checks for bound and BOP tradeable
-                    if isGuildBankDepositPanel or isGuildStoreSellPanel then
+                    if isGuildBankDepositPanel or isGuildStoreSellPanel or isMailSendPanel then
                         isBound         = IsItemBound(itemData.bagId, itemData.slotIndex)
                         isBOPTradeable  = IsItemBoPAndTradeable(itemData.bagId, itemData.slotIndex)
                     end
@@ -1295,6 +1350,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                         -->Or junk, and junk inventory filter button is active
                     elseif isVendorBuy then
                         doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk))
+
+                        --[Mail send]
+                        --Item is:
+                        -->not stolen
+                        -->not bound
+                    elseif isMailSendPanel then
+                        doEnableSubFilterButtonAgain = not isItemStolen and not isBound
 
                         --[Normal inventory, mail, trade, craftbag]
                         --Item is:
@@ -1990,6 +2052,72 @@ function util.DoesInventoryTypeEqualLibFiltersType(inventoryType)
     local invEqualsLibFilters = AF.invEqualsLibFilters
     local retVar = invEqualsLibFilters[inventoryType] or false
     return retVar
+end
+
+--Get the LibFilters filterType constant of a subfilterBar
+function util.GetSubFilterBarsLibFiltersFilterType(subfilterBar, inventoryType)
+    local subFilterBarFilterInfo = util.GetSubFilterBarsFilterTypeInfo(subfilterBar, inventoryType)
+    local libFiltersFilterType
+    if subFilterBarFilterInfo.isMailSendPanel == true then
+        libFiltersFilterType = LF_MAIL_SEND
+    elseif subFilterBarFilterInfo.isVendorPanel == true then
+        libFiltersFilterType = LF_VENDOR_SELL
+    elseif subFilterBarFilterInfo.isFencePanel == true then
+        libFiltersFilterType = LF_FENCE_SELL
+    elseif subFilterBarFilterInfo.isLaunderPanel == true then
+        libFiltersFilterType = LF_FENCE_LAUNDER
+    elseif subFilterBarFilterInfo.isBankDepositPanel == true then
+        libFiltersFilterType = LF_BANK_DEPOSIT
+    elseif subFilterBarFilterInfo.isGuildBankDepositPanel == true then
+        libFiltersFilterType = LF_GUILDBANK_DEPOSIT
+    elseif subFilterBarFilterInfo.isHouseBankDepositPanel == true then
+        libFiltersFilterType = LF_HOUSE_BANK_DEPOSIT
+    elseif subFilterBarFilterInfo.isGuildStoreSellPanel == true then
+        libFiltersFilterType = LF_GUILDSTORE_SELL
+    elseif subFilterBarFilterInfo.isTradePanel == true then
+        libFiltersFilterType = LF_TRADE
+    end
+    return libFiltersFilterType
+end
+
+--Get the LibFilters filterType constant of a subfilterGroup
+function util.GetSubFilterGroupsLibFiltersFilterType(inventoryTypeOfSubfilterGroup, tradeSkillTypeOfSubFilterGroup, itemFilterTypesOfSubfilterGroup)
+--d("[AF]util.GetSubFilterGroupsLibFiltersFilterType - inventoryTypeOfSubfilterGroup: " ..tostring(inventoryTypeOfSubfilterGroup))
+    if not inventoryTypeOfSubfilterGroup then return nil, nil end
+    local isSubFilterGroupTheSameAsLibFiltersFilterType = util.DoesInventoryTypeEqualLibFiltersType(inventoryTypeOfSubfilterGroup)
+    local libFiltersFilterType, callbackFunctionForUpdate
+    if not isSubFilterGroupTheSameAsLibFiltersFilterType then
+        libFiltersFilterType = AF.mapInvTypeToLibFiltersFilterType[inventoryTypeOfSubfilterGroup] or nil
+--d(">libFiltersFilterType: " ..tostring(libFiltersFilterType))
+        if libFiltersFilterType ~= nil then
+            if type(libFiltersFilterType) == "function" then
+                local libFiltersFilterTypeResult = libFiltersFilterType(inventoryTypeOfSubfilterGroup, tradeSkillTypeOfSubFilterGroup, itemFilterTypesOfSubfilterGroup)
+                --d(">>isFunction: true, result: " ..tostring(libFiltersFilterTypeResult))
+                libFiltersFilterType = libFiltersFilterTypeResult
+            else
+                --INVENTORY_BACKPACK and LF_INVENTORY can be several different ones:
+                --LF_BANK_DEPOSIT, LF_GUILDBANK_DEPOSIT, LF_HOUSE_BANK_DEPOSIT, LF_MAIL, LF_TRADE, LF_VENDOR_SELL, LF_GUILDSTORE_SELL
+                --So we need to register a callback function to the subFilterGroup which is called as the subfilterGroup is shown, to
+                --update the AdvancedFilters.currentSubfilterGroup.libFilters_filterType variable properly
+                if inventoryTypeOfSubfilterGroup == INVENTORY_BACKPACK and libFiltersFilterType == LF_INVENTORY then
+                    callbackFunctionForUpdate = util.GetSubFilterBarsLibFiltersFilterType
+                end
+            end
+        end
+    else
+        libFiltersFilterType = inventoryTypeOfSubfilterGroup
+    end
+    return libFiltersFilterType, callbackFunctionForUpdate
+end
+
+--return the LibFilters filterType constant for the inventory's subfilterGroup data.
+--Will be called for INVENTORY_BACKPACK to determine the correct value of the libFilters filterType e.g. LF_INVENTORY or LF_BANK_DEPOSIT or LF_MAIL etc.
+-->Called dynamically from function util.GetSubFilterGroupsLibFiltersFilterType(inventoryTypeOfSubfilterGroup, tradeSkillTypeOfSubFilterGroup, itemFilterTypesOfSubfilterGroup)
+-->via table AF.mapInvTypeToLibFiltersFilterType
+function util.GetLibFiltersFilterTypeForInventorySubfilterGroup(inventoryTypeOfSubfilterGroup, tradeSkillTypeOfSubFilterGroup, itemFilterTypesOfSubfilterGroup)
+d("[AF]util.GetLibFiltersFilterTypeForInventorySubfilterGroup - inventoryTypeOfSubfilterGroup: " ..tostring(inventoryTypeOfSubfilterGroup))
+    local libFiltersFilterType = LF_INVENTORY
+    return libFiltersFilterType
 end
 
 --Function to return a boolean value if the craftingPanel is using the worn bag ID as well.

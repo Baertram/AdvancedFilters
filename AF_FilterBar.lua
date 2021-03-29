@@ -27,8 +27,9 @@ local function HidePulse()
     pulseTimeline:Stop()
 end
 
-function AF_FilterBar:New(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
+function AF_FilterBar:New(libFiltersFiltertype, inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     local obj = ZO_Object.New(self)
+    obj.libFilters_filterType = libFiltersFiltertype
     obj:Initialize(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     return obj
 end
@@ -913,8 +914,11 @@ function AF.CreateSubfilterBars()
                         excludeTheseButtonsAtThisFilterBar = excludeButtonNamesfromSubFilterBar[inventoryType][tradeSkillType][itemFilterType]
                     end
                     if inventoryNames[inventoryType] and tradeSkillNames[tradeSkillType] and filterTypeNames[itemFilterType] and subfilterButtonNames[itemFilterType] then
+                        --Get the LibFilters filtertype of the currently active filterbar
+                        local libFiltersFilterType = util.GetSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
                         --Build the subfilterBar with the buttons now
                         local subfilterBar = AF.AF_FilterBar:New(
+                                libFiltersFilterType,
                                 inventoryNames[inventoryType],
                                 tradeSkillNames[tradeSkillType],
                                 filterTypeNames[itemFilterType],

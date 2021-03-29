@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2020-11-29
---Max todos: #53
+--TODO Last updated: 2021-03-29
+--Max todos: #56
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -33,16 +33,47 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 
---#45: 2020-10-26: Bug, Baertram:
---     Fix search box at quickslots
 
 --#50: 2020-10-31: Bug, Baertram:
 --     Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
 --
 
+--#54: 2021-02-20: Bug, Baertram: Bank withdraw panel somehow applies filters from Bank deposit/mail send panel? Or at
+--     least the selected subfilters do not show any items anymore? LibFilters-3.0 v20 bug? Not always reproducable. You
+--     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
+--     withdraw
+
+--#55: 2021-02-20: Bug, Baertram: Bank withdraw panel does not reset the disabled subfilter buttons if directly opened after
+--     e.g. mail send panel, where the subfilter button was disabled due to e.g. items that cannot be send by mail (bound).
+--     e.g. weapons->1hd at mail send panel -> Button is disabled. Open the bank, switch to withdraw tab: The weapons sub-filter
+--     button is still disabled there! Needs to be reset on bank open e.g.
+
+--#56: 2021-03-25: Bug, Yumi: AwesomeGuildStore's CraftBag sell / List tab does not filter the subfilters properly anymore
+--[[
+      > Needs to be fixed within AGS's function SellTabWrapper:SetupCraftBag() which overwrite the additionalFilter for the CraftBag!
+    self.originalCraftBagAdditionalFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].additionalFilter
+    local runCraftBagAdditionalFilters
+    if self.originalCraftBagAdditionalFilter ~= nil and type(self.originalCraftBagAdditionalFilter) == "function" then
+        runCraftBagAdditionalFilters = function(slot)
+            return IsCraftBagItemSellableOnTradingHouse(slot) and self.originalCraftBagAdditionalFilter(slot)
+        end
+    else
+        runCraftBagAdditionalFilters = function(slot)
+            return IsCraftBagItemSellableOnTradingHouse(slot)
+        end
+    end
+    PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].additionalFilter = runCraftBagAdditionalFilters
+    -- no need to set the craft bag here, since UpdateFragments will be called right after OnOpen anyway
+end
+]]
+
+
+--WORKING ON - Last updated: 2021-03-29
+
+
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.3 - Current 1.6.0.3 - Changed 2020-11-29
+--  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-03-29
 --______________________________________________________________________________________________________________________
 
 
@@ -64,13 +95,14 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
---Level filters CP150 and CP160 were split up
+--
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---Removed debug messages
---#53: Removed crafting deconstruction/improvement "visible gap" between sort header and inventory list
+--#50 Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
+--#54 If PerfectPixel is enabled the search box won't be shown off-place in the main menu anymore (thanks to Pat1487 for the info and fix)
+--
 
 
 ---==========================================================================================================================================================================
@@ -250,9 +282,13 @@ local function reanchorAndHideVanillaUIControls(baseControl)
         local textSearchName = ZOsControlNames.textSearch
         local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
         if searchFiltersTextSearch then
+            local searchFilterBoxOffsetY = -10
+            if PerfectPixel ~= nil or PP ~= nil then
+                searchFilterBoxOffsetY = 70
+            end
             searchFiltersTextSearch:ClearAnchors()
             searchFiltersTextSearch:SetParent(baseControl)
-            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) - 10)
+            searchFiltersTextSearch:SetAnchor(BOTTOMLEFT, baseControl, TOPLEFT, 0, (-1 * searchFiltersTextSearch:GetHeight()) + searchFilterBoxOffsetY)
             if not VotanSearchBox_SavedVariables then
                 searchFiltersTextSearch:SetDimensions(150, 25)
                 searchFiltersTextSearch:SetAlpha(0.45)
@@ -828,6 +864,10 @@ local function InitializeHooks()
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
             end
             if doNormalChecks == true then
+                local llibFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
+                if debugSpam then
+                    d(">llibFiltersPanelId: " ..tostring(llibFiltersPanelId))
+                end
                 --AF.currentInventoryTypeOverride will be set if the inventory's quest item tab was opened before the
                 --inventory fragment get's hidden. AF.currentInventoryCurrentFilter will be ITEM_TYPE_DISPLAY_CATEGORY_QUEST
                 --(8) in that case!
@@ -839,7 +879,7 @@ local function InitializeHooks()
                     --Check if mail send or player trade are shown
                     local libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
                     if debugSpam then
-                        d(">libFiltersPanelId: " ..tostring(libFiltersPanelId))
+                        d(">>libFiltersPanelId: " ..tostring(libFiltersPanelId))
                     end
                     if ((libFiltersPanelId and (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
                                 libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
@@ -1918,15 +1958,22 @@ local function createDropdownBoxCallbackFunctionKeys()
     AF.dropdownCallbackKeys = keys
 end
 
+local function checkIfAddonIsDisallowed(addonName)
+    local otherAddonsDisallowed = AF.otherAddonsDisallowed
+    local isDisallowed = otherAddonsDisallowed[addonName]
+    if isDisallowed == true then
+        AF.otherAddons[addonName] = true
+    end
+    return isDisallowed
+end
+
 local function AdvancedFilters_Loaded(eventCode, addonName)
     --Disable the searchBar of the different inventories
     if not vanillaUIChangesToSearchBarsWereDone then
         disableVanillaUISearchBarsInLayouts()
     end
+    checkIfAddonIsDisallowed(addonName)
 
-    if addonName == "MultiCraft" then
-        AF.otherAddons[addonName] = true
-    end
     if addonName ~= AF.name then return end
 
     EVENT_MANAGER:UnregisterForEvent(AF.name .. "_Loaded", EVENT_ADD_ON_LOADED)

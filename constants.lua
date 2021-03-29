@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.4"
+AF.version = "1.6.0.5"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -13,6 +13,11 @@ AF.currentInventoryType = INVENTORY_BACKPACK
 AF.currentlySelectedDropDownEntry = nil
 
 AF.clientLang = GetCVar("language.2")
+
+AF.otherAddonsDisallowed = {
+    ["MultiCraft"] = true
+}
+
 
 --SavedVariables default settings
 AF.defaultSettings = {
@@ -123,6 +128,8 @@ local controlsForChecks = {
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
     quickslot               = QUICKSLOT_WINDOW,
+    mailSend                = MAIL_SEND,
+    trade                   = TRADE,
     --Keyboard variables
     store                   = STORE_WINDOW,
     smithingBaseVar         = ZO_Smithing,
@@ -500,6 +507,7 @@ AF.abortSubFilterRefreshInventoryTypes = abortSubFilterRefreshInventoryTypes
 --The possible subfilter groups for each inventory type, trade skill type and filtertype.
 local subfilterGroups = {
     --Player inventory
+    --> Will be re-used for inventory, bank deposit, guild bank deposit, house bank deposit, mail, trade with player, vendor sell, guild store sell
     [INVENTORY_BACKPACK] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
@@ -777,6 +785,64 @@ local subfilterGroups = {
     }
 }
 AF.subfilterGroups = subfilterGroups
+
+--INVENTORY TYPES
+--The following inventoryTypes (within AF.subfilterGroups) are LibFilters filterPanelIds!
+local invEqualsLibFilters = {
+    [LF_QUICKSLOT]              = true,
+    [LF_SMITHING_REFINE]        = true,
+    [LF_JEWELRY_REFINE]         = true,
+    [LF_SMITHING_CREATION]      = true,
+    [LF_JEWELRY_CREATION]       = true,
+    [LF_SMITHING_DECONSTRUCT]   = true,
+    [LF_JEWELRY_DECONSTRUCT]    = true,
+    [LF_SMITHING_IMPROVEMENT]   = true,
+    [LF_JEWELRY_IMPROVEMENT]    = true,
+    [LF_SMITHING_RESEARCH]      = true,
+    [LF_JEWELRY_RESEARCH]       = true,
+    [LF_ENCHANTING_CREATION]    = true,
+    [LF_ENCHANTING_EXTRACTION]  = true,
+    [LF_RETRAIT]                = true,
+}
+AF.invEqualsLibFilters = invEqualsLibFilters
+
+--Map the inventory types to their LibFilters filterType constant, where there is no entry in invEqualsLibFilters
+local mapInvTypeToLibFiltersFilterType = {
+    --Inventory
+    --Does not work as we need to check which filterType it is as the panel opens, and not as the subfilterBar gets created.
+    --So we will set the value to LF_INVENTORY and add a function to the control/fragment of the inventory to get the proper filterType
+    --[INVENTORY_BACKPACK]        = function(...) local lUtil = AF.util return lUtil.GetLibFiltersFilterTypeForInventorySubfilterGroup(...) end, --function to return LF_INVENTORY, LF_BANK_DEPOSIT etc. properly
+    [INVENTORY_BACKPACK]        = LF_INVENTORY,
+    --Others
+    [INVENTORY_QUEST_ITEM]      = LF_INVENTORY_QUEST,
+    [INVENTORY_CRAFT_BAG]       = LF_CRAFTBAG,
+    [INVENTORY_BANK]            = LF_BANK_WITHDRAW,
+    [INVENTORY_HOUSE_BANK]      = LF_HOUSE_BANK_WITHDRAW,
+    [INVENTORY_GUILD_BANK]      = LF_GUILDBANK_WITHDRAW,
+}
+AF.mapInvTypeToLibFiltersFilterType = mapInvTypeToLibFiltersFilterType
+
+local mapInvTypeToInvTypeBefore = {
+    --Inventory
+    [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,
+    [INVENTORY_QUEST_ITEM]      = INVENTORY_BACKPACK,
+    --Enchanting
+    [LF_ENCHANTING_CREATION]    = LF_ENCHANTING_EXTRACTION,
+    [LF_ENCHANTING_EXTRACTION]  = LF_ENCHANTING_CREATION,
+    --Refinement
+    [LF_SMITHING_REFINE]        = LF_JEWELRY_REFINE,
+    [LF_JEWELRY_REFINE]         = LF_SMITHING_REFINE,
+    --Deconstruction
+    [LF_SMITHING_DECONSTRUCT]   = LF_JEWELRY_DECONSTRUCT,
+    [LF_JEWELRY_DECONSTRUCT]    = LF_SMITHING_DECONSTRUCT,
+    --Improvement
+    [LF_SMITHING_IMPROVEMENT]   = LF_JEWELRY_IMPROVEMENT,
+    [LF_JEWELRY_IMPROVEMENT]    = LF_SMITHING_IMPROVEMENT,
+    --Research
+    [LF_SMITHING_RESEARCH]      = LF_JEWELRY_RESEARCH,
+    [LF_JEWELRY_RESEARCH]       = LF_SMITHING_RESEARCH,
+}
+AF.mapInvTypeToInvTypeBefore = mapInvTypeToInvTypeBefore
 
 --The filter bar parent controls
 local filterBarParents = {
@@ -1178,48 +1244,6 @@ local subfilterButtonEntriesNotForDropdownCallback = {
     },
 }
 AF.subfilterButtonEntriesNotForDropdownCallback = subfilterButtonEntriesNotForDropdownCallback
-
---INVENTORY TYPES
---The following inventoryTypes are LibFilters filterPanelIds!
-local invEqualsLibFilters = {
-    [LF_QUICKSLOT]              = true,
-    [LF_SMITHING_REFINE]        = true,
-    [LF_JEWELRY_REFINE]         = true,
-    [LF_SMITHING_CREATION]      = true,
-    [LF_JEWELRY_CREATION]       = true,
-    [LF_SMITHING_DECONSTRUCT]   = true,
-    [LF_JEWELRY_DECONSTRUCT]    = true,
-    [LF_SMITHING_IMPROVEMENT]   = true,
-    [LF_JEWELRY_IMPROVEMENT]    = true,
-    [LF_SMITHING_RESEARCH]      = true,
-    [LF_JEWELRY_RESEARCH]       = true,
-    [LF_ENCHANTING_CREATION]    = true,
-    [LF_ENCHANTING_EXTRACTION]  = true,
-    [LF_RETRAIT]                = true,
-}
-AF.invEqualsLibFilters = invEqualsLibFilters
-
-local mapInvTypeToInvTypeBefore = {
-    --Inventory + quest
-    [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,
-    [INVENTORY_QUEST_ITEM]      = INVENTORY_BACKPACK,
-    --Enchanting
-    [LF_ENCHANTING_CREATION]    = LF_ENCHANTING_EXTRACTION,
-    [LF_ENCHANTING_EXTRACTION]  = LF_ENCHANTING_CREATION,
-    --Refinement
-    [LF_SMITHING_REFINE]        = LF_JEWELRY_REFINE,
-    [LF_JEWELRY_REFINE]         = LF_SMITHING_REFINE,
-    --Deconstruction
-    [LF_SMITHING_DECONSTRUCT]   = LF_JEWELRY_DECONSTRUCT,
-    [LF_JEWELRY_DECONSTRUCT]    = LF_SMITHING_DECONSTRUCT,
-    --Improvement
-    [LF_SMITHING_IMPROVEMENT]   = LF_JEWELRY_IMPROVEMENT,
-    [LF_JEWELRY_IMPROVEMENT]    = LF_SMITHING_IMPROVEMENT,
-    --Research
-    [LF_SMITHING_RESEARCH]      = LF_JEWELRY_RESEARCH,
-    [LF_JEWELRY_RESEARCH]       = LF_SMITHING_RESEARCH,
-}
-AF.mapInvTypeToInvTypeBefore = mapInvTypeToInvTypeBefore
 
 --CRAFTBAG
 --The different filter groups for the CraftBag

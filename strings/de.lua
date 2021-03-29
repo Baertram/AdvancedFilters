@@ -36,6 +36,8 @@ local strings = {
     lamDebugOutputTT = "Zeigt Debugging Nachrichten im Chat/DebugLogViewer UI. an",
     lamDebugSpamOutput = "Debug Spam",
     lamDebugSpamOutputTT = "Achtung: Dies aktiviert sehr viele Debugging Nachrichten von AdvancedFilters im Chat/DebugLogViewer UI an. Aktiviere diese Einstellung NUR wenn du darum gebeten wirst!",
+    lamDebugSpamExcludeRefreshSubfilterBar = "Ausschließen: \'RefreshSubfilterBar\'",
+    lamDebugSpamExcludeDropdownBoxFilters = "Ausschließen: \'Dropdownbox Filter\'",
 
 
     --Error messages

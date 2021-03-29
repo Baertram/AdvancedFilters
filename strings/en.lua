@@ -209,8 +209,8 @@ local strings = {
     lamDebugOutputTT = "Shows some debug messages into the chat/DebugLogViewer UI.",
     lamDebugSpamOutput = "Debug Spam",
     lamDebugSpamOutputTT = "Attention: This will spam your chat/DebugLogViewer UI with a lot of messages from AdvancedFilters. Only enable this if you were told to do so!",
-    lamDebugSpamExcludeRefreshSubfilterBar = "Exclude RefreshSubfilterBar",
-    lamDebugSpamExcludeDropdownBoxFilters = "Exclude Dropdownbox filters",
+    lamDebugSpamExcludeRefreshSubfilterBar = "Exclude: \'RefreshSubfilterBar\'",
+    lamDebugSpamExcludeDropdownBoxFilters = "Exclude: \'Dropdownbox filters\'",
 
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Please read the chat error message!",
