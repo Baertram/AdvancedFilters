@@ -32,6 +32,58 @@ function AF.LAMSettingsMenu()
         --The LibAddonMenu2.0 settings panel reference variable
         AF.LAMsettingsPanel = AF.LAM:RegisterAddonPanel(AF.name .. "_LAM", panelData)
 
+------------------------------------------------------------------------------------------------------------------------
+        local optionsTableSubmenuDebug = {}
+        --For debugging
+        local debugCb = {
+            type = "checkbox",
+            name = strings.lamDebugOutput,
+            tooltip = strings.lamDebugOutputTT,
+            getFunc = function() return settings.doDebugOutput end,
+            setFunc = function(value)
+                AF.settings.doDebugOutput = value
+            end,
+            default = defSettings.doDebugOutput,
+        }
+        table.insert(optionsTableSubmenuDebug, debugCb)
+        local cbDebugSpam =             {
+            type = "checkbox",
+            name = strings.lamDebugSpamOutput,
+            tooltip = strings.lamDebugSpamOutputTT,
+            warning= strings.lamDebugSpamOutputTT,
+            getFunc = function() return settings.debugSpam end,
+            setFunc = function(value)
+                AF.settings.debugSpam = value
+            end,
+            default = defSettings.debugSpam,
+        }
+        table.insert(optionsTableSubmenuDebug, cbDebugSpam)
+        local cbDebugSpamRefreshSubfilterBarExclude =             {
+            type = "checkbox",
+            name = strings.lamDebugSpamExcludeRefreshSubfilterBar,
+            tooltip = strings.lamDebugSpamExcludeRefreshSubfilterBar,
+            getFunc = function() return settings.debugSpamExcludeRefreshSubfilterBar end,
+            setFunc = function(value)
+                AF.settings.debugSpamExcludeRefreshSubfilterBar = value
+            end,
+            disabled = function() return not AF.settings.debugSpam end,
+            default = defSettings.debugSpamExcludeRefreshSubfilterBar,
+        }
+        table.insert(optionsTableSubmenuDebug, cbDebugSpamRefreshSubfilterBarExclude)
+        local cbDebugSpamDropdownBoxfilterExclude =             {
+            type = "checkbox",
+            name = strings.lamDebugSpamExcludeDropdownBoxFilters,
+            tooltip = strings.lamDebugSpamExcludeDropdownBoxFilters,
+            getFunc = function() return settings.debugSpamExcludeDropdownBoxFilters end,
+            setFunc = function(value)
+                AF.settings.debugSpamExcludeDropdownBoxFilters = value
+            end,
+            disabled = function() return not AF.settings.debugSpam end,
+            default = defSettings.debugSpamExcludeDropdownBoxFilters,
+        }
+        table.insert(optionsTableSubmenuDebug, cbDebugSpamDropdownBoxfilterExclude)
+
+------------------------------------------------------------------------------------------------------------------------
         --The option controls for the LAM 2.0 panel
         local optionsTable =
         {	-- BEGIN OF OPTIONS TABLE
@@ -138,39 +190,12 @@ function AF.LAMSettingsMenu()
             --                              DEBUG
             --==============================================================================
             {
-                type = "description",
+                type = "submenu",
                 name = strings.lamDebugOutput,
-
-            },
-            {
-                type = "checkbox",
-                name = strings.lamDebugOutput,
-                tooltip = strings.lamDebugOutput,
-                getFunc = function() return settings.doDebugOutput end,
-                setFunc = function(value)
-                    AF.settings.doDebugOutput = value
-                end,
-                default = defSettings.doDebugOutput,
+                controls = optionsTableSubmenuDebug
             },
 
         } -- END OF OPTIONS TABLE
-        --For debugging
-        if GetDisplayName() == "@Baertram" then
-            --Enable short global variable for AdvancedFilters
-            local cbDebugSpam =             {
-                type = "checkbox",
-                name = strings.lamDebugSpamOutput,
-                tooltip = strings.lamDebugSpamOutput,
-                getFunc = function() return settings.debugSpam end,
-                setFunc = function(value)
-                    AF.settings.debugSpam = value
-                end,
-                default = defSettings.debugSpam,
-            }
-            table.insert(optionsTable, cbDebugSpam)
-        end
-
-
         --CALLBACK_MANAGER:RegisterCallback("LAM-PanelControlsCreated", AFLAMPanelCreated)
         AF.LAM:RegisterOptionControls(AF.name .. "_LAM", optionsTable)
     end

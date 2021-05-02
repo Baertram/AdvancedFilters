@@ -32,6 +32,14 @@ local strings = {
     lamShowDropdownLastSelectedEntries = "Zeige Filter Box Auswahl Historie",
     lamShowDropdownLastSelectedEntriesTT = "Klicke rechts auf die Filter Auswahl Box, um die Historie der letzten 10 ausgewählten Einträge aus den Filter Auswahl Boxen anzuzeigen (unterhalb der standard Einträge des Kontextmenüs). Klicke auf einen der Historien Einträge, um diesen erneut auszuwählen, sofern die Filter Auswahlbox der aktuellen Unterfilter Leiste diesen Eintrag besitzt (da die Historie übergreifend über alle zuletzt verwendeten Auswahl Filter Boxen funktioniert).",
 
+    lamDebugOutput = "Debug",
+    lamDebugOutputTT = "Zeigt Debugging Nachrichten im Chat/DebugLogViewer UI. an",
+    lamDebugSpamOutput = "Debug Spam",
+    lamDebugSpamOutputTT = "Achtung: Dies aktiviert sehr viele Debugging Nachrichten von AdvancedFilters im Chat/DebugLogViewer UI an. Aktiviere diese Einstellung NUR wenn du darum gebeten wirst!",
+    lamDebugSpamExcludeRefreshSubfilterBar = "Ausschließen: \'RefreshSubfilterBar\'",
+    lamDebugSpamExcludeDropdownBoxFilters = "Ausschließen: \'Dropdownbox Filter\'",
+
+
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Bitte lese die Fehlermeldung im Chat!",
     errorLibraryMissing     = afPrefixError .. " Benötigte Bibliothek \'%s\' ist nicht aktiviert. Dieses AddOn funktioniert nicht ohne diese!",

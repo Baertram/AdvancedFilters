@@ -27,8 +27,9 @@ local function HidePulse()
     pulseTimeline:Stop()
 end
 
-function AF_FilterBar:New(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
+function AF_FilterBar:New(libFiltersFiltertype, inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     local obj = ZO_Object.New(self)
+    obj.libFilters_filterType = libFiltersFiltertype
     obj:Initialize(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     return obj
 end
@@ -37,7 +38,10 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     local settings = AF.settings
     if settings.debugSpam then d("=============================================\n[AF]AF_FilterBarInitialize - inventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames)) end
     --get upper anchor position for subfilter bar
-    local _,_,_,_,_,offsetY = ZO_PlayerInventorySortBy:GetAnchor()
+    --Fix for patch 6.2.7 2020-11-23 ZOs added their own subFilter bars with Markarth patch and thus the subfilterbars are
+    --movin the inventory sort header down.
+    --local _,_,_,_,_,offsetY = ZO_PlayerInventorySortBy:GetAnchor()
+    local offsetY = 0
 
     --parent for the subfilter bar control
     local parents = AF.filterBarParents
@@ -587,8 +591,11 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
 end
 
 function AF_FilterBar:ActivateButton(newButton)
+    local settings              = AF.settings
+    local doDebugOutput         = settings.doDebugOutput
+    local debugSpam             = settings.debugSpam
     if not newButton then return end
-    if AF.settings.debugSpam then
+    if debugSpam then
         d("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>")
         d("[AF]ActivateButton: " ..tostring(newButton.name))
     end
@@ -694,7 +701,7 @@ function AF_FilterBar:ActivateButton(newButton)
 
     --Should the subfilterBar be shown?
     if util.CheckIfNoSubfilterBarShouldBeShown(nil, inventoryTypeOfFilterBar) then
-        if AF.settings.debugSpam then d(">[AF]ActivateButton - ABORT: CheckIfNoSubfilterBarShouldBeShown: true") end
+        if debugSpam then d(">[AF]ActivateButton - ABORT: CheckIfNoSubfilterBarShouldBeShown: true") end
         return
     end
 
@@ -730,18 +737,22 @@ function AF_FilterBar:ActivateButton(newButton)
     self.dropdown.m_comboBox.m_sortedItems = {}
     --Get the current LibFilters filterPanelId
     if inventoryTypeOfFilterBar == nil then
-        d("===============================================")
-        d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
-        d(">ERROR - inventoryType is NIL!")
-        d("===============================================")
+        --if doDebugOutput or debugSpam then
+            d("===============================================")
+            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
+            d(">ERROR - inventoryType is NIL!")
+            d("===============================================")
+        --end
     end
     --Get the current's inventory filterType
     local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryTypeOfFilterBar)
     if filterPanelIdActive == nil then
-        d("===============================================")
-        d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
-        d(">ERROR - filterPanelId is NIL!")
-        d("===============================================")
+        --if doDebugOutput or debugSpam then
+            d("===============================================")
+            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
+            d(">ERROR - filterPanelId is NIL!")
+            d("===============================================")
+        --end
     end
     --add new dropdown data
     PopulateDropdown(newButton)
@@ -885,6 +896,7 @@ end
 function AF.CreateSubfilterBars()
     --local variables for a speedUp on access on addon's global table variables
     local doDebugOutput         = AF.settings.doDebugOutput
+    local debugSpam             = AF.settings.debugSpam
     local inventoryNames        = AF.inventoryNames
     local tradeSkillNames       = AF.tradeSkillNames
     local filterTypeNames       = AF.filterTypeNames
@@ -902,8 +914,11 @@ function AF.CreateSubfilterBars()
                         excludeTheseButtonsAtThisFilterBar = excludeButtonNamesfromSubFilterBar[inventoryType][tradeSkillType][itemFilterType]
                     end
                     if inventoryNames[inventoryType] and tradeSkillNames[tradeSkillType] and filterTypeNames[itemFilterType] and subfilterButtonNames[itemFilterType] then
+                        --Get the LibFilters filtertype of the currently active filterbar
+                        local libFiltersFilterType = util.GetSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
                         --Build the subfilterBar with the buttons now
                         local subfilterBar = AF.AF_FilterBar:New(
+                                libFiltersFilterType,
                                 inventoryNames[inventoryType],
                                 tradeSkillNames[tradeSkillType],
                                 filterTypeNames[itemFilterType],
@@ -913,10 +928,10 @@ function AF.CreateSubfilterBars()
                         subfilterBar:SetInventoryType(inventoryType)
                         subfilterGroups[inventoryType][tradeSkillType][itemFilterType] = subfilterBar
                     else
-                        if doDebugOutput or AF.settings.debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing names - inventoryName: " ..tostring(inventoryNames[inventoryType]) .. ", tradeSkillName: " .. tostring(tradeSkillNames[tradeSkillType]) .. ", filterTypeName: " .. tostring(filterTypeNames[itemFilterType]) .. ", subfilterButtonName: " .. tostring(subfilterButtonNames[itemFilterType])) end
+                        if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing names - inventoryName: " ..tostring(inventoryNames[inventoryType]) .. ", tradeSkillName: " .. tostring(tradeSkillNames[tradeSkillType]) .. ", filterTypeName: " .. tostring(filterTypeNames[itemFilterType]) .. ", subfilterButtonName: " .. tostring(subfilterButtonNames[itemFilterType])) end
                     end
                 else
-                    if doDebugOutput or AF.settings.debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing data - inventoryType: " ..tostring(inventoryType) .. ", tradeSkillType: " .. tostring(tradeSkillType) .. ", itemFilterType: " .. tostring(itemFilterType)) end
+                    if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing data - inventoryType: " ..tostring(inventoryType) .. ", tradeSkillType: " .. tostring(tradeSkillType) .. ", itemFilterType: " .. tostring(itemFilterType)) end
                 end
             end
         end

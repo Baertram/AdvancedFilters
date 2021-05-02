@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.1"
+AF.version = "1.6.0.6"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -14,9 +14,16 @@ AF.currentlySelectedDropDownEntry = nil
 
 AF.clientLang = GetCVar("language.2")
 
+AF.otherAddonsDisallowed = {
+    ["MultiCraft"] = true
+}
+
+
 --SavedVariables default settings
 AF.defaultSettings = {
-    debugSpam                               = false, --Only for addon dev!
+    debugSpam                               = false,
+    debugSpamExcludeRefreshSubfilterBar     = true,
+    debugSpamExcludeDropdownBoxFilters      = true,
     doDebugOutput                           = false,
     hideItemCount                           = false,
     itemCountLabelColor = {
@@ -121,6 +128,8 @@ local controlsForChecks = {
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
     quickslot               = QUICKSLOT_WINDOW,
+    mailSend                = MAIL_SEND,
+    trade                   = TRADE,
     --Keyboard variables
     store                   = STORE_WINDOW,
     smithingBaseVar         = ZO_Smithing,
@@ -129,6 +138,7 @@ local controlsForChecks = {
     enchanting              = ENCHANTING,
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
+    companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
 }
 --Smithing
 controlsForChecks.refinementPanel       =   controlsForChecks.smithing.refinementPanel
@@ -170,6 +180,9 @@ local inventories = {
     [LF_QUICKSLOT] = {
         searchBox = ZO_QuickSlotSearchFiltersTextSearchBox,
     },
+    [LF_INVENTORY_COMPANION] = {
+        searchBox = ZO_CompanionEquipment_Panel_KeyboardSearchFiltersTextSearchBox, --controlsForChecks.companionInv.searchBox
+    },
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
@@ -177,7 +190,7 @@ INVENTORY_TYPE_VENDOR_BUY = 900
 
 --ITEMFILTERTYPES
 --Get the current maximum itemFilterType
-AF.maxItemFilterType = ITEMFILTERTYPE_MAX_VALUE -- 26 is the maximum at API 100028 "Scalebreaker"
+AF.maxItemFilterType = ITEM_TYPE_DISPLAY_CATEGORY_MAX_VALUE -- 41 is the maximum at API 100035 "Blackwood"
 --Build new "virtual" itemfiltertypes for crafting stations so one can distinguish the different subfilter bars
 local itemFilterTypesDefinedForAdvancedFilters = {
     --Refine
@@ -245,6 +258,7 @@ local inventoryNames = {
     [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
     [LF_RETRAIT]                = "Retrait",
     [LF_QUICKSLOT]              = "QuickSlot",
+    [LF_INVENTORY_COMPANION]    = "CompanionInventory",
 }
 AF.inventoryNames = inventoryNames
 
@@ -284,6 +298,7 @@ local filterTypeNames = {
     [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]         = "Furnishings",
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]    = "JewelryCrafting",
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]            = "Jewelry",
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION]          = "Companion",
     [ITEMFILTERTYPE_AF_WEAPONS_SMITHING]            = "WeaponsSmithing",
     --[ITEMFILTERTYPE_AF_CREATE_ARMOR_SMITHING]       = "CreateArmorSmithing",
     [ITEMFILTERTYPE_AF_REFINE_SMITHING]             = "RefineSmithing",
@@ -300,6 +315,7 @@ local filterTypeNames = {
     --[ITEMFILTERTYPE_AF_CREATE_WEAPONS_WOODWORKING]  = "CreateWeaponsWoodworking",
     --[ITEMFILTERTYPE_AF_CREATE_ARMOR_WOODWORKING]    = "CreateArmorWoodworking",
     [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER]              = "ArmorClothier",
+
     --[ITEMFILTERTYPE_AF_CREATE_JEWELRY]              = "CreateJewelryCraftingStation",
     [ITEMFILTERTYPE_AF_REFINE_JEWELRY]              = "RefineJewelryCraftingStation",
     [ITEMFILTERTYPE_AF_RETRAIT_ARMOR]               = "ArmorRetrait",
@@ -342,7 +358,24 @@ AF.normalFilter2CraftingFilter = normalFilter2CraftingFilter
 --SUBFILTER BARS
 --The list controls for the reanchoring of subfilter bars
 local reanchorDataSmithingResearch = {
-    --The timer icon at the top left edge at the SMITHING reasearch panel
+    {
+        --The research line list in total was anchored to the include banked checkbox
+        control         = ZO_SmithingTopLevelResearchPanelResearchLineList,
+        anchorPoint     = TOP,
+        relativeTo      = ZO_SmithingTopLevelResearchPanelButtonDivider,
+        relativePoint   = BOTTOM,
+        offsetX         = 0,
+        offsetY         = 45,--subFilter bar height + 5 space
+    },
+    {
+        --The research line list in total was anchored to the include banked checkbox
+        control         = ZO_SmithingTopLevelResearchPanelResearchLineListList,
+        anchorPoint     = TOP,
+        relativeTo      = ZO_SmithingTopLevelResearchPanelResearchLineList,
+        relativePoint   = TOP,
+        offsetX         = 0,
+        offsetY         = 30,
+    },
     {
         --The researching text at the top left edge at the SMITHING reasearch panel
         control         = ZO_SmithingTopLevelResearchPanelNumResearching,
@@ -421,8 +454,8 @@ AF.subFiltersBarInactive = subFiltersBarInactive
 --These panels are currently not supported
 local notSupportedPanels = {
     [CRAFTING_TYPE_ENCHANTING] = {
-        [ENCHANTING_MODE_RECIPES]   = true,
         [ENCHANTING_MODE_NONE]      = true,
+        [ENCHANTING_MODE_RECIPES]   = true,
     },
 }
 AF.notSupportedPanels = notSupportedPanels
@@ -481,6 +514,7 @@ AF.abortSubFilterRefreshInventoryTypes = abortSubFilterRefreshInventoryTypes
 --The possible subfilter groups for each inventory type, trade skill type and filtertype.
 local subfilterGroups = {
     --Player inventory
+    --> Will be re-used for inventory, bank deposit, guild bank deposit, house bank deposit, mail, trade with player, vendor sell, guild store sell
     [INVENTORY_BACKPACK] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
@@ -491,6 +525,7 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
 
@@ -755,9 +790,78 @@ local subfilterGroups = {
             [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT]          = {},
             [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT]    = {},
         }
-    }
+    },
+    --Companion inventory
+    [LF_INVENTORY_COMPANION] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
+        },
+    },
+
 }
 AF.subfilterGroups = subfilterGroups
+
+--INVENTORY TYPES
+--The following inventoryTypes (within AF.subfilterGroups) are LibFilters filterPanelIds!
+local invEqualsLibFilters = {
+    [LF_QUICKSLOT]              = true,
+    [LF_SMITHING_REFINE]        = true,
+    [LF_JEWELRY_REFINE]         = true,
+    [LF_SMITHING_CREATION]      = true,
+    [LF_JEWELRY_CREATION]       = true,
+    [LF_SMITHING_DECONSTRUCT]   = true,
+    [LF_JEWELRY_DECONSTRUCT]    = true,
+    [LF_SMITHING_IMPROVEMENT]   = true,
+    [LF_JEWELRY_IMPROVEMENT]    = true,
+    [LF_SMITHING_RESEARCH]      = true,
+    [LF_JEWELRY_RESEARCH]       = true,
+    [LF_ENCHANTING_CREATION]    = true,
+    [LF_ENCHANTING_EXTRACTION]  = true,
+    [LF_RETRAIT]                = true,
+    [LF_INVENTORY_COMPANION]    = true,
+}
+AF.invEqualsLibFilters = invEqualsLibFilters
+
+--Map the inventory types to their LibFilters filterType constant, where there is no entry in invEqualsLibFilters
+local mapInvTypeToLibFiltersFilterType = {
+    --Inventory
+    --Does not work as we need to check which filterType it is as the panel opens, and not as the subfilterBar gets created.
+    --So we will set the value to LF_INVENTORY and add a function to the control/fragment of the inventory to get the proper filterType
+    --[INVENTORY_BACKPACK]        = function(...) local lUtil = AF.util return lUtil.GetLibFiltersFilterTypeForInventorySubfilterGroup(...) end, --function to return LF_INVENTORY, LF_BANK_DEPOSIT etc. properly
+    [INVENTORY_BACKPACK]        = LF_INVENTORY,
+    --Others
+    [INVENTORY_QUEST_ITEM]      = LF_INVENTORY_QUEST,
+    [INVENTORY_CRAFT_BAG]       = LF_CRAFTBAG,
+    [INVENTORY_BANK]            = LF_BANK_WITHDRAW,
+    [INVENTORY_HOUSE_BANK]      = LF_HOUSE_BANK_WITHDRAW,
+    [INVENTORY_GUILD_BANK]      = LF_GUILDBANK_WITHDRAW,
+}
+AF.mapInvTypeToLibFiltersFilterType = mapInvTypeToLibFiltersFilterType
+
+local mapInvTypeToInvTypeBefore = {
+    --Inventory
+    [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,
+    [INVENTORY_QUEST_ITEM]      = INVENTORY_BACKPACK,
+    --Enchanting
+    [LF_ENCHANTING_CREATION]    = LF_ENCHANTING_EXTRACTION,
+    [LF_ENCHANTING_EXTRACTION]  = LF_ENCHANTING_CREATION,
+    --Refinement
+    [LF_SMITHING_REFINE]        = LF_JEWELRY_REFINE,
+    [LF_JEWELRY_REFINE]         = LF_SMITHING_REFINE,
+    --Deconstruction
+    [LF_SMITHING_DECONSTRUCT]   = LF_JEWELRY_DECONSTRUCT,
+    [LF_JEWELRY_DECONSTRUCT]    = LF_SMITHING_DECONSTRUCT,
+    --Improvement
+    [LF_SMITHING_IMPROVEMENT]   = LF_JEWELRY_IMPROVEMENT,
+    [LF_JEWELRY_IMPROVEMENT]    = LF_SMITHING_IMPROVEMENT,
+    --Research
+    [LF_SMITHING_RESEARCH]      = LF_JEWELRY_RESEARCH,
+    [LF_JEWELRY_RESEARCH]       = LF_SMITHING_RESEARCH,
+}
+AF.mapInvTypeToInvTypeBefore = mapInvTypeToInvTypeBefore
 
 --The filter bar parent controls
 local filterBarParents = {
@@ -782,6 +886,7 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_QUICKSLOT]]              = GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
+    [inventoryNames[LF_INVENTORY_COMPANION]]    = GetControl(controlsForChecks.companionInv.control, filterDividerSuffix),
 }
 AF.filterBarParents = filterBarParents
 
@@ -864,48 +969,25 @@ local layoutDataFragments = {
 AF.layoutDataFragments = layoutDataFragments
 
 --The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
---2020-09-24: https://github.com/esoui/esoui/blob/c47af79c7c51681ae315d4f9a6d70d9e965ad514/esoui/ingame/inventory/backpacklayouts.lua#L6
-local AF_defaultInventoryBackpackLayoutData = {
-    --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-    width = 565,
-    backpackOffsetY = 96,
-    --inventoryTopOffsetY = -20,
-    --inventoryBottomOffsetY = -30,
-    sortByOffsetY = 102,
-    --emptyLabelOffsetY = 100,
-    --sortByHeaderWidth = 576,
-    --sortByNameWidth = 241,
-    --hideBankInfo = true,
-    --hideCurrencyInfo = false,
-}
-local AF_smithingResearchLayoutData = {
+--for some of the panels, e.g. ENCHANTING
+--2020-11-23:
+local AF_modifiedInventoryBackpackLayoutDataForQuickslot = {
     --inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
     --width = 565,
-    backpackOffsetY = 0,
+    backpackOffsetY = 136, --original is 136 in BACKPACK_DEFAULT_LAYOUT_FRAGMENT.layoutData
     --inventoryTopOffsetY = -20,
     --inventoryBottomOffsetY = -30,
-    --sortByOffsetY = 0,
+    sortByOffsetY = 96,
     --emptyLabelOffsetY = 100,
     --sortByHeaderWidth = 576,
     --sortByNameWidth = 241,
     --hideBankInfo = true,
     --hideCurrencyInfo = false,
 }
-local filterBarCraftingInventoryLayoutData = {
-    [LF_SMITHING_REFINE]        = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_DECONSTRUCT]   = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_IMPROVEMENT]   = AF_defaultInventoryBackpackLayoutData,
-    [LF_SMITHING_RESEARCH]      = AF_smithingResearchLayoutData,
-    [LF_JEWELRY_REFINE]         = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_DECONSTRUCT]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_IMPROVEMENT]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_JEWELRY_RESEARCH]       = AF_smithingResearchLayoutData,
-    [LF_ENCHANTING_CREATION]    = AF_defaultInventoryBackpackLayoutData,
-    [LF_ENCHANTING_EXTRACTION]  = AF_defaultInventoryBackpackLayoutData,
-    [LF_RETRAIT]                = AF_defaultInventoryBackpackLayoutData,
+local filterBarAlternativeInventoryLayoutData = {
+    [LF_QUICKSLOT]         = AF_modifiedInventoryBackpackLayoutDataForQuickslot,
 }
-AF.defaultInventoryBackpackLayoutData = AF_defaultInventoryBackpackLayoutData
-AF.filterBarCraftingInventoryLayoutData = filterBarCraftingInventoryLayoutData
+AF.filterBarAlternativeInventoryLayoutData = filterBarAlternativeInventoryLayoutData
 
 --SUBFILTER BAR BUTTONS
 --The subfilter bars button names
@@ -1046,6 +1128,9 @@ local subfilterButtonNames = {
     [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY] = {
         "Neck", "Ring", AF_CONST_ALL,
     },
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {
+        "Jewelry", "Weapon", "Armor", AF_CONST_ALL,
+    },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT] = {
         "Trophy", "Repair", "Siege", "Scroll", "Potion", "Food", "Drink", "Crown",
         AF_CONST_ALL,
@@ -1182,48 +1267,6 @@ local subfilterButtonEntriesNotForDropdownCallback = {
     },
 }
 AF.subfilterButtonEntriesNotForDropdownCallback = subfilterButtonEntriesNotForDropdownCallback
-
---INVENTORY TYPES
---The following inventoryTypes are LibFilters filterPanelIds!
-local invEqualsLibFilters = {
-    [LF_QUICKSLOT]              = true,
-    [LF_SMITHING_REFINE]        = true,
-    [LF_JEWELRY_REFINE]         = true,
-    [LF_SMITHING_CREATION]      = true,
-    [LF_JEWELRY_CREATION]       = true,
-    [LF_SMITHING_DECONSTRUCT]   = true,
-    [LF_JEWELRY_DECONSTRUCT]    = true,
-    [LF_SMITHING_IMPROVEMENT]   = true,
-    [LF_JEWELRY_IMPROVEMENT]    = true,
-    [LF_SMITHING_RESEARCH]      = true,
-    [LF_JEWELRY_RESEARCH]       = true,
-    [LF_ENCHANTING_CREATION]    = true,
-    [LF_ENCHANTING_EXTRACTION]  = true,
-    [LF_RETRAIT]                = true,
-}
-AF.invEqualsLibFilters = invEqualsLibFilters
-
-local mapInvTypeToInvTypeBefore = {
-    --Inventory + quest
-    [INVENTORY_BACKPACK]        = INVENTORY_QUEST_ITEM,
-    [INVENTORY_QUEST_ITEM]      = INVENTORY_BACKPACK,
-    --Enchanting
-    [LF_ENCHANTING_CREATION]    = LF_ENCHANTING_EXTRACTION,
-    [LF_ENCHANTING_EXTRACTION]  = LF_ENCHANTING_CREATION,
-    --Refinement
-    [LF_SMITHING_REFINE]        = LF_JEWELRY_REFINE,
-    [LF_JEWELRY_REFINE]         = LF_SMITHING_REFINE,
-    --Deconstruction
-    [LF_SMITHING_DECONSTRUCT]   = LF_JEWELRY_DECONSTRUCT,
-    [LF_JEWELRY_DECONSTRUCT]    = LF_SMITHING_DECONSTRUCT,
-    --Improvement
-    [LF_SMITHING_IMPROVEMENT]   = LF_JEWELRY_IMPROVEMENT,
-    [LF_JEWELRY_IMPROVEMENT]    = LF_SMITHING_IMPROVEMENT,
-    --Research
-    [LF_SMITHING_RESEARCH]      = LF_JEWELRY_RESEARCH,
-    [LF_JEWELRY_RESEARCH]       = LF_SMITHING_RESEARCH,
-}
-AF.mapInvTypeToInvTypeBefore = mapInvTypeToInvTypeBefore
 
 --CRAFTBAG
 --The different filter groups for the CraftBag
