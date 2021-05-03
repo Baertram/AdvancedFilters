@@ -954,6 +954,9 @@ local filterBarParentControlsToHide = {
     },
     [LF_QUICKSLOT] = {
         GetControl(controlsForChecks.quickslot.container, searchDividerSuffix),
+    },
+    [LF_INVENTORY_COMPANION] = {
+        GetControl(controlsForChecks.companionInv.control, searchDividerSuffix),
     }
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide

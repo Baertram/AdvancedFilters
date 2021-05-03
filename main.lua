@@ -148,6 +148,7 @@ local enchantingVar = controlsForChecks.enchanting
 local enchantingBaseVar = controlsForChecks.enchantingBaseVar
 local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
+local companionInvVar = controlsForChecks.companionInv
 
 --local functions for speedup
 local util = AF.util
@@ -792,6 +793,8 @@ local function InitializeHooks()
                 UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
+            elseif invType == LF_INVENTORY_COMPANION then
+                UpdateListAnchors(companionInvVar, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             else
@@ -817,6 +820,8 @@ local function InitializeHooks()
                 UpdateListAnchors(STORE_WINDOW, 0, nil, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
+            elseif invType == LF_INVENTORY_COMPANION then
+                UpdateListAnchors(companionInvVar, 0, nil, false)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, 0, nil, true)
             else
@@ -1196,6 +1201,66 @@ local function InitializeHooks()
     end
     -->Throws error message if you open inventory after reloadui:
     SecurePostHook(playerInvVar, "ChangeFilter", ChangeFilterInventory)
+
+
+    --=== COMPANION INVENTORY===========================================================================================
+    local function ChangeFilterCompanionInventory(self, filterData)
+        local debugSpam = AF.settings.debugSpam
+
+        --self: playerInvVar, filterTab: playerInvVar.filterTab
+        local tabInvType = LF_INVENTORY_COMPANION
+        local currentInvType = tabInvType
+        AF.currentInventoryType = currentInvType
+        --Is the bank opened but the current filterType is 0 then check if another currentFilter was set as the bank was closed last time
+        --and reset the subfilter bar to the last chosen one now. Therefor the currentFilter needs to be changed to the correct "last" one again:
+        local currentFilter = self.currentFilter.descriptor
+        if debugSpam then
+            d("===========================================================================================================>")
+            d("[AF]companionInvVar:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
+        end
+        --Check if currentFilter is a function and then try to resolve the real filtervalue below it
+        local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(currentInvType, currentFilter)
+        if customInventoryFilterButtonsItemType then
+            if debugSpam then d("[AF]ChangeFilterCompanionInventory-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
+        end
+        if debugSpam then
+            d(">>[ChangeFilterCompanionInventory]ThrottledUpdate - ShowSubfilterBar, currentInvType: " ..tostring(currentInvType))
+        end
+        local inventoryControl = self.control
+        if inventoryControl then
+            --For debugging
+            AF.currentInventoryControl = inventoryControl
+
+            --Hide and move some controls like subfilter bar divider lines etc.
+            reanchorAndHideVanillaUIControls(inventoryControl)
+        end
+
+        ThrottledUpdate("ShowSubfilterBar_" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, currentInvType)
+        --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added
+        --inventory filters like HarvensStolenFilter or NTakLootAndSteal addons
+        local currentFilterToCheck = customInventoryFilterButtonsItemType or currentFilter
+        local inactiveSubFilterBarInventoryType = AF.subFiltersBarInactive[currentFilterToCheck] or nil
+        if inactiveSubFilterBarInventoryType ~= nil and inactiveSubFilterBarInventoryType ~= false then
+            if debugSpam then
+                d(">inactiveSubFilterBarInventoryType: " ..tostring(inactiveSubFilterBarInventoryType) .. ", curInvType: " .. tostring(currentInvType) .. ", tabInvType: " ..tostring(tabInvType) .. ", currentFilterToCheck: " ..tostring(currentFilterToCheck))
+            end
+            if debugSpam then d(">inactiveSubFilterBarInventoryType: " ..tostring(inactiveSubFilterBarInventoryType) .. ", curInvType: " .. tostring(currentInvType) .. ", tabInvType: " ..tostring(tabInvType) .. ", currentFilterToCheck: " ..tostring(currentFilterToCheck)) end
+            --Compare the inventory tab's inventoryType with the inactive inventoryType, and
+            --set the inventory to update accordingly
+            local invType
+            if tabInvType == inactiveSubFilterBarInventoryType then
+                invType = inactiveSubFilterBarInventoryType
+            else
+                invType = currentInvType
+            end
+            --Update the count of filtered/shown items in the inventory FreeSlot label
+            --Delay this function call as the data needs to be filtered first!
+            ThrottledUpdate("RefreshItemCount_" .. invType,
+                    50, util.updateInventoryInfoBarCountLabel, invType, false)
+        end
+    end
+    SecurePostHook(companionInvVar, "ChangeFilter", ChangeFilterCompanionInventory)
+
 
 
     --=== QUICKLOT =========================================================================================================
@@ -1684,7 +1749,6 @@ local function InitializeHooks()
     end
     --Hook the inventories info bar now for the item filtered/shown count
     hookInventoryInfoBar()
-
 
     --=== INVENTORY - EmptyBagLabel ========================================================================================
     --Update the count of items filtered if text search boxes are used (ZOs or Votans Search Box)

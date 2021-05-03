@@ -238,6 +238,9 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
         --CurrentFilter is a table
         --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentFilter(invType, currentFilter)
         AF.controlsForChecks.quickslot.currentFilter = currentFilter
+    elseif invType == LF_INVENTORY_COMPANION then
+        --CurrentFilter is a table
+        AF.controlsForChecks.companionInv.currentFilter.descriptor = currentFilter
     else
         local playerInvVar = controlsForChecks.playerInv
         if not playerInvVar.inventories[invType] then
