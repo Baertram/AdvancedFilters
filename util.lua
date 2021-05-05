@@ -181,6 +181,9 @@ function util.GetCurrentFilter(invType)
         local craftingInv = subfilterBar and util.GetInventoryFromCraftingPanel(subfilterBar.inventoryType)
         if not craftingInv then return end
         currentFilter = craftingInv.currentFilter
+    elseif invType == LF_INVENTORY_COMPANION then
+        --CurrentFilter is a table
+        currentFilter = AF.controlsForChecks.companionInv.currentFilter.descriptor
     else
         --Get the player inventory for the inventory type
         local playerInvVar = controlsForChecks.playerInv
@@ -347,7 +350,8 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         [LF_JEWELRY_DECONSTRUCT]    = INVENTORY_BACKPACK,
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BACKPACK,
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BACKPACK,
-        [LF_JEWELRY_RESEARCH]      = INVENTORY_BACKPACK,
+        [LF_JEWELRY_RESEARCH]       = INVENTORY_BACKPACK,
+        [LF_INVENTORY_COMPANION]    = INVENTORY_BACKPACK,
     }
     local mapLibFiltersInvToRealInvType2 = {
         [LF_RETRAIT]                = INVENTORY_BANK,
@@ -988,6 +992,7 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isJunkInvButtonActive         = subFilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isTrade                       = util.IsFilterPanelShown(LF_TRADE) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
+    local isCompanionInv                = util.IsCompanionInventoryShown()
     return {
         libFiltersPanelId = libFiltersPanelId,
         isMailSendPanel = isMailSendPanel,
@@ -1001,7 +1006,8 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
         isGuildStoreSellPanel = isGuildStoreSellPanel,
         isRetraitStation = isRetraitStation,
         isJunkInvButtonActive = isJunkInvButtonActive,
-        isTrade = isTrade
+        isTrade = isTrade,
+        isCompanionInv = isCompanionInv
     }
 end
 
@@ -1153,8 +1159,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local isGuildStoreSellPanel         = subFilterBarFilterInfo.isGuildStoreSellPanel
     local isRetraitStation              = subFilterBarFilterInfo.isRetraitStation
     local isJunkInvButtonActive         = subFilterBarFilterInfo.isJunkInvButtonActive
+    local isCompanionInv                = subFilterBarFilterInfo.isCompanionInv
 
-    if debugSpam then d(">isMailSend: " ..tostring(isMailSendPanel) .. ", isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
+    if debugSpam then d(">isMailSend: " ..tostring(isMailSendPanel) .. ", isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", isCompanionInv: " ..tostring(isCompanionInv) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
     ------------------------------------------------------------------------------------------------------------------------
@@ -1190,8 +1197,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             local isItemBankAble = true
             local isBOPTradeable = false
             local isBound = false
+            local itemIsOwnedByCompanion = false
             local passesCallback
             local passesFilter
+
+            local bagId     = itemData.bagId
+            local slotIndex = itemData.slotIndex
+
             --Another addon uses filters on this LibFilters panelId?
             local otherAddonUsesFilters = util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters(itemData, realInvType, craftingType, libFiltersPanelId)
             if isNoCrafting then
@@ -1206,9 +1218,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                 if debugSpam and not debugSpamExcludeRefreshSubfilterBar then
                     local itemlink
                     if isVendorBuy then
-                        itemlink = GetStoreItemLink(itemData.slotIndex)
+                        itemlink = GetStoreItemLink(slotIndex)
                     else
-                        itemlink = GetItemLink(itemData.bagId, itemData.slotIndex)
+                        itemlink = GetItemLink(bagId, slotIndex)
                     end
                     d(">> " .. itemlink .. " - passesCallback: " ..tostring(passesCallback) .. ", passesFilter: " ..tostring(passesFilter))
                 end
@@ -1226,13 +1238,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     if craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
                         --Jewelry deconstruction
                         if libFiltersPanelId == LF_JEWELRY_DECONSTRUCT then
-                            local itemLink = GetItemLink(itemData.bagId, itemData.slotIndex)
+                            local itemLink = GetItemLink(bagId, slotIndex)
                             passesFilter = passesFilter and not IsItemLinkForcedNotDeconstructable(itemLink)
                         end
                         --Retrait
                     elseif craftingType == CRAFTING_TYPE_NONE then
                         if libFiltersPanelId == LF_RETRAIT and isRetraitStation then
-                            passesFilter = passesFilter and CanItemBeRetraited(itemData.bagId, itemData.slotIndex)
+                            passesFilter = passesFilter and CanItemBeRetraited(bagId, slotIndex)
                         end
                     end
                 end
@@ -1242,7 +1254,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                 -- TODO: Check jewelry refine subfilter buttons greying out properly
                 --if passesCallback and passesFilter then
                 --if libFiltersPanelId == LF_JEWELRY_REFINE then
-                --    local itemLink = GetItemLink(itemData.bagId, itemData.slotIndex)
+                --    local itemLink = GetItemLink(bagId, slotIndex)
                 --    local itemType = GetItemLinkItemType(itemLink)
                 --    if itemType == ITEMTYPE_JEWELRY_TRAIT or itemType == ITEMTYPE_JEWELRY_RAW_TRAIT or itemType == ITEMTYPE_JEWELRYCRAFTING_BOOSTER or
                 --    itemType == ITEMTYPE_JEWELRYCRAFTING_MATERIAL or itemType == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER or itemType == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL then
@@ -1255,13 +1267,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                 if not isVendorBuy then
                     --Check if item is junk and do not pass the callback then!
                     if hasAnyJunkInBag then
-                        isItemJunk = IsItemJunk(itemData.bagId, itemData.slotIndex)
+                        isItemJunk = IsItemJunk(bagId, slotIndex)
                     end
                     --Check if the item can be sold
                     if isVendorPanel or isFencePanel then
                         isItemSellable = true
                         --[[
-                            local itemSellInformation = GetItemLinkSellInformation(GetItemLink(itemData.bagId, itemData.slotIndex))
+                            local itemSellInformation = GetItemLinkSellInformation(GetItemLink(bagId, slotIndex))
                             --ItemSellInformation
                             --        * ITEM_SELL_INFORMATION_CANNOT_SELL = 4
                             --        * ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED = 3
@@ -1277,12 +1289,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     end
                     --Check if item is stolen (crafting or banks)
                     if isABankDepositPanel or isVendorPanel or not isNoCrafting or isGuildStoreSellPanel or isFencePanel or isLaunderPanel or isMailSendPanel then
-                        isItemStolen = IsItemStolen(itemData.bagId, itemData.slotIndex)
+                        isItemStolen = IsItemStolen(bagId, slotIndex)
                     end
                     --Checks for bound and BOP tradeable
                     if isGuildBankDepositPanel or isGuildStoreSellPanel or isMailSendPanel then
-                        isBound         = IsItemBound(itemData.bagId, itemData.slotIndex)
-                        isBOPTradeable  = IsItemBoPAndTradeable(itemData.bagId, itemData.slotIndex)
+                        isBound         = IsItemBound(bagId, slotIndex)
+                        isBOPTradeable  = IsItemBoPAndTradeable(bagId, slotIndex)
                     end
                     --Is an item below a subfilter but cannot be deposit/sold (bank, guild bank, vendor):
                     --The subfilter button will be still enabled as there are no items to check (will be filtered by ESO vanilla UI BEFORE AF can check them)
@@ -1297,6 +1309,15 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                         --Bound but tradeable items
                         isItemBankAble = not isBound and not isBOPTradeable
                     end
+                    --Companion inventory
+                    if isCompanionInv then
+                        itemIsOwnedByCompanion = (GetItemActorCategory(bagId, slotIndex) == GAMEPLAY_ACTOR_CATEGORY_COMPANION) or false
+if debugSpam then
+    local il = GetItemLink(bagId, slotIndex)
+    d(">>[COMPANION INV] item: " .. il .. ", itemIsOwnedByCompanion: " ..tostring(itemIsOwnedByCompanion))
+end
+                    end
+
                 end
                 ----------------------------------------------------------------------------------------
                 --[No crafting panel] (e.g. inventory, bank, guild bank, mail, trade, craftbag):
@@ -1361,6 +1382,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     elseif isMailSendPanel then
                         doEnableSubFilterButtonAgain = not isItemStolen and not isBound
 
+                        --[Companion inventory]
+                        --Item is:
+                        --owned by companion
+                        -->not junk
+                    elseif isCompanionInv then
+                        doEnableSubFilterButtonAgain = (itemIsOwnedByCompanion and not isItemJunk)
+
                         --[Normal inventory, mail, trade, craftbag]
                         --Item is:
                         -->not junk
@@ -1368,13 +1396,13 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     else
                         doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk))
                     end
-                    ----------------------------------------------------------------------------------------
-                    --[Crafting panel] (e.g. refine, creation, deconstruction, improvement, research, recipes, extraction, retrait):
-                    --Item is:
-                    -->Not stolen (currently deactivated!)
+                        ----------------------------------------------------------------------------------------
+                        --[Crafting panel] (e.g. refine, creation, deconstruction, improvement, research, recipes, extraction, retrait):
+                        --Item is:
+                        -->Not stolen (currently deactivated!)
                 else
                     --if isRetraitStation and button.name == "Shield" then
-                    --d(">" .. GetItemLink(itemData.bagId, itemData.slotIndex) .. " passesCallback: " ..tostring(passesCallback) .. ", otherAddonUsesFilters: " .. tostring(otherAddonUsesFilters) .. ", passesFilter: " ..tostring(passesFilter) .. ", canBeRetraited: " .. tostring(CanItemBeRetraited(itemData.bagId, itemData.slotIndex)) .. " - doEnableSubFilterButtonAgain: " ..tostring(doEnableSubFilterButtonAgain))
+                    --d(">" .. GetItemLink(bagId, slotIndex) .. " passesCallback: " ..tostring(passesCallback) .. ", otherAddonUsesFilters: " .. tostring(otherAddonUsesFilters) .. ", passesFilter: " ..tostring(passesFilter) .. ", canBeRetraited: " .. tostring(CanItemBeRetraited(bagId, slotIndex)) .. " - doEnableSubFilterButtonAgain: " ..tostring(doEnableSubFilterButtonAgain))
                     --end
                     itemsFound = itemsFound +1
                     --d("<<< Crafting station: " ..tostring(itemsFound))
@@ -1394,11 +1422,11 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
-
+    local playerInvVar      = controlsForChecks.playerInv
+    
     --Check if filters apply to the subfilter and change the color of the subfilter button
     for _, button in ipairs(subfilterBar.subfilterButtons) do
-        if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">==============================>\nButtonName: " .. tostring(button.name)) end
-        local playerInvVar = controlsForChecks.playerInv
+        if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">=====>\nButtonName: " .. tostring(button.name)) end
         if onlyEnableAllSubfilterBarButtons == true or not grayOutSubFiltersWithNoItems then
             doEnableSubFilterButtonAgain = true
         else
@@ -1949,6 +1977,18 @@ end
 
 --======================================================================================================================
 -- -^- Filter functions                                                                                             -^-
+--======================================================================================================================
+
+
+--======================================================================================================================
+-- -v- Companion functions                                                                                           -v-
+--======================================================================================================================
+function util.IsCompanionInventoryShown()
+    local isCompanionInvHidden = controlsForChecks.companionInv.control:IsHidden()
+    return not isCompanionInvHidden
+end
+--======================================================================================================================
+-- -^- Companion functions                                                                                           -^-
 --======================================================================================================================
 
 --======================================================================================================================
