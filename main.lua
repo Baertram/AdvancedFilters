@@ -976,17 +976,16 @@ local function InitializeHooks()
             end
             --Call RefreshSubfilterBar via "proxy" metatable function on the inventoryType
             if inventoryType == LF_INVENTORY_COMPANION then
-                --[[
-                --Breaks the search filter bar if executed here!
-                if AF.settings.debugSpam then d("---------->Calling 'Companion' RefreshSubfilterBar via direct function") end
-                local subfilterGroup = AF.subfilterGroups[inventoryType]
-                if not subfilterGroup then return end
-                local craftingType = GetCraftingType()
-                local currentSubfilterBar = subfilterGroup.currentSubfilterBar
-                if not currentSubfilterBar then return end
-                ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-                        RefreshSubfilterBar, currentSubfilterBar)
-                ]]
+                --Delay to let the menus update properly so the currentFilter etc. are the correct ones
+                zo_callLater(function()
+                    local subfilterGroup = AF.subfilterGroups[inventoryType]
+                    if not subfilterGroup then return end
+                    local craftingType = GetCraftingType()
+                    local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+                    if not currentSubfilterBar then return end
+                    ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                            RefreshSubfilterBar, currentSubfilterBar)
+                end, 50)
             else
                 if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
                 PLAYER_INVENTORY.isListDirty = track(playerInvVar.isListDirty)
