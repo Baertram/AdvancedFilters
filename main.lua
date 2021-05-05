@@ -1264,13 +1264,16 @@ local function InitializeHooks()
             d("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
             d("---------->Calling 'CompanionInventory:ChangeFilter' RefreshSubfilterBar via direct function")
         end
-        local subfilterGroup = AF.subfilterGroups[currentInvType]
-        if not subfilterGroup then return end
-        local craftingType = GetCraftingType()
-        local currentSubfilterBar = subfilterGroup.currentSubfilterBar
-        if not currentSubfilterBar then return end
-        ThrottledUpdate("RefreshSubfilterBar_" .. currentInvType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-                RefreshSubfilterBar, currentSubfilterBar)
+        --Delay to let the menus update properly so the currentFilter etc. are the correct ones
+        zo_callLater(function()
+            local subfilterGroup = AF.subfilterGroups[currentInvType]
+            if not subfilterGroup then return end
+            local craftingType = GetCraftingType()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. currentInvType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 50)
 
         --Update the count of filtered/shown items in the inventory FreeSlot label
         --Delay this function call as the data needs to be filtered first!
