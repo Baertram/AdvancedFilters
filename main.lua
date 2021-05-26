@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2021-03-29
---Max todos: #56
+--TODO Last updated: 2021-05-26
+--Max todos: #59
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -67,13 +67,49 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 end
 ]]
 
+--#57: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, tehn sell them -> Error message
+--[[
+[21:19] [21:19] >>>======== AF ERROR - BEGIN ========>>>
+[21:19] [21:19] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
+[21:19] [21:19] !> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:
+https://bit.ly/2lSbb2A
+[21:19] [21:19] 1) What did you do? i was selling resin at the trader of my guild store
+2)Where did you do it? Coldharbour bank
+3)Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)? yes i did and the error still happens with only this addon and libs
+4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error? i do not think its caused by other addons
+[21:19] [21:19] -> [ ShowSubfilterBar - SubFilterBar missing]
 
---WORKING ON - Last updated: 2021-03-29
+[21:19] [21:19] InventoryType: 6, craftingType: 0/0, currentFilter: 5, subFilterGroupMissing: false, subfilterBarMissing: false
+[21:19] [21:19] <<<======== AF ERROR - END ========<<<
+
+WHat i was doing, is once on the panel to sell my items, i have the possibility to choose the craftbag, then retreive items from it and sell them once in my inventory.
+
+And yes this is when i did that, that is error came up
+
+-1 - open guild store
+-2 - check first which price the items are already selling by doing this:
+2.1- use the buy tab and select on the right panel, the crafting mats icons, then Smithing
+2,2- choose the gold slider for the mats
+-3 - select the selling tab on the right panel
+-4 - select on the left panel the craftbag icon
+-5 - choose the crafting mat you want, then right click on it, and select retreive do get 8 quantitiies
+
+THIS is when you shoud have the bug
+
+i use no keybinding at all for those addons at all
+]]
+
+
+--#58: 2021-03-26: Bug, Baertram: Inventory shows subfilter buttons enabled for companion items (where there are no player items below)
+--#59: 2021-03-26: Bug, Baertram: Un-equipping an item to the companion/normal inventory does not update the subfilter bars of AF to hide/show subfilters enabled now
+
+
+--WORKING ON - Last updated: 2021-05-26
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-03-29
+--  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-05-26
 --______________________________________________________________________________________________________________________
 
 

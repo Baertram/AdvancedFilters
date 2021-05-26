@@ -979,6 +979,8 @@ end
 
 function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     if not subFilterBar or not inventoryType then return end
+    local AFsubFilterNameInv = AF.inventoryNames[INVENTORY_BACKPACK]
+    local filterTypeNames = AF.filterTypeNames
     local isMailSendPanel               = util.IsFilterPanelShown(LF_MAIL_SEND) or false
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
     local isVendorPanel                 = util.IsFilterPanelShown(LF_VENDOR_SELL) or false
@@ -989,10 +991,11 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isHouseBankDepositPanel       = AF.houseBankOpened  and util.IsFilterPanelShown(LF_HOUSE_BANK_DEPOSIT) or false
     local isGuildStoreSellPanel         = util.IsFilterPanelShown(LF_GUILDSTORE_SELL) or false
     local isRetraitStation              = util.IsRetraitPanelShown()
-    local isJunkInvButtonActive         = subFilterBar.name == (AF.inventoryNames[INVENTORY_BACKPACK] .. "_" .. AF.filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
+    local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNameInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isTrade                       = util.IsFilterPanelShown(LF_TRADE) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
     local isCompanionInv                = util.IsCompanionInventoryShown()
+    local isCompanionInvButtonActive    = subFilterBar.name == (AFsubFilterNameInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION]) or false
     return {
         libFiltersPanelId = libFiltersPanelId,
         isMailSendPanel = isMailSendPanel,
@@ -1007,7 +1010,8 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
         isRetraitStation = isRetraitStation,
         isJunkInvButtonActive = isJunkInvButtonActive,
         isTrade = isTrade,
-        isCompanionInv = isCompanionInv
+        isCompanionInv = isCompanionInv,
+        isCompanionInvButtonActive = isCompanionInvButtonActive,
     }
 end
 
@@ -1161,6 +1165,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local isRetraitStation              = subFilterBarFilterInfo.isRetraitStation
     local isJunkInvButtonActive         = subFilterBarFilterInfo.isJunkInvButtonActive
     local isCompanionInvPanel           = subFilterBarFilterInfo.isCompanionInv
+    local isCompanionInvButtonActive    = subFilterBarFilterInfo.isCompanionInvButtonActive
 
     if debugSpam then d(">isMailSend: " ..tostring(isMailSendPanel) .. ", isVendorBuy: " ..tostring(isVendorBuy) ..", isFencePanel: " .. tostring(isFencePanel) .. ", isLaunderPanel: " .. tostring(isLaunderPanel) .. ", isVendorPanel: " .. tostring(isVendorPanel) .. ", isBankDepositPanel: " .. tostring(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tostring(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tostring(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tostring(isRetraitStation) .. ", isJunkInvButtonActive: " .. tostring(isJunkInvButtonActive) .. ", isCompanionInv: " ..tostring(isCompanionInvPanel) .. ", libFiltersPanelId: " .. tostring(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tostring(grayOutSubFiltersWithNoItems)) end
     local doEnableSubFilterButtonAgain = false
@@ -1295,28 +1300,23 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     if isGuildBankDepositPanel or isGuildStoreSellPanel or isMailSendPanel then
                         isBound         = IsItemBound(bagId, slotIndex)
                         isBOPTradeable  = IsItemBoPAndTradeable(bagId, slotIndex)
-                    end
-                    --Is an item below a subfilter but cannot be deposit/sold (bank, guild bank, vendor):
-                    --The subfilter button will be still enabled as there are no items to check (will be filtered by ESO vanilla UI BEFORE AF can check them)
-                    --if isBankDepositPanel or isHouseBankDepositPanel then
-                    --Check if items are not bankable:
-                    --isItemBankAble =
-                    --end
-                    if isGuildBankDepositPanel then
-                    --Check if items are not guild bankable:
-                    --Stolen items
-                    --Bound items
-                    --Bound but tradeable items
-                        isItemBankAble = not isBound and not isBOPTradeable
-                    end
-                    --Companion inventory
-                    if isCompanionInvPanel then
-                        itemIsOwnedByCompanion = (GetItemActorCategory(bagId, slotIndex) == GAMEPLAY_ACTOR_CATEGORY_COMPANION) or false
-                        if debugSpam then
-                            local il = GetItemLink(bagId, slotIndex)
-                            d(">>[COMPANION INV] item: " .. il .. ", itemIsOwnedByCompanion: " ..tostring(itemIsOwnedByCompanion))
+
+                        --Is an item below a subfilter but cannot be deposit/sold (bank, guild bank, vendor):
+                        --The subfilter button will be still enabled as there are no items to check (will be filtered by ESO vanilla UI BEFORE AF can check them)
+                        --if isBankDepositPanel or isHouseBankDepositPanel then
+                        --Check if items are not bankable:
+                        --isItemBankAble =
+                        --end
+                        if isGuildBankDepositPanel then
+                        --Check if items are not guild bankable:
+                        --Stolen items
+                        --Bound items
+                        --Bound but tradeable items
+                            isItemBankAble = not isBound and not isBOPTradeable
                         end
                     end
+                    --Companion owned item? Do not show in normal inv but show at companion inv
+                    itemIsOwnedByCompanion = (GetItemActorCategory(bagId, slotIndex) == GAMEPLAY_ACTOR_CATEGORY_COMPANION) or false
                 end --if not isVendorBuy then
             ----------------------------------------------------------------------------------------
                 --[No crafting panel] (e.g. inventory, bank, guild bank, mail, trade, craftbag):
@@ -1390,10 +1390,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
 
                     --[Normal inventory, mail, trade, craftbag]
                     --Item is:
+                    -->not itemIsOwnedByCompanion if not companionFilterButton active
                     -->not junk
                     -->Or junk, and junk inventory filter button is active
                     else
-                        doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk))
+                        doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk)) and
+                                                        ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
                     end
 
                 ----------------------------------------------------------------------------------------
