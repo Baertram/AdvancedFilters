@@ -11,7 +11,7 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
 --TODO Last updated: 2021-05-26
---Max todos: #59
+--Max todos: #60
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -100,9 +100,7 @@ i use no keybinding at all for those addons at all
 ]]
 
 
---#58: 2021-03-26: Bug, Baertram: Inventory shows subfilter buttons enabled for companion items (where there are no player items below)
---#59: 2021-03-26: Bug, Baertram: Un-equipping an item to the companion/normal inventory does not update the subfilter bars of AF to hide/show subfilters enabled now
-
+--#60: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items/items at the bank (if the "include banked items" checkbox is disabled)
 
 --WORKING ON - Last updated: 2021-05-26
 
@@ -138,7 +136,8 @@ i use no keybinding at all for those addons at all
 --______________________________________________________________________________________________________________________
 --#50 Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
 --#54 If PerfectPixel is enabled the search box won't be shown off-place in the main menu anymore (thanks to Pat1487 for the info and fix)
---
+--#58 Inventory shows subfilter buttons enabled for companion items (where there are no player items below)
+--#59 Un-equipping an item to the companion/normal inventory does not update the subfilter bars of AF to hide/show subfilters enabled now
 
 
 ---==========================================================================================================================================================================
@@ -1856,6 +1855,41 @@ local function InitializeHooks()
         SecurePostHook(smithingVar.deconstructionPanel.inventory, "PerformFullRefresh", function() performFullRefreshFunc() end)
         --SecurePostHook(smithingVar.researchPanel, "HandleDirtyEvent", function() performFullRefreshFunc() end)
     end
+
+
+    --Equip and unequip items -> Subfilterbar refresh if settings to "hide subfilter buttons where no items are filtered below" is enabled
+    local function refreshSubFilterBarAfterEquip(bagId, slotIndex, wornBagId, equipSlot)
+        if not AF.settings.grayOutSubFiltersWithNoItems then return end
+        local inventoryType = AF.currentInventoryType
+        --Check if the inventoryType is one of the two that should update their contents if equipment was changed
+        local invTypesForEquipUpdate = {
+            [INVENTORY_BACKPACK]        = true,
+            [LF_INVENTORY_COMPANION]    = true,
+        }
+        if not inventoryType or not invTypesForEquipUpdate[inventoryType] then return end
+
+        --Refresh the actual subfilterbar now, with a 300ms delay as the inventory needs to update it's contents first
+        zo_callLater(function()
+            local subfilterGroup = AF.subfilterGroups[inventoryType]
+            if not subfilterGroup then return end
+            local craftingType = GetCraftingType()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 300)
+    end
+    SecurePostHook("RequestEquipItem", function(bagId, slotIndex, wornBagId, equipSlot)
+    --d("[AF]RequestEquipItem")
+        refreshSubFilterBarAfterEquip(bagId, slotIndex, wornBagId, equipSlot)
+        return false
+    end)
+    SecurePostHook("RequestUnequipItem", function(bagId, equipSlot)
+    --d("[AF]RequestUnequipItem")
+        refreshSubFilterBarAfterEquip(nil, nil, bagId, equipSlot)
+        return false
+    end)
+
 
 end --function InitializeHooks()
 --======================================================================================================================
