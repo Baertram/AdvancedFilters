@@ -1,14 +1,15 @@
 local AF = AdvancedFilters
 local util = AF.util
 local checkCraftingStationSlot = AF.checkCraftingStationSlot
-if util.LibMotifCategories == nil then return end
+local lib = util.LibMotifCategories
+if lib == nil then return end
 
 local function GetFilterCallbackForCraftableMotif()
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         local itemLink = util.GetItemLink(slot)
 
-        return util.LibMotifCategories:IsMotifCraftable(itemLink)
+        return lib:IsMotifCraftable(itemLink)
     end
 end
 
@@ -21,7 +22,7 @@ local function GetFilterCallbackForKnownMotif()
         end
         local itemLink = util.GetItemLink(slot)
 
-        return util.LibMotifCategories:IsMotifKnown(itemLink)
+        return lib:IsMotifKnown(itemLink)
     end
 end
 

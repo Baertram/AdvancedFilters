@@ -1,14 +1,15 @@
 local AF = AdvancedFilters
 local util = AF.util
 local checkCraftingStationSlot = AF.checkCraftingStationSlot
-if util.LibMotifCategories == nil then return end
+local lib = util.LibMotifCategories
+if lib == nil then return end
 
 local function GetFilterCallbackForNewMotif()
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         local itemLink = util.GetItemLink(slot)
 
-        return util.LibMotifCategories:IsNewMotif(itemLink)
+        return lib:IsNewMotif(itemLink)
     end
 end
 

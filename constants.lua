@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.5"
+AF.version = "1.6.0.7"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -138,6 +138,7 @@ local controlsForChecks = {
     enchanting              = ENCHANTING,
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
+    companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
 }
 --Smithing
 controlsForChecks.refinementPanel       =   controlsForChecks.smithing.refinementPanel
@@ -179,6 +180,9 @@ local inventories = {
     [LF_QUICKSLOT] = {
         searchBox = ZO_QuickSlotSearchFiltersTextSearchBox,
     },
+    [LF_INVENTORY_COMPANION] = {
+        searchBox = ZO_CompanionEquipment_Panel_KeyboardSearchFiltersTextSearchBox, --controlsForChecks.companionInv.searchBox
+    },
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
@@ -186,7 +190,7 @@ INVENTORY_TYPE_VENDOR_BUY = 900
 
 --ITEMFILTERTYPES
 --Get the current maximum itemFilterType
-AF.maxItemFilterType = ITEMFILTERTYPE_MAX_VALUE -- 26 is the maximum at API 100028 "Scalebreaker"
+AF.maxItemFilterType = ITEM_TYPE_DISPLAY_CATEGORY_MAX_VALUE -- 41 is the maximum at API 100035 "Blackwood"
 --Build new "virtual" itemfiltertypes for crafting stations so one can distinguish the different subfilter bars
 local itemFilterTypesDefinedForAdvancedFilters = {
     --Refine
@@ -254,6 +258,7 @@ local inventoryNames = {
     [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
     [LF_RETRAIT]                = "Retrait",
     [LF_QUICKSLOT]              = "QuickSlot",
+    [LF_INVENTORY_COMPANION]    = "CompanionInventory",
 }
 AF.inventoryNames = inventoryNames
 
@@ -293,6 +298,7 @@ local filterTypeNames = {
     [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING]         = "Furnishings",
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING]    = "JewelryCrafting",
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]            = "Jewelry",
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION]          = "Companion",
     [ITEMFILTERTYPE_AF_WEAPONS_SMITHING]            = "WeaponsSmithing",
     --[ITEMFILTERTYPE_AF_CREATE_ARMOR_SMITHING]       = "CreateArmorSmithing",
     [ITEMFILTERTYPE_AF_REFINE_SMITHING]             = "RefineSmithing",
@@ -309,6 +315,7 @@ local filterTypeNames = {
     --[ITEMFILTERTYPE_AF_CREATE_WEAPONS_WOODWORKING]  = "CreateWeaponsWoodworking",
     --[ITEMFILTERTYPE_AF_CREATE_ARMOR_WOODWORKING]    = "CreateArmorWoodworking",
     [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER]              = "ArmorClothier",
+
     --[ITEMFILTERTYPE_AF_CREATE_JEWELRY]              = "CreateJewelryCraftingStation",
     [ITEMFILTERTYPE_AF_REFINE_JEWELRY]              = "RefineJewelryCraftingStation",
     [ITEMFILTERTYPE_AF_RETRAIT_ARMOR]               = "ArmorRetrait",
@@ -447,8 +454,8 @@ AF.subFiltersBarInactive = subFiltersBarInactive
 --These panels are currently not supported
 local notSupportedPanels = {
     [CRAFTING_TYPE_ENCHANTING] = {
-        [ENCHANTING_MODE_RECIPES]   = true,
         [ENCHANTING_MODE_NONE]      = true,
+        [ENCHANTING_MODE_RECIPES]   = true,
     },
 }
 AF.notSupportedPanels = notSupportedPanels
@@ -518,6 +525,7 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
 
@@ -538,6 +546,7 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
         },
@@ -782,7 +791,17 @@ local subfilterGroups = {
             [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT]          = {},
             [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT]    = {},
         }
-    }
+    },
+    --Companion inventory
+    [LF_INVENTORY_COMPANION] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
+        },
+    },
+
 }
 AF.subfilterGroups = subfilterGroups
 
@@ -803,6 +822,7 @@ local invEqualsLibFilters = {
     [LF_ENCHANTING_CREATION]    = true,
     [LF_ENCHANTING_EXTRACTION]  = true,
     [LF_RETRAIT]                = true,
+    [LF_INVENTORY_COMPANION]    = true,
 }
 AF.invEqualsLibFilters = invEqualsLibFilters
 
@@ -867,6 +887,7 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_QUICKSLOT]]              = GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
+    [inventoryNames[LF_INVENTORY_COMPANION]]    = GetControl(controlsForChecks.companionInv.control, filterDividerSuffix),
 }
 AF.filterBarParents = filterBarParents
 
@@ -934,6 +955,9 @@ local filterBarParentControlsToHide = {
     },
     [LF_QUICKSLOT] = {
         GetControl(controlsForChecks.quickslot.container, searchDividerSuffix),
+    },
+    [LF_INVENTORY_COMPANION] = {
+        GetControl(controlsForChecks.companionInv.control, searchDividerSuffix),
     }
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
@@ -1107,6 +1131,9 @@ local subfilterButtonNames = {
     },
     [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY] = {
         "Neck", "Ring", AF_CONST_ALL,
+    },
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {
+        "Jewelry", "Weapon", "Armor", AF_CONST_ALL,
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT] = {
         "Trophy", "Repair", "Siege", "Scroll", "Potion", "Food", "Drink", "Crown",

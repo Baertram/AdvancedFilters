@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2021-03-29
---Max todos: #56
+--TODO Last updated: 2021-05-26
+--Max todos: #60
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -67,13 +67,47 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 end
 ]]
 
+--#57: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, tehn sell them -> Error message
+--[[
+[21:19] [21:19] >>>======== AF ERROR - BEGIN ========>>>
+[21:19] [21:19] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
+[21:19] [21:19] !> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:
+https://bit.ly/2lSbb2A
+[21:19] [21:19] 1) What did you do? i was selling resin at the trader of my guild store
+2)Where did you do it? Coldharbour bank
+3)Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)? yes i did and the error still happens with only this addon and libs
+4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error? i do not think its caused by other addons
+[21:19] [21:19] -> [ ShowSubfilterBar - SubFilterBar missing]
 
---WORKING ON - Last updated: 2021-03-29
+[21:19] [21:19] InventoryType: 6, craftingType: 0/0, currentFilter: 5, subFilterGroupMissing: false, subfilterBarMissing: false
+[21:19] [21:19] <<<======== AF ERROR - END ========<<<
+
+WHat i was doing, is once on the panel to sell my items, i have the possibility to choose the craftbag, then retreive items from it and sell them once in my inventory.
+
+And yes this is when i did that, that is error came up
+
+-1 - open guild store
+-2 - check first which price the items are already selling by doing this:
+2.1- use the buy tab and select on the right panel, the crafting mats icons, then Smithing
+2,2- choose the gold slider for the mats
+-3 - select the selling tab on the right panel
+-4 - select on the left panel the craftbag icon
+-5 - choose the crafting mat you want, then right click on it, and select retreive do get 8 quantitiies
+
+THIS is when you shoud have the bug
+
+i use no keybinding at all for those addons at all
+]]
+
+
+--#60: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items/items at the bank (if the "include banked items" checkbox is disabled)
+
+--WORKING ON - Last updated: 2021-05-26
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-03-29
+--  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-05-26
 --______________________________________________________________________________________________________________________
 
 
@@ -102,7 +136,8 @@ end
 --______________________________________________________________________________________________________________________
 --#50 Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
 --#54 If PerfectPixel is enabled the search box won't be shown off-place in the main menu anymore (thanks to Pat1487 for the info and fix)
---
+--#58 Inventory shows subfilter buttons enabled for companion items (where there are no player items below)
+--#59 Un-equipping an item to the companion/normal inventory does not update the subfilter bars of AF to hide/show subfilters enabled now
 
 
 ---==========================================================================================================================================================================
@@ -148,6 +183,7 @@ local enchantingVar = controlsForChecks.enchanting
 local enchantingBaseVar = controlsForChecks.enchantingBaseVar
 local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
+local companionInvVar = controlsForChecks.companionInv
 
 --local functions for speedup
 local util = AF.util
@@ -792,6 +828,8 @@ local function InitializeHooks()
                 UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
+            elseif invType == LF_INVENTORY_COMPANION then
+                UpdateListAnchors(companionInvVar, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, subFilterBarHeight, subfilterBar, isCraftingInventoryType)
             else
@@ -817,6 +855,8 @@ local function InitializeHooks()
                 UpdateListAnchors(STORE_WINDOW, 0, nil, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
+            elseif invType == LF_INVENTORY_COMPANION then
+                UpdateListAnchors(companionInvVar, 0, nil, false)
             elseif isCraftingInventoryType then
                 UpdateListAnchors(craftingInv, 0, nil, true)
             else
@@ -864,9 +904,14 @@ local function InitializeHooks()
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
             end
             if doNormalChecks == true then
-                local llibFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
+                local libFiltersPanelId
+                if util.DoesInventoryTypeEqualLibFiltersType(inventoryType) == true then
+                    libFiltersPanelId = inventoryType
+                else
+                    libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
+                end
                 if debugSpam then
-                    d(">llibFiltersPanelId: " ..tostring(llibFiltersPanelId))
+                    d(">libFiltersPanelId: " ..tostring(libFiltersPanelId))
                 end
                 --AF.currentInventoryTypeOverride will be set if the inventory's quest item tab was opened before the
                 --inventory fragment get's hidden. AF.currentInventoryCurrentFilter will be ITEM_TYPE_DISPLAY_CATEGORY_QUEST
@@ -877,22 +922,21 @@ local function InitializeHooks()
                         AF.currentInventoryTypeOverride and AF.currentInventoryTypeOverride == INVENTORY_QUEST_ITEM then
                     local sceneNames = AF.scenesForChecks
                     --Check if mail send or player trade are shown
-                    local libFiltersPanelId = util.LibFilters:GetCurrentFilterTypeForInventory(inventoryType)
                     if debugSpam then
-                        d(">>libFiltersPanelId: " ..tostring(libFiltersPanelId))
+                        d(">>libFiltersPanelId - INVENTORY_BACKPACK: " ..tostring(libFiltersPanelId))
                     end
                     if ((libFiltersPanelId and (libFiltersPanelId == LF_MAIL_SEND or libFiltersPanelId == LF_TRADE or
-                                libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
-                                libFiltersPanelId == LF_GUILDSTORE_SELL or
-                                libFiltersPanelId == LF_FENCE_SELL or libFiltersPanelId == LF_FENCE_LAUNDER )) or
-                                (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
-                                (TRADE.control and not TRADE.control:IsHidden()) or
-                                util.IsSceneShown(sceneNames.bank) or
-                                util.IsSceneShown(sceneNames.guildBank) or
-                                util.IsSceneShown(sceneNames.tradinghouse) or
-                                (TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL or (TRADING_HOUSE.control and not TRADING_HOUSE.control:IsHidden())) or
-                                util.IsSceneShown(sceneNames.fence)
-                            )
+                            libFiltersPanelId == LF_BANK_DEPOSIT or libFiltersPanelId == LF_GUILDBANK_DEPOSIT or
+                            libFiltersPanelId == LF_GUILDSTORE_SELL or
+                            libFiltersPanelId == LF_FENCE_SELL or libFiltersPanelId == LF_FENCE_LAUNDER )) or
+                            (MAIL_SEND.control and not MAIL_SEND.control:IsHidden()) or
+                            (TRADE.control and not TRADE.control:IsHidden()) or
+                            util.IsSceneShown(sceneNames.bank) or
+                            util.IsSceneShown(sceneNames.guildBank) or
+                            util.IsSceneShown(sceneNames.tradinghouse) or
+                            (TRADING_HOUSE.currentMode == ZO_TRADING_HOUSE_MODE_SELL or (TRADING_HOUSE.control and not TRADING_HOUSE.control:IsHidden())) or
+                            util.IsSceneShown(sceneNames.fence)
+                    )
                     then
                         AF.currentInventoryTypeOverride = nil
                         if debugSpam then
@@ -921,7 +965,8 @@ local function InitializeHooks()
                     inventoryControl = STORE_WINDOW.control
                 else
                     -- fragmentType = "Inv"
-                    local currentFilter = playerInvVar.inventories[inventoryTypeUpdated].currentFilter
+                    --local currentFilter = playerInvVar.inventories[inventoryTypeUpdated].currentFilter
+                    local currentFilter = util.GetCurrentFilter(inventoryTypeUpdated)
                     if debugSpam then
                         d(">>>>>>>currentFilter: " ..tostring(currentFilter) .. "; inventoryTypeUpdated: " ..tostring(inventoryTypeUpdated))
                     end
@@ -957,13 +1002,29 @@ local function InitializeHooks()
                     end
                     ThrottledUpdate("ShowSubfilterBar_" .. inventoryTypeUpdated, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType)
 
-                    inventoryControl = playerInvVar.inventories[inventoryTypeUpdated].filterBar:GetParent()
+                    if inventoryType == LF_INVENTORY_COMPANION then
+                        inventoryControl = companionInvVar.control
+                    else
+                        inventoryControl = playerInvVar.inventories[inventoryTypeUpdated].filterBar:GetParent()
+                    end
                 end
             end
             --Call RefreshSubfilterBar via "proxy" metatable function on the inventoryType
-            if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
-            PLAYER_INVENTORY.isListDirty = track(playerInvVar.isListDirty)
-
+            if inventoryType == LF_INVENTORY_COMPANION then
+                --Delay to let the menus update properly so the currentFilter etc. are the correct ones
+                zo_callLater(function()
+                    local subfilterGroup = AF.subfilterGroups[inventoryType]
+                    if not subfilterGroup then return end
+                    local craftingType = GetCraftingType()
+                    local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+                    if not currentSubfilterBar then return end
+                    ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                            RefreshSubfilterBar, currentSubfilterBar)
+                end, 50)
+            else
+                if AF.settings.debugSpam then d("---------->Calling RefreshSubfilterBar via 'proxy' function") end
+                PLAYER_INVENTORY.isListDirty = track(playerInvVar.isListDirty)
+            end
             if inventoryControl then
                 --For debugging
                 AF.currentInventoryControl = inventoryControl
@@ -1004,7 +1065,9 @@ local function InitializeHooks()
         end
 
         local function onFragmentHiding(p_fragment)
-            PLAYER_INVENTORY.isListDirty = untrack(playerInvVar.isListDirty)
+            if inventoryType ~= LF_INVENTORY_COMPANION then
+                PLAYER_INVENTORY.isListDirty = untrack(playerInvVar.isListDirty)
+            end
             --CraftBag
             if inventoryType == INVENTORY_CRAFT_BAG then
                 AF.craftBagCurrentFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
@@ -1042,7 +1105,7 @@ local function InitializeHooks()
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
     --hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
     hookFragment(QUICKSLOT_FRAGMENT, LF_QUICKSLOT)
-
+    hookFragment(COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT, LF_INVENTORY_COMPANION)
 
     --=== SCENES ===========================================================================================================
     --Hook some scenes to register variables as the scenes show/hide.
@@ -1196,6 +1259,63 @@ local function InitializeHooks()
     end
     -->Throws error message if you open inventory after reloadui:
     SecurePostHook(playerInvVar, "ChangeFilter", ChangeFilterInventory)
+
+
+    --=== COMPANION INVENTORY===========================================================================================
+    local function ChangeFilterCompanionInventory(self, filterData)
+        local debugSpam = AF.settings.debugSpam
+
+        --self: playerInvVar, filterTab: playerInvVar.filterTab
+        local tabInvType = LF_INVENTORY_COMPANION
+        local currentInvType = tabInvType
+        AF.currentInventoryType = currentInvType
+        --Is the bank opened but the current filterType is 0 then check if another currentFilter was set as the bank was closed last time
+        --and reset the subfilter bar to the last chosen one now. Therefor the currentFilter needs to be changed to the correct "last" one again:
+        local currentFilter = self.currentFilter.descriptor
+        if debugSpam then
+            d("===========================================================================================================>")
+            d("[AF]companionInvVar:ChangeFilter, tabInvType: " ..tostring(tabInvType) .. ", curInvType: " .. tostring(currentInvType) .. ", currentFilter: " .. tostring(currentFilter))
+        end
+        local inventoryControl = self.control
+        if inventoryControl then
+            --For debugging
+            AF.currentInventoryControl = inventoryControl
+
+            --Hide and move some controls like subfilter bar divider lines etc.
+            reanchorAndHideVanillaUIControls(inventoryControl)
+        end
+
+        if debugSpam then
+            d(">>[ChangeFilterCompanionInventory]ThrottledUpdate - ShowSubfilterBar, currentInvType: " ..tostring(currentInvType))
+        end
+        ThrottledUpdate("ShowSubfilterBar_" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, nil, currentInvType)
+        --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added
+        --inventory filters like HarvensStolenFilter or NTakLootAndSteal addons
+
+        if debugSpam then
+            d("curInvType: " .. tostring(currentInvType) .. ", tabInvType: " ..tostring(tabInvType) .. ", currentFilter: " ..tostring(currentFilter))
+            --Update the subfilter buttons enabled state
+            d("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
+            d("---------->Calling 'CompanionInventory:ChangeFilter' RefreshSubfilterBar via direct function")
+        end
+        --Delay to let the menus update properly so the currentFilter etc. are the correct ones
+        zo_callLater(function()
+            local subfilterGroup = AF.subfilterGroups[currentInvType]
+            if not subfilterGroup then return end
+            local craftingType = GetCraftingType()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. currentInvType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 50)
+
+        --Update the count of filtered/shown items in the inventory FreeSlot label
+        --Delay this function call as the data needs to be filtered first!
+        --ThrottledUpdate("RefreshItemCount_" .. invType,
+        --  50, util.updateInventoryInfoBarCountLabel, invType, false)
+    end
+    SecurePostHook(companionInvVar, "ChangeFilter", ChangeFilterCompanionInventory)
+
 
 
     --=== QUICKLOT =========================================================================================================
@@ -1685,7 +1805,6 @@ local function InitializeHooks()
     --Hook the inventories info bar now for the item filtered/shown count
     hookInventoryInfoBar()
 
-
     --=== INVENTORY - EmptyBagLabel ========================================================================================
     --Update the count of items filtered if text search boxes are used (ZOs or Votans Search Box)
     ZO_PreHook(ZO_InventoryManager, "UpdateEmptyBagLabel", function(ctrl, inventoryType, isEmptyList)
@@ -1736,6 +1855,41 @@ local function InitializeHooks()
         SecurePostHook(smithingVar.deconstructionPanel.inventory, "PerformFullRefresh", function() performFullRefreshFunc() end)
         --SecurePostHook(smithingVar.researchPanel, "HandleDirtyEvent", function() performFullRefreshFunc() end)
     end
+
+
+    --Equip and unequip items -> Subfilterbar refresh if settings to "hide subfilter buttons where no items are filtered below" is enabled
+    local function refreshSubFilterBarAfterEquip(bagId, slotIndex, wornBagId, equipSlot)
+        if not AF.settings.grayOutSubFiltersWithNoItems then return end
+        local inventoryType = AF.currentInventoryType
+        --Check if the inventoryType is one of the two that should update their contents if equipment was changed
+        local invTypesForEquipUpdate = {
+            [INVENTORY_BACKPACK]        = true,
+            [LF_INVENTORY_COMPANION]    = true,
+        }
+        if not inventoryType or not invTypesForEquipUpdate[inventoryType] then return end
+
+        --Refresh the actual subfilterbar now, with a 300ms delay as the inventory needs to update it's contents first
+        zo_callLater(function()
+            local subfilterGroup = AF.subfilterGroups[inventoryType]
+            if not subfilterGroup then return end
+            local craftingType = GetCraftingType()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 300)
+    end
+    SecurePostHook("RequestEquipItem", function(bagId, slotIndex, wornBagId, equipSlot)
+    --d("[AF]RequestEquipItem")
+        refreshSubFilterBarAfterEquip(bagId, slotIndex, wornBagId, equipSlot)
+        return false
+    end)
+    SecurePostHook("RequestUnequipItem", function(bagId, equipSlot)
+    --d("[AF]RequestUnequipItem")
+        refreshSubFilterBarAfterEquip(nil, nil, bagId, equipSlot)
+        return false
+    end)
+
 
 end --function InitializeHooks()
 --======================================================================================================================

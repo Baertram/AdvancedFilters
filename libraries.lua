@@ -13,20 +13,17 @@ function AF.loadLibraries(calledFromEventPlayerActivated)
     local strings = AF.strings
     local libMissingString = strings.errorLibraryMissing
 
-    --LibCommonInventoryFilters
-    --util.libCIF = LibCIF
     ------------------------------------------------------------------------------------------------------------------------
     --LibFilters-3.0
     util.LibFilters = LibFilters3
     if not util.LibFilters and calledFromEventPlayerActivated then d(string.format(libMissingString, "LibFilters-3.0")) return end
+
     --LibAddonMenu-2.0
     AF.LAM = LibAddonMenu2
-    if AF.LAM == nil and LibStub then AF.LAM = LibStub('LibAddonMenu-2.0', true) end
     if not AF.LAM and calledFromEventPlayerActivated then d(string.format(libMissingString, "LibAddonMenu-2.0")) return end
     ------------------------------------------------------------------------------------------------------------------------
     --LibMotifCategories
     util.LibMotifCategories = LibMotifCategories
-    if not util.LibMotifCategories and calledFromEventPlayerActivated then d(string.format(libMissingString, "LibMotifCategories-1.0")) return end
 
     AF.dependenciesLoaded = true
 end
