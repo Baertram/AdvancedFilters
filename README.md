@@ -22,7 +22,7 @@ Finally, Advanced Filters! The default inventory has type filters, but they're s
 * vixion - additional icon work
 * sirinsidiator - additional icon work, translations, testing
 * Ayantir - translations, testing
-* Baertram - translations, testing
+* Baertram - translations, testing -> Picked up the addon and keeps it running
 
 If you would like to further filter your quickslot items, I wholly recommend installing [Mer Quickslot Filters](http://www.esoui.com/downloads/info707-MerQuickslotFilters.html) or [Mer Quickslot Filters - Split up consumables (drink, food, potion)](http://www.esoui.com/downloads/info953-MerQuickslotFilters-Splitupconsumablesdrinkfoodpotion.html)!
 
