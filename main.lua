@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2021-05-26
---Max todos: #60
+--TODO Last updated: 2021-06-11
+--Max todos: #62
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -32,42 +32,19 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     Right click the dropdown box and ALWAYS show entries "Invert current filter 1-49", "Select all".
 --     But also show below the last selected filter 1-49 now (up to last 5 selected ones from whatever subfilterGroup).
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
-
-
---#50: 2020-10-31: Bug, Baertram:
---     Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
---
-
---#54: 2021-02-20: Bug, Baertram: Bank withdraw panel somehow applies filters from Bank deposit/mail send panel? Or at
---     least the selected subfilters do not show any items anymore? LibFilters-3.0 v20 bug? Not always reproducable. You
---     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
---     withdraw
+--> Not doable that easily as filters which cannot be applied at a panel should not be shown in teh "last selected" list then, and so on
 
 --#55: 2021-02-20: Bug, Baertram: Bank withdraw panel does not reset the disabled subfilter buttons if directly opened after
 --     e.g. mail send panel, where the subfilter button was disabled due to e.g. items that cannot be send by mail (bound).
 --     e.g. weapons->1hd at mail send panel -> Button is disabled. Open the bank, switch to withdraw tab: The weapons sub-filter
 --     button is still disabled there! Needs to be reset on bank open e.g.
 
---#56: 2021-03-25: Bug, Yumi: AwesomeGuildStore's CraftBag sell / List tab does not filter the subfilters properly anymore
---[[
-      > Needs to be fixed within AGS's function SellTabWrapper:SetupCraftBag() which overwrite the additionalFilter for the CraftBag!
-    self.originalCraftBagAdditionalFilter = PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].additionalFilter
-    local runCraftBagAdditionalFilters
-    if self.originalCraftBagAdditionalFilter ~= nil and type(self.originalCraftBagAdditionalFilter) == "function" then
-        runCraftBagAdditionalFilters = function(slot)
-            return IsCraftBagItemSellableOnTradingHouse(slot) and self.originalCraftBagAdditionalFilter(slot)
-        end
-    else
-        runCraftBagAdditionalFilters = function(slot)
-            return IsCraftBagItemSellableOnTradingHouse(slot)
-        end
-    end
-    PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].additionalFilter = runCraftBagAdditionalFilters
-    -- no need to set the craft bag here, since UpdateFragments will be called right after OnOpen anyway
-end
-]]
+--#57: 2021-02-20: Bug, Baertram: Bank withdraw panel somehow applies filters from Bank deposit/mail send panel? Or at
+--     least the selected subfilters do not show any items anymore? LibFilters-3.0 v20 bug? Not always reproducable. You
+--     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
+--     withdraw
 
---#57: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, tehn sell them -> Error message
+--#60: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, tehn sell them -> Error message
 --[[
 [21:19] [21:19] >>>======== AF ERROR - BEGIN ========>>>
 [21:19] [21:19] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
@@ -100,14 +77,16 @@ i use no keybinding at all for those addons at all
 ]]
 
 
---#60: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items/items at the bank (if the "include banked items" checkbox is disabled)
+--#61: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items
+--#62: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for items at the bank (if the "include banked items" checkbox is disabled)
 
---WORKING ON - Last updated: 2021-05-26
-
+------------------------------------------------------------------------------------------------------------------------
+--WORKING ON - Last updated: 2021-06-11
+--#61
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.4 - Current 1.6.0.5 - Changed 2021-05-26
+--  UPDATE INFORMATION: since AF 1.6.0.8 - Current 1.6.0.9 - Changed 2021-06-11
 --______________________________________________________________________________________________________________________
 
 
@@ -129,15 +108,12 @@ i use no keybinding at all for those addons at all
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
---
+--#62: Crafting inventory shows subfilter buttons enabled for items at the bank (if the "include banked items" checkbox is disabled)
+--FCOCraftFilter integration was improved to use it for the crafting panels: Disable subfilter buttons (e.g. if no banked items should be shown)
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#50 Opening the bank withdraw tab directly after reloadui/login will not hide the searchDivider control line
---#54 If PerfectPixel is enabled the search box won't be shown off-place in the main menu anymore (thanks to Pat1487 for the info and fix)
---#58 Inventory shows subfilter buttons enabled for companion items (where there are no player items below)
---#59 Un-equipping an item to the companion/normal inventory does not update the subfilter bars of AF to hide/show subfilters enabled now
 
 
 ---==========================================================================================================================================================================
@@ -618,15 +594,18 @@ local function InitializeHooks()
             filterPanelId = filterPanelId or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
             --d(">filterPanelId: " ..tostring(filterPanelId))
             local ZOsControlNames = AF.ZOsControlNames
-            local includeBankedCBoxName = ZOsControlNames.includeBankedCheckbox
-            local craftingTablePanel = util.GetCraftingTablePanel(filterPanelId)
-            local includeBankedCbox = craftingTablePanel and craftingTablePanel.control and craftingTablePanel.control:GetNamedChild(includeBankedCBoxName)
-            local parentCtrl = craftingTablePanel.control
-            if not includeBankedCbox then
-                local craftingTablePanelInv = util.GetCraftingTablePanelInventory(filterPanelId)
-                includeBankedCbox = craftingTablePanelInv and craftingTablePanelInv.control and craftingTablePanelInv.control:GetNamedChild(includeBankedCBoxName)
-                parentCtrl = craftingTablePanelInv.control
-            end
+            --[[
+                        local includeBankedCBoxName = ZOsControlNames.includeBankedCheckbox
+                        local craftingTablePanel = util.GetCraftingTablePanel(filterPanelId)
+                        local includeBankedCbox = craftingTablePanel and craftingTablePanel.control and craftingTablePanel.control:GetNamedChild(includeBankedCBoxName)
+                        local parentCtrl = craftingTablePanel.control
+                        if not includeBankedCbox then
+                            local craftingTablePanelInv = util.GetCraftingTablePanelInventory(filterPanelId)
+                            includeBankedCbox = craftingTablePanelInv and craftingTablePanelInv.control and craftingTablePanelInv.control:GetNamedChild(includeBankedCBoxName)
+                            parentCtrl = craftingTablePanelInv.control
+                        end
+            ]]
+            local includeBankedCbox, parentCtrl = util.GetCraftingTablePanelIncludeBankedCheckbox(filterPanelId)
             if includeBankedCbox and parentCtrl then
                 --Unanchor the filterDivider control
                 local includeBankedCBoxFilterDividerName = ZOsControlNames.filterDivider
@@ -1059,7 +1038,7 @@ local function InitializeHooks()
                 local filterType = util.GetCurrentFilterTypeForInventory(invType)
                 d("[AF]OnFragmentShown - inventoryType: " ..tostring(invType) .. ", filterType: " ..tostring(filterType))
             ]]
---d("[AF]OnFragmentShown")
+            --d("[AF]OnFragmentShown")
             --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
             util.HideInventoryControls(nil)
         end
@@ -1081,7 +1060,7 @@ local function InitializeHooks()
             else
                 AF.currentInventoryType = INVENTORY_BACKPACK
             end
---d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
+            --d("!!!!!!!!!!!!!!!Fagment hide - AF.currentInvType = " ..tostring(AF.currentInventoryType) .. ", currentFilter: " ..tostring(AF.currentInventoryCurrentFilter))
         end
 
         local function onFragmentStateChange(oldState, newState)
@@ -1845,16 +1824,36 @@ local function InitializeHooks()
 
     --=== SMITHING - Checkbox "Include banked items" ========================================================================================
     --After checking/Unchecking the checkbox "Include banked items" the number of items filtered should be updated
-    --But only if FCOCraftFilter is not enabled!
-    if not FCOCraftFilter then
-        local function performFullRefreshFunc()
-            --Delay the update as there might be several incoming refresh calls from e.g. AF_CONST_BUTTON_FILTER and AF_CONST_DROPDOWN_FILTER
-            local currentInvType = AF.currentInventoryType
-            ThrottledUpdate("UpdateCraftingInventoryFilteredCount_" .. tostring(currentInvType), 10, util.UpdateCraftingInventoryFilteredCount, currentInvType)
-        end
-        SecurePostHook(smithingVar.deconstructionPanel.inventory, "PerformFullRefresh", function() performFullRefreshFunc() end)
-        --SecurePostHook(smithingVar.researchPanel, "HandleDirtyEvent", function() performFullRefreshFunc() end)
+    local function refreshSubFilterBarAfterIncludeBankedItemsCBChange(invType)
+--"[AF]refreshSubFilterBarAfterIncludeBankedItemsCBChange - invType: " ..tostring(invType))
+        local inventoryType = invType or AF.currentInventoryType
+        --Refresh the actual subfilterbar now, with a 300ms delay as the inventory needs to update it's contents first
+        zo_callLater(function()
+            local subfilterGroup = AF.subfilterGroups[inventoryType]
+            if not subfilterGroup then return end
+            local craftingType = GetCraftingType()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. inventoryType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar)
+        end, 50)
     end
+
+    local function performFullRefreshFunc(isImprovement)
+        isImprovement = isImprovement or false
+        if not isImprovement then
+            if FCOCF or FCOCraftFilter then return end
+        end
+        local currentInvType = AF.currentInventoryType
+        refreshSubFilterBarAfterIncludeBankedItemsCBChange(currentInvType)
+
+        --Delay the update as there might be several incoming refresh calls from e.g. AF_CONST_BUTTON_FILTER and AF_CONST_DROPDOWN_FILTER
+        -->But only if FCOCraftFilter is not enabled!
+        if FCOCF or FCOCraftFilter then return end
+        ThrottledUpdate("UpdateCraftingInventoryFilteredCount_" .. tostring(currentInvType), 10, util.UpdateCraftingInventoryFilteredCount, currentInvType)
+    end
+    SecurePostHook(smithingVar.deconstructionPanel.inventory, "PerformFullRefresh", function() performFullRefreshFunc() end)
+    SecurePostHook(smithingVar.improvementPanel.inventory, "PerformFullRefresh", function() performFullRefreshFunc(true) end)
 
 
     --Equip and unequip items -> Subfilterbar refresh if settings to "hide subfilter buttons where no items are filtered below" is enabled
@@ -1880,12 +1879,12 @@ local function InitializeHooks()
         end, 300)
     end
     SecurePostHook("RequestEquipItem", function(bagId, slotIndex, wornBagId, equipSlot)
-    --d("[AF]RequestEquipItem")
+        --d("[AF]RequestEquipItem")
         refreshSubFilterBarAfterEquip(bagId, slotIndex, wornBagId, equipSlot)
         return false
     end)
     SecurePostHook("RequestUnequipItem", function(bagId, equipSlot)
-    --d("[AF]RequestUnequipItem")
+        --d("[AF]RequestUnequipItem")
         refreshSubFilterBarAfterEquip(nil, nil, bagId, equipSlot)
         return false
     end)
