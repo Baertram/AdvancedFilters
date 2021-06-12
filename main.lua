@@ -44,7 +44,7 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
 --     withdraw
 
---#60: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, tehn sell them -> Error message
+--#60: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, then sell them -> Error message
 --[[
 [21:19] [21:19] >>>======== AF ERROR - BEGIN ========>>>
 [21:19] [21:19] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
@@ -75,6 +75,9 @@ THIS is when you shoud have the bug
 
 i use no keybinding at all for those addons at all
 ]]
+-->Tried to rebuild the bug that way. not possible! But changing to buy tab, change filters, change to sell tab, select craftbag, change filter, select buy tab again,
+-->change filter, select sell tab (craftbag is still active there) -> Error is shown!
+--> Reason: The selected subfilter filter (e.g. companion items 41) at the normal inventory will be searched at the CraftBag panel then.
 
 
 --#61: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items
@@ -625,7 +628,8 @@ local function InitializeHooks()
         ----------------------------------------------------------------------------------------------------------------
         ----------------------------------------------------------------------------------------------------------------
 
-        local invType = currentInvType or AF.currentInventoryType
+        local invType = currentInvType
+        if invType == nil then invType = AF.currentInventoryType end
         local currentFilterToUse
         if debugSpam then
             d(">invType: " ..tostring(invType) .. ", currentInvType: " ..tostring(currentInvType) .. ", AF.currentInventoryType: " ..tostring(AF.currentInventoryType))
@@ -640,7 +644,8 @@ local function InitializeHooks()
 
                 --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
-                local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                local currentCBFilter = util.GetCurrentFilter(invType)
                 if debugSpam then
                     d(">currentCBFilter: " .. tostring(currentCBFilter))
                 end
@@ -682,22 +687,27 @@ local function InitializeHooks()
         if doDebugOutput then
             local showErrorInChat = false
             if invType == nil then
+                --d(">InvType is nil")
                 showErrorInChat = true
             end
             if AF.subfilterGroups[invType] == nil then
                 showErrorInChat = true
+                --d(">subfilterGroupMissingForInvType")
                 subfilterGroupMissingForInvType = true
             end
             if currentFilterToUse == nil then
+                --d(">currentFilterToUse is nil")
                 showErrorInChat = true
             end
             if craftingType == nil then
+                --d(">craftingType is nil")
                 showErrorInChat = true
             end
             local subFilterBarName
             if invType ~= nil and craftingType ~= nil and currentFilterToUse ~= nil then
                 local nextSubfilterBar = AF.subfilterGroups[invType][craftingType][currentFilterToUse]
                 if nextSubfilterBar == nil then
+                    --d(">subfilterBarMissing true")
                     subfilterBarMissing = true
                     showErrorInChat = true
                     subFilterBarName = "N/A"
@@ -961,12 +971,17 @@ local function InitializeHooks()
                     end
 
                     --CraftBag
-                    --if inventoryType == INVENTORY_CRAFT_BAG then
-                    --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-                    --local afCBCurrentFilter = AF.craftBagCurrentFilter
-                    --d("[AF]CraftBag fragment showing, currentFilter: " .. tostring(currentCBFilter) .. ", afCBCurrentFilter: " .. tostring(afCBCurrentFilter))
-                    --fragmentType = "CraftBag"
-                    --end
+                    local invTypeForShowSubfilterBar = inventoryTypeUpdated
+                    if inventoryType == INVENTORY_CRAFT_BAG then
+                        --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                        local currentCBFilter = util.GetCurrentFilter(inventoryType)
+                        local afCBCurrentFilter = AF.craftBagCurrentFilter
+--d("[AF]CraftBag fragment showing, currentFilter: " ..tostring(currentFilter) ..", currentFilterCB: " .. tostring(currentCBFilter) .. ", afCBCurrentFilter: " .. tostring(afCBCurrentFilter))
+                        --Overwrite the inventory type for the function ShowSubfilterBar so that addons like AwesomeGuildStore, which add the CraftBag Fragment to
+                        --the guild sore sell tab, won't cause 2 subfilterbars to be shown: 1st normal inv. 2nd craftbag. Where the missing invType at teh ShowSubfilterBar function
+                        --will make the addon use AF.currentInventoryType and thus produces a combination of normal inv's currentfilter + CraftBag inventory subfilter bars -> Error message!
+                        invTypeForShowSubfilterBar = inventoryTypeUpdated
+                    end
                     if AF.settings.debugSpam then
                         d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>")
                         d("[AF]hookFragment " .. tostring(fragment.control:GetName()) .. " - fragment OnShow -> ShowSubfilterBar")
@@ -979,7 +994,7 @@ local function InitializeHooks()
                     if debugSpam then
                         d(">>>[onFragmentShowing]ThrottledUpdate -> ShowSubfilterBar_"..tostring(inventoryTypeUpdated))
                     end
-                    ThrottledUpdate("ShowSubfilterBar_" .. inventoryTypeUpdated, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType)
+                    ThrottledUpdate("ShowSubfilterBar_" .. inventoryTypeUpdated, 20, ShowSubfilterBar, currentFilter, nil, customInventoryFilterButtonsItemType, invTypeForShowSubfilterBar)
 
                     if inventoryType == LF_INVENTORY_COMPANION then
                         inventoryControl = companionInvVar.control
@@ -1049,7 +1064,8 @@ local function InitializeHooks()
             end
             --CraftBag
             if inventoryType == INVENTORY_CRAFT_BAG then
-                AF.craftBagCurrentFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                --AF.craftBagCurrentFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
+                AF.craftBagCurrentFilter = util.GetCurrentFilter(INVENTORY_CRAFT_BAG)
                 if AF.settings.debugSpam then d("[AF]CraftBag fragment hiding, currentFilter: " .. tostring(AF.craftBagCurrentFilter)) end
             end
             --Reset the current inventory type to the normal inventory, or the quest (depending on the currentFilter before craftbag was opened)
@@ -1121,7 +1137,6 @@ local function InitializeHooks()
                     --Set the "block inventory filter prehook" variable
                     AF.blockOnInventoryFilterChangedPreHookForCraftBag = true
                 elseif  filterPanelId == LF_GUILDSTORE_BROWSE or LF_GUILDSTORE_SELL then
-                    --d(">GuildStore scene closing!")
                     --Set the "block inventory filter prehook" variable
                     AF.blockOnInventoryFilterChangedPreHookForCraftBag = true
                     --Retrait
@@ -1154,6 +1169,7 @@ local function InitializeHooks()
     --Filter changing function for normal inventories
     --Recognizes if a button like armor/weapons/material/... was changed at the inventory (which is a filter change internally)
     local function ChangeFilterInventory(self, filterTab)
+--d("[AF]ChangeFilterInventory")
         local debugSpam = AF.settings.debugSpam
         AF.currentInventoryTypeOverride = nil
         --self: playerInvVar, filterTab: playerInvVar.filterTab
@@ -1332,6 +1348,7 @@ local function InitializeHooks()
 
     --=== VENDOR / STORE ===================================================================================================
     --  Store "BUY" changefilter function
+    --[[
     local function ChangeFilterVendor(self, filterTab)
         local debugSpam = AF.settings.debugSpam
         if debugSpam then
@@ -1362,13 +1379,11 @@ local function InitializeHooks()
 
         --Update the count of filtered/shown items in the inventory FreeSlot label
         --Delay this function call as the data needs to be filtered first!
-        --[[
-        ThrottledUpdate("RefreshItemCount_" .. invType,
-                50, util.updateInventoryInfoBarCountLabel, invType, false)
-        ]]
+        --ThrottledUpdate("RefreshItemCount_" .. invType,
+        --        50, util.updateInventoryInfoBarCountLabel, invType, false)
     end
-    --ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
-
+    ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
+    ]]
 
     --=== SMITHING =========================================================================================================
     --Hook the crafting station

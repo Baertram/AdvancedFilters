@@ -162,6 +162,7 @@ end
 
 --Get the currentFilter of an inventory type
 function util.GetCurrentFilter(invType)
+--d("[AF]util.GetCurrentFilter-invType: " ..tostring(invType))
     if not invType then return end
     local currentFilter
 

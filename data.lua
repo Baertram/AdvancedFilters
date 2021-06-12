@@ -411,11 +411,12 @@ end
 local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
+        if not util.LibMotifCategories then return true end
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        if categoryConst == AF.util.LibMotifCategories:GetMotifCategory(itemLink) then
+        if categoryConst == util.LibMotifCategories:GetMotifCategory(itemLink) then
             return true
         end
         return false
