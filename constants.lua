@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.0.9"
+AF.version = "1.6.1.1"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -566,6 +566,22 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
         },
     },
+    --Houes bank withdraw
+    [INVENTORY_HOUSE_BANK] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {},
+        },
+    },
     --Craft bag
     [INVENTORY_CRAFT_BAG] = {
         [CRAFTING_TYPE_INVALID] = {
@@ -759,21 +775,6 @@ local subfilterGroups = {
         [CRAFTING_TYPE_ENCHANTING] = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {},
-        },
-    },
-    --Houes bank withdraw
-    [INVENTORY_HOUSE_BANK] = {
-        [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
-            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {},
         },
     },
     --Retrait

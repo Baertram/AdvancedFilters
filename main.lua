@@ -10,8 +10,8 @@ AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2021-06-11
---Max todos: #62
+--TODO Last updated: 2021-06-15
+--Max todos: #64
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -44,52 +44,33 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
 --     withdraw
 
---#60: 2021-05-24: Bug, Anceane: AwesomeGuildStore's CraftBag -> Retrieve items to inventory, then sell them -> Error message
 --[[
-[21:19] [21:19] >>>======== AF ERROR - BEGIN ========>>>
-[21:19] [21:19] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
-[21:19] [21:19] !> Please answer the following 4 questions and send the answers (and if given: the variables shown in the lines, starting with ->, after the questions) to the addon's comments of AdvancedFilters @www.esoui.com:
-https://bit.ly/2lSbb2A
-[21:19] [21:19] 1) What did you do? i was selling resin at the trader of my guild store
-2)Where did you do it? Coldharbour bank
-3)Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)? yes i did and the error still happens with only this addon and libs
-4)If error happens with other addons active: Which other addons were you using as the error happened, and are you able to say which of these causes the error? i do not think its caused by other addons
-[21:19] [21:19] -> [ ShowSubfilterBar - SubFilterBar missing]
+>>>======== AF ERROR - BEGIN ========>>>
+[AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
 
-[21:19] [21:19] InventoryType: 6, craftingType: 0/0, currentFilter: 5, subFilterGroupMissing: false, subfilterBarMissing: false
-[21:19] [21:19] <<<======== AF ERROR - END ========<<<
+1) What did you do?
+- Open a storage furnishing
+- Withdraw "Tab"
+- click Companion Items Filter Tab <- ERROR happens
+2) Where did you do it?
+At my ingame home
+3) Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)?
+yes - happens with only AdvancedFilters active
 
-WHat i was doing, is once on the panel to sell my items, i have the possibility to choose the craftbag, then retreive items from it and sell them once in my inventory.
+-> [ ShowSubfilterBar - SubFilterBar missing]
 
-And yes this is when i did that, that is error came up
-
--1 - open guild store
--2 - check first which price the items are already selling by doing this:
-2.1- use the buy tab and select on the right panel, the crafting mats icons, then Smithing
-2,2- choose the gold slider for the mats
--3 - select the selling tab on the right panel
--4 - select on the left panel the craftbag icon
--5 - choose the crafting mat you want, then right click on it, and select retreive do get 8 quantitiies
-
-THIS is when you shoud have the bug
-
-i use no keybinding at all for those addons at all
+InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: false, subfilterBarMissing: false
+<<<======== AF ERROR - END ========<<<
+ Report comment to moderator
 ]]
--->Tried to rebuild the bug that way. not possible! But changing to buy tab, change filters, change to sell tab, select craftbag, change filter, select buy tab again,
--->change filter, select sell tab (craftbag is still active there) -> Error is shown!
---> Reason: The selected subfilter filter (e.g. companion items 41) at the normal inventory will be searched at the CraftBag panel then.
 
-
---#61: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for companion items
---#62: 2021-05-26: Bug, Baertram: Crafting inventory shows subfilter buttons enabled for items at the bank (if the "include banked items" checkbox is disabled)
 
 ------------------------------------------------------------------------------------------------------------------------
---WORKING ON - Last updated: 2021-06-11
---#61
+--WORKING ON - Last updated: 2021-06-15
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.0.8 - Current 1.6.0.9 - Changed 2021-06-11
+--  UPDATE INFORMATION: since AF 1.6.1.0 - Current 1.6.1.1 - Changed 2021-06-15
 --______________________________________________________________________________________________________________________
 
 
@@ -111,12 +92,12 @@ i use no keybinding at all for those addons at all
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
---#62: Crafting inventory shows subfilter buttons enabled for items at the bank (if the "include banked items" checkbox is disabled)
---FCOCraftFilter integration was improved to use it for the crafting panels: Disable subfilter buttons (e.g. if no banked items should be shown)
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
+--#63: House bank companion item filter shows error message
+--#64: Bank companion item filter always greys out even if items are banked
 
 
 ---==========================================================================================================================================================================

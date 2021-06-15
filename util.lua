@@ -980,7 +980,8 @@ end
 
 function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     if not subFilterBar or not inventoryType then return end
-    local AFsubFilterNameInv = AF.inventoryNames[INVENTORY_BACKPACK]
+    local AFsubFilterNamePlayerInv = AF.inventoryNames[INVENTORY_BACKPACK]
+    local AFsubFilterNameActiveInv = AF.inventoryNames[inventoryType]
     local filterTypeNames = AF.filterTypeNames
     local isMailSendPanel               = util.IsFilterPanelShown(LF_MAIL_SEND) or false
     local isVendorBuy                   = util.IsFilterPanelShown(LF_VENDOR_BUY) or false
@@ -992,11 +993,11 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isHouseBankDepositPanel       = AF.houseBankOpened  and util.IsFilterPanelShown(LF_HOUSE_BANK_DEPOSIT) or false
     local isGuildStoreSellPanel         = util.IsFilterPanelShown(LF_GUILDSTORE_SELL) or false
     local isRetraitStation              = util.IsRetraitPanelShown()
-    local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNameInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
+    local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNamePlayerInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isTrade                       = util.IsFilterPanelShown(LF_TRADE) or false
     local libFiltersPanelId             = util.GetCurrentFilterTypeForInventory(inventoryType, true)
     local isCompanionInv                = util.IsCompanionInventoryShown()
-    local isCompanionInvButtonActive    = subFilterBar.name == (AFsubFilterNameInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION]) or false
+    local isCompanionInvButtonActive    = subFilterBar.name == (AFsubFilterNameActiveInv ~= nil and AFsubFilterNameActiveInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION]) or false
     return {
         libFiltersPanelId = libFiltersPanelId,
         isMailSendPanel = isMailSendPanel,
@@ -1449,8 +1450,8 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                         -->not junk
                         -->Or junk, and junk inventory filter button is active
                     else
-                        doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk)) and
-                                ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
+                        doEnableSubFilterButtonAgain = (not isItemJunk or (isJunkInvButtonActive and isItemJunk))
+                              and ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
                     end
 
                     ----------------------------------------------------------------------------------------
