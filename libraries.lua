@@ -38,6 +38,13 @@ function AF.addLibrariesStrings()
         AF.strings.ExoticStyle = util.LibMotifCategories:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_EXOTIC)
         AF.strings.DroppedStyle = util.LibMotifCategories:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_DROPPED)
         AF.strings.CrownStyle = util.LibMotifCategories:GetLocalizedCategoryName(LMC_MOTIF_CATEGORY_CROWN)
+    else
+        AF.strings.NormalStyle = "Normal"
+        AF.strings.RareStyle = "Rare"
+        AF.strings.AllianceStyle = "Alliance"
+        AF.strings.ExoticStyle = "Exotic"
+        AF.strings.DroppedStyle = "Dropped"
+        AF.strings.CrownStyle = "Crown"
     end
 end
 

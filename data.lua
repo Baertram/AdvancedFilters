@@ -11,6 +11,20 @@ local normalFilterNames = AF.normalFilterNames
 local normalFilter2CraftingFilter = AF.normalFilter2CraftingFilter
 
 local itemIds = AF.itemIds
+
+--Local speedup
+local isInTab   = ZO_IsElementInNumericallyIndexedTable
+local isij      = IsItemJunk
+local gileqt    = GetItemLinkEquipType
+local gilat     = GetItemLinkArmorType
+local gilwt     = GetItemLinkWeaponType
+local gilit     = GetItemLinkItemType
+local gilii     = GetItemLinkInfo
+local gilfti    = GetItemLinkFilterTypeInfo
+local gilti     = GetItemLinkTraitInfo
+local giliid    = GetItemLinkItemId
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Other helper functions
 ---------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +32,7 @@ local itemIds = AF.itemIds
 local function checkNoFilterTypesOrIsJunk(slot, junkCheck)
     --Shall we check only junk items?
     if junkCheck and slot.bagId and slot.slotIndex then
-        return IsItemJunk(slot.bagId, slot.slotIndex)
+        return isij(slot.bagId, slot.slotIndex)
     end
     --No junk but must be junk, and no slot data to check: Disallow/Filter out
     if junkCheck then return false end
@@ -28,22 +42,52 @@ end
 
 local function increaseCounterIfFoundInNummericallyIndexedTable(tableName, searchValues, counter)
     for _, searchValue in ipairs(searchValues) do
-        if ZO_IsElementInNumericallyIndexedTable(tableName, searchValue) == true then
+        if isInTab(tableName, searchValue) == true then
             counter = counter + 1
         end
     end
     return counter
 end
 
+local function checkExcludedTypes(itemLink, excludeThisTypes)
+    if not excludeThisTypes then return true end
+    local itemType, spezializedItemType, armorType, weaponType, equipType
+    for excludeTypeToCheck, excludedTypesTab in pairs(excludeThisTypes) do
+        if excludedTypesTab and #excludedTypesTab > 0 then
+            if excludeTypeToCheck == "equipType" then
+                equipType = equipType or gileqt(itemLink)
+                if isInTab(excludedTypesTab, equipType) then return false end
+
+            elseif excludeTypeToCheck == "armorType" then
+                armorType = armorType or gilat(itemLink)
+                if isInTab(excludedTypesTab, armorType) then return false end
+
+            elseif excludeTypeToCheck == "weaponType" then
+                weaponType = weaponType or gilwt(itemLink)
+                if isInTab(excludedTypesTab, weaponType) then return false end
+
+            elseif excludeTypeToCheck == "itemType" then
+                itemType, spezializedItemType = itemType, spezializedItemType or gilit(itemLink)
+                if isInTab(excludedTypesTab, itemType) then return false end
+
+            elseif excludeTypeToCheck == "specializedItemType" then
+                itemType, spezializedItemType = itemType, spezializedItemType or gilit(itemLink)
+                if isInTab(excludedTypesTab, spezializedItemType) then return false end
+            end
+        end
+    end
+    return true
+end
 ------------------------------------------------------------------------------------------------------------------------
 -- Subfilter callback functions
 ---------------------------------------------------------------------------------------------------------------------------
 --Check if the first parameter "slot" is the bagId of a crafting station item row, or the dataEntry.data table of another
 --inventory row and prepare the slot variable then properly for the filter functions
+local prepareSlot = util.prepareSlot
 local function checkCraftingStationSlot(slot, slotIndex)
-    if util.prepareSlot and slotIndex ~= nil and type(slot) ~= "table" then
+    if prepareSlot and slotIndex ~= nil and type(slot) ~= "table" then
         --Slot is the bagId!
-        slot = util.prepareSlot(slot, slotIndex)
+        slot = prepareSlot(slot, slotIndex)
     end
     return slot
 end
@@ -70,9 +114,9 @@ local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk, addFil
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local weaponType = GetItemLinkWeaponType(itemLink)
+        local weaponType = gilwt(itemLink)
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes = {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -96,9 +140,9 @@ local function GetFilterCallbackForArmorType(filterTypes, checkOnlyJunk, addFilt
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local armorType = GetItemLinkArmorType(itemLink)
+        local armorType = gilat(itemLink)
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes =  {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes =  {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -125,7 +169,7 @@ local function GetFilterCallbackForGear(filterTypes, armorTypes, checkOnlyJunk, 
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
 
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes = {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -134,7 +178,7 @@ local function GetFilterCallbackForGear(filterTypes, armorTypes, checkOnlyJunk, 
         end
 
         if armorTypes ~= nil then
-            local armorType = GetItemLinkArmorType(itemLink)
+            local armorType = gilat(itemLink)
             for i=1, #armorTypes do
                 if armorTypes[i] == armorType then
                     goOn = true
@@ -145,7 +189,7 @@ local function GetFilterCallbackForGear(filterTypes, armorTypes, checkOnlyJunk, 
             goOn = true
         end
         if goOn then
-            local _, _, _, equipType = GetItemLinkInfo(itemLink)
+            local _, _, _, equipType = gilii(itemLink)
 
             for i=1, #filterTypes do
                 if filterTypes[i] == equipType then
@@ -164,9 +208,9 @@ local function GetFilterCallbackForJewelry(filterTypes, itemTraitType, checkOnly
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local _, _, _, equipType = GetItemLinkInfo(itemLink)
+        local _, _, _, equipType = gilii(itemLink)
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes = {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -176,7 +220,7 @@ local function GetFilterCallbackForJewelry(filterTypes, itemTraitType, checkOnly
 
         for i=1, #filterTypes do
             if filterTypes[i] == equipType then
-                local checkItemTraitType = GetItemLinkTraitInfo(itemLink)
+                local checkItemTraitType = gilti(itemLink)
                 if itemTraitType == checkItemTraitType then
                     return true
                 end
@@ -193,11 +237,11 @@ local function GetFilterCallbackForClothing(checkOnlyJunk, addFilterTypesToMatch
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local armorType = GetItemLinkArmorType(itemLink)
-        local _, _, _, equipType = GetItemLinkInfo(itemLink)
+        local armorType = gilat(itemLink)
+        local _, _, _, equipType = gilii(itemLink)
 
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes = {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -224,7 +268,7 @@ local function GetFilterCallbackForTrophy(checkOnlyJunk)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local itemType = GetItemLinkItemType(itemLink)
+        local itemType = gilit(itemLink)
         --if not IsItemLinkStolen(itemLink) and (itemType == ITEMTYPE_TROPHY
         if (itemType == ITEMTYPE_TROPHY
                 or itemType == ITEMTYPE_COLLECTIBLE or itemType == ITEMTYPE_FISH
@@ -243,7 +287,7 @@ local function GetFilterCallbackForFence(checkOnlyJunk)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local itemType = GetItemLinkItemType(itemLink)
+        local itemType = gilit(itemLink)
         if IsItemLinkStolen(itemLink) and not (itemType == ITEMTYPE_GLYPH_ARMOR
           or itemType == ITEMTYPE_GLYPH_JEWELRY
           or itemType == ITEMTYPE_GLYPH_WEAPON or itemType == ITEMTYPE_SOUL_GEM
@@ -400,8 +444,8 @@ local function GetFilterCallbackForProvisioningIngredient(ingredientType)
         }
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        if GetItemLinkItemType(itemLink) ~= ITEMTYPE_INGREDIENT then return false end
-        local itemId = GetItemLinkItemId(itemLink)
+        if gilit(itemLink) ~= ITEMTYPE_INGREDIENT then return false end
+        local itemId = giliid(itemLink)
         if lookup[itemId] == ingredientType then return true end
         return false
     end
@@ -411,11 +455,12 @@ end
 local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
     checkOnlyJunk = checkOnlyJunk or false
     return function(slot, slotIndex)
+        if not util.LibMotifCategories then return true end
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        if categoryConst == AF.util.LibMotifCategories:GetMotifCategory(itemLink) then
+        if categoryConst == util.LibMotifCategories:GetMotifCategory(itemLink) then
             return true
         end
         return false
@@ -432,7 +477,7 @@ local function GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sS
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+        local itemType, specializedItemType = gilit(itemLink)
         for i = 1, #sItemTypes do
             if sItemTypes[i] == itemType then
                 if needsItemTypeAndSpecializedItemType == true then
@@ -459,7 +504,7 @@ local function GetFilterCallbackForSpecializedItemtype(sSpecializedItemTypes, ch
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+        local itemType, specializedItemType = gilit(itemLink)
         for i = 1, #sSpecializedItemTypes do
             if sSpecializedItemTypes[i] == specializedItemType then
                 return true
@@ -497,7 +542,8 @@ local function GetFilterCallbackForCollectibles(categoryTypes)
 end
 AF.GetFilterCallbackForCollectibles = GetFilterCallbackForCollectibles
 
-local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds, addFilterTypesToMatch)
+
+local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds, addFilterTypesToMatch, excludeThisTypes)
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
         slot = checkCraftingStationSlot(slot, slotIndex)
@@ -505,11 +551,11 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds,
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = util.GetItemLink(slot)
         if not itemLink then return false end
-        local itemId = GetItemLinkItemId(itemLink)
-        local itemType = GetItemLinkItemType(itemLink)
+        local itemId = giliid(itemLink)
+        local itemType = gilit(itemLink)
 
         if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {GetItemLinkFilterTypeInfo(itemLink)}
+            local itemFilterTypes = {gilfti(itemLink)}
             local matchesFound = 0
             matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
             if matchesFound ~= #addFilterTypesToMatch then
@@ -529,7 +575,7 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeThisItemIds,
                         if itemId == excludeThisItemIds then return false end
                     end
                 end
-                return true
+                return checkExcludedTypes(itemLink, excludeThisTypes)
             end
         end
         return false
@@ -719,6 +765,16 @@ local subfilterCallbacks = {
                         {name = "Robust", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
                         {name = "Swift", showIcon=true, addString = "Neck",         filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
                         {name = "Triune", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
+                        --Companion
+                        {name = "Aggressive", showIcon=true, addString = "Neck",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
+                        {name = "Augmented", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
+                        {name = "Bolstered", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
+                        {name = "Focused", showIcon=true, addString = "Neck",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
+                        {name = "Quickened", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
+                        {name = "Shattering", showIcon=true, addString = "Neck",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
+                        {name = "Soothing", showIcon=true, addString = "Neck",      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
+                        {name = "Vigorous", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
+
                         {name = "None", showIcon=true, addString = "Neck",          filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_NONE)},
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
@@ -759,6 +815,16 @@ local subfilterCallbacks = {
                         {name = "Robust", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
                         {name = "Swift", showIcon=true, addString = "Ring",         filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
                         {name = "Triune", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
+                        --Companion
+                        {name = "Aggressive", showIcon=true, addString = "Ring",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
+                        {name = "Augmented", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
+                        {name = "Bolstered", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
+                        {name = "Focused", showIcon=true, addString = "Ring",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
+                        {name = "Quickened", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
+                        {name = "Shattering", showIcon=true, addString = "Ring",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
+                        {name = "Soothing", showIcon=true, addString = "Ring",      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
+                        {name = "Vigorous", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
+
                         {name = "None", showIcon=true, addString = "Ring",          filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_NONE)},
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
@@ -1798,7 +1864,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
         Weapon = {
-            filterCallback = GetFilterCallback({ITEMTYPE_WEAPON}, false, nil, {ITEMFILTERTYPE_COMPANION}),
+            filterCallback = GetFilterCallback({ITEMTYPE_WEAPON}, false, nil, {ITEMFILTERTYPE_COMPANION}, {equipType={EQUIP_TYPE_OFF_HAND}}),
             dropdownCallbacks = {
                 {name = "OneHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}, false, {ITEMFILTERTYPE_COMPANION})},
                 {name = "TwoHand", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}, false, {ITEMFILTERTYPE_COMPANION})},
@@ -1808,7 +1874,7 @@ local subfilterCallbacks = {
             },
         },
         Armor = {
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET}, nil, false, {ITEMFILTERTYPE_COMPANION}),
+            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET, EQUIP_TYPE_OFF_HAND}, nil, false, {ITEMFILTERTYPE_COMPANION}),
             dropdownCallbacks = {
                 {name = "Heavy", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}, false, {ITEMFILTERTYPE_COMPANION})},
                 {name = "Medium", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}, false, {ITEMFILTERTYPE_COMPANION})},
@@ -1827,6 +1893,7 @@ local subfilterCallbacks = {
             },
         },
     },
+
 --=============================================================================================================================================================================================
 -- -^- Companion (in Player Inventory)                                                                                            -^-
 --=============================================================================================================================================================================================
@@ -2246,7 +2313,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 --Added with ESO PTS API100033 Markarth
 --TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
---TODO: filterInformationTable to the new ZOs ItmFilterDisplayCategory! Else the subfilterBars won't be recognized
+--TODO: filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
 --TODO: properly and the dropdown filters won't be registered to the correct bars!
         local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory

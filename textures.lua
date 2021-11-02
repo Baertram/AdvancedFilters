@@ -175,6 +175,17 @@ local textures = {
     Robust = "/esoui/art/icons/jewelrycrafting_trait_refined_zinc.dds",
     Swift = "/esoui/art/icons/crafting_outfitter_plug_component_002.dds",
     Triune = "/esoui/art/icons/jewelrycrafting_trait_refined_dawnprism.dds",
+    
+    --Companion traits
+    Aggressive  = "EsoUI/Art/Campaign/campaignBrowser_indexIcon_normal_up.dds",
+    Augmented   = "EsoUI/Art/Campaign/overview_indexIcon_bonus_up.dds",
+    Bolstered   = "EsoUI/Art/Campaign/campaign_tabIcon_browser_up.dds",
+    Focused     = "EsoUI/Art/Campaign/overview_indexIcon_scoring_up.dds",
+    Prolific    = "EsoUI/Art/Crafting/retrait_tabicon_up.dds",
+    Quickened   = "EsoUI/Art/Guild/tabIcon_history_up.dds",
+    Shattering  = "EsoUI/Art/Repair/inventory_tabIcon_repair_up.dds",
+    Soothing    = "EsoUI/Art/Inventory/inventory_tabIcon_healstaff_up.dds",
+    Vigorous    = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_up.dds",
 
     --Recall stones
     RecallStone = "/esoui/art/icons/rune_a.dds",

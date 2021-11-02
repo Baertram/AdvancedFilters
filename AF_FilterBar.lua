@@ -37,6 +37,7 @@ end
 function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     local settings = AF.settings
     if settings.debugSpam then d("=============================================\n[AF]AF_FilterBarInitialize - inventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames)) end
+
     --get upper anchor position for subfilter bar
     --Fix for patch 6.2.7 2020-11-23 ZOs added their own subFilter bars with Markarth patch and thus the subfilterbars are
     --movin the inventory sort header down.
@@ -58,6 +59,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+    local selfVar = self
     --unique identifier
     self.name = inventoryName .. tradeSkillname .. groupName
     local AF_FilterBarName = self.name
@@ -91,9 +93,12 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     --Function for the mouse right click on the dropdown box (filter plugins) of the subfilterBar
     local function DropdownOnMouseUpHandler(dropdown, mouseButton, upInside)
         local comboBox = dropdown.m_comboBox
+        AF.currentCombobox = comboBox
+        AF.currentComboboxSelectedItem = nil
+
         if not upInside then return end
         --Get the current subfilterBar button
-        local button = self:GetCurrentButton()
+        local button = selfVar:GetCurrentButton()
         if not button then return end
         --Get the current LibFilters filterPanelId
         local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
@@ -132,7 +137,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             ]]
 --AF._lastFilterButton = button
             local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-            local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
+            local filterType = util.GetCurrentFilterTypeForInventory(selfVar:GetInventoryType())
 --d(">[AF]l_filterPanelIdActive: " ..tostring(l_filterPanelIdActive) .. ", filterType: " ..tostring(filterType))
             local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
             local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
@@ -187,7 +192,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     newSelectedItem.name = "≠" .. currentlySelectedDropdownItem.name
                 end
             end
-AF._newSelectedItem = newSelectedItem
+--AF._newSelectedItem = newSelectedItem
             button.previousDropdownSelection[l_filterPanelIdActive] = newSelectedItem
             comboBox.m_selectedItemData = newSelectedItem
             comboBox.m_selectedItemText:SetText(newSelectedItem.name)
@@ -195,7 +200,7 @@ AF._newSelectedItem = newSelectedItem
             PlaySound(SOUNDS.MENU_BAR_CLICK)
 
             util.ApplyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
-            self:UpdateLastSelectedDropdownEntries(button, "invertDropdownEntryAndCallCallback")
+            selfVar:UpdateLastSelectedDropdownEntries(button, "invertDropdownEntryAndCallCallback")
             return true
         end
 
@@ -203,7 +208,7 @@ AF._newSelectedItem = newSelectedItem
         local function selectDropdownEntry(entry)
             if entry == nil or entry == "" then return end
             --AF._lastSelectedEntry = entry
-            local filterType = util.GetCurrentFilterTypeForInventory(self:GetInventoryType())
+            local filterType = util.GetCurrentFilterTypeForInventory(selfVar:GetInventoryType())
             local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
 
             --Is the entry inverted?
@@ -288,7 +293,7 @@ AF._newSelectedItem = newSelectedItem
                             comboBox.m_selectedItemText:SetText(newSelectedItem.name)
 
                             PlaySound(SOUNDS.MENU_BAR_CLICK)
-                            self:UpdateLastSelectedDropdownEntries(button, "selectDropdownEntry-SubMenuItem")
+                            selfVar:UpdateLastSelectedDropdownEntries(button, "selectDropdownEntry-SubMenuItem")
                         end
                         if newSelectedItem.isInverted == true then
                             --d(">history item was inverted")
@@ -307,14 +312,28 @@ AF._newSelectedItem = newSelectedItem
             end
         end
 
+        --[Show/Hide the combobox dropdown entries]
+        local anchorZOMenuToControl = selfVar.anchorZOMenuOfDropdownFiltersToControl or dropdown
+        local anchorToDropdown = anchorZOMenuToControl == dropdown or false
         --Left mouse button
         if mouseButton == MOUSE_BUTTON_INDEX_LEFT then
             if comboBox.m_isDropdownVisible then
                 comboBox:HideDropdownInternal()
             else
-                comboBox:ShowDropdownInternal()
+                if IsShiftKeyDown() then
+                    --Select All entry
+                    selectDropdownEntry(AF_CONST_ALL)
+                else
+                    --Show menu to select an entry
+                    comboBox:ShowDropdownInternal()
+                    if not anchorToDropdown then
+                        comboBox:SetVisible(false)
+                        AnchorMenu(anchorZOMenuToControl, 5)
+                        comboBox:SetVisible(true)
+                    end
+                end
             end
-            --Right mouse button
+        --Right mouse button
         elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
             --Add the context menu dropdown filter box menu for "All" and "Invert" and "last selected history" entries
             --d("[AF]filterPanelIdActive at filter plugin dropdown right click: " ..tostring(filterPanelIdActive))
@@ -370,18 +389,24 @@ AF._newSelectedItem = newSelectedItem
                 end
             end
             ]]
-            ShowMenu(dropdown)
+
+            --Anchor the ZO_Menu of the dropdown to a control specified, or to the dropdown control
+            ShowMenu(anchorZOMenuToControl)
         end
     end
     self.dropdown:SetHandler("OnMouseUp", DropdownOnMouseUpHandler)
+    self.dropdown.dropdownOnMouseUpHandlerFunc = DropdownOnMouseUpHandler
 ------------------------------------------------------------------------------------------------------------------------
 
     local comboBox = self.dropdown.m_comboBox
 
     local function DropdownOnMouseEnterHandler()
-        local tooltipText = comboBox.m_selectedItemText:GetText()
-        if tooltipText and string.len(tooltipText) > 12 then
-            ZO_Tooltips_ShowTextTooltip(self.dropdown, LEFT, tooltipText)
+        local selectedItemText = comboBox.m_selectedItemText
+        if selectedItemText ~= nil and selectedItemText:WasTruncated() == true then
+            local tooltipText = selectedItemText:GetText()
+            if tooltipText and tooltipText ~= "" then
+                ZO_Tooltips_ShowTextTooltip(self.dropdown, LEFT, tooltipText)
+            end
         end
     end
     self.dropdown:SetHandler("OnMouseEnter", DropdownOnMouseEnterHandler)
@@ -392,34 +417,39 @@ AF._newSelectedItem = newSelectedItem
     self.dropdown:SetHandler("OnMouseExit", DropdownOnMouseExitHandler)
 ------------------------------------------------------------------------------------------------------------------------
 
-    local filterBarCreated = self
-
     comboBox:SetSortsItems(false)
     comboBox.AddMenuItems = function(p_comboBox)
-        local button = self:GetCurrentButton()
-        local self = p_comboBox
+        local button = selfVar:GetCurrentButton()
+        --local self = p_comboBox
 
         --Get the current LibFilters filterPanelId
         local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
 
-        for i = 1, #self.m_sortedItems do
+        for i = 1, #p_comboBox.m_sortedItems do
             -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
-            local item = self.m_sortedItems[i]
+            local item = p_comboBox.m_sortedItems[i]
 
             local function OnSelect()
-                ZO_ComboBox_Base_ItemSelectedClickHelper(self, item)
+                AF.currentCombobox = p_comboBox
+                AF.currentComboboxSelectedItem = item
+
+                ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, item)
                 button.previousDropdownSelection = button.previousDropdownSelection or {}
                 button.previousDropdownSelection[filterPanelIdActive] = item
 
                 PlaySound(SOUNDS.MENU_BAR_CLICK)
             end
-
-            AddCustomMenuItem(item.name, OnSelect, nil, self.m_font, self.m_normalColor, self.m_highlightColor)
+            local itemCallbackFunc
+            local itemType = item.itemType
+            if itemType ~= MENU_ADD_OPTION_HEADER then
+                itemCallbackFunc = OnSelect
+            end
+            AddCustomMenuItem(item.name, itemCallbackFunc, itemType, p_comboBox.m_font, p_comboBox.m_normalColor, p_comboBox.m_highlightColor)
         end
 
         --Add the dropdown filter box context menu entries
         -->Normal filters via AF and plugins
-        local submenuCandidates = self.submenuCandidates
+        local submenuCandidates = p_comboBox.submenuCandidates
         for _, submenuCandidate in ipairs(submenuCandidates) do
             local entries = {}
             for _, callbackEntry in ipairs(submenuCandidate.callbackTable) do
@@ -432,35 +462,44 @@ AF._newSelectedItem = newSelectedItem
                 if not nameOfEntry or nameOfEntry == "" then
                     d("[AdvancedFilters] ERROR: FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames))
                 end
-                local entry = {
-                    label = nameOfEntryWithIcon,
-                    callback = function()
-                        util.ApplyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
-                        filterBarCreated:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tostring(nameOfEntry))
-                        button.forceNextDropdownRefresh = true
-                        self.m_selectedItemText:SetText(nameOfEntryWithIcon)
-                        self.m_selectedItemData = self:CreateItemEntry(nameOfEntryWithIcon,
-                                function(p_l_comboBox, itemName, item, selectionChanged)
-                                    util.ApplyFilter(callbackEntry,
-                                            AF_CONST_DROPDOWN_FILTER,
-                                            selectionChanged or button.forceNextDropdownRefresh)
-                                    filterBarCreated:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(self.name).."-ComboBoxEntry SelectedItemData: " ..tostring(nameOfEntry))
-                                end)
-                        self.m_selectedItemData.filterResetAtStartDelay = callbackEntry.filterResetAtStartDelay
-                        self.m_selectedItemData.filterResetAtStart      = callbackEntry.filterResetAtStart
-                        self.m_selectedItemData.filterStartCallback     = callbackEntry.filterStartCallback
-                        self.m_selectedItemData.filterEndCallback       = callbackEntry.filterEndCallback
-                        self.m_selectedItemData.nameWithoutIcon         = nameOfEntryWithoutIcon
-                        --Get the current LibFilters filterPanelId
-                        local filterPanelIdActiveAsContextMenuEntryCallbackFires = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-                        button.previousDropdownSelection = button.previousDropdownSelection or {}
-                        button.previousDropdownSelection[filterPanelIdActiveAsContextMenuEntryCallbackFires] = self.m_selectedItemData
+                local entry
+                if callbackEntry.itemType ~= nil and callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
+                    entry = {
+                        itemType = MENU_ADD_OPTION_HEADER,
+                        label = nameOfEntryWithIcon or nameOfEntryWithoutIcon or nameOfEntry,
+                        --disabled = true,
+                    }
+                else
+                    entry = {
+                        label = nameOfEntryWithIcon,
+                        callback = function()
+                            util.ApplyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
+                            selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tostring(nameOfEntry))
+                            button.forceNextDropdownRefresh = true
+                            p_comboBox.m_selectedItemText:SetText(nameOfEntryWithIcon)
+                            p_comboBox.m_selectedItemData = p_comboBox:CreateItemEntry(nameOfEntryWithIcon,
+                                    function(p_l_comboBox, itemName, item, selectionChanged)
+                                        util.ApplyFilter(callbackEntry,
+                                                AF_CONST_DROPDOWN_FILTER,
+                                                selectionChanged or button.forceNextDropdownRefresh)
+                                        selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(p_comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tostring(nameOfEntry))
+                                    end)
+                            p_comboBox.m_selectedItemData.filterResetAtStartDelay = callbackEntry.filterResetAtStartDelay
+                            p_comboBox.m_selectedItemData.filterResetAtStart      = callbackEntry.filterResetAtStart
+                            p_comboBox.m_selectedItemData.filterStartCallback     = callbackEntry.filterStartCallback
+                            p_comboBox.m_selectedItemData.filterEndCallback       = callbackEntry.filterEndCallback
+                            p_comboBox.m_selectedItemData.nameWithoutIcon         = nameOfEntryWithoutIcon
+                            --Get the current LibFilters filterPanelId
+                            local filterPanelIdActiveAsContextMenuEntryCallbackFires = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+                            button.previousDropdownSelection = button.previousDropdownSelection or {}
+                            button.previousDropdownSelection[filterPanelIdActiveAsContextMenuEntryCallbackFires] = p_comboBox.m_selectedItemData
 
-                        PlaySound(SOUNDS.MENU_BAR_CLICK)
+                            PlaySound(SOUNDS.MENU_BAR_CLICK)
 
-                        ClearMenu()
-                    end,
-                }
+                            ClearMenu()
+                        end,
+                    }
+                end
                 table.insert(entries, entry)
             end
             AddCustomSubMenuItem(AF.strings[submenuCandidate.submenuName], entries, "ZoFontGameSmall")
@@ -504,7 +543,8 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
         down    = string.format(iconPath, "down"),
         over    = string.format(iconPath, "over"),
     }
-    if AF.settings.debugSpam then d("[AF_FilterBar:AddSubfilter]groupName: " ..tostring(groupName) .. ", subfilterName: " ..tostring(subfilterName)) end
+    local settings = AF.settings
+    if settings.debugSpam then d("[AF_FilterBar:AddSubfilter]groupName: " ..tostring(groupName) .. ", subfilterName: " ..tostring(subfilterName)) end
     if AF.subfilterCallbacks[groupName] == nil then
         d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'data\' missing for group \'" ..tostring(groupName).."\'")
         return nil
@@ -530,6 +570,8 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
         d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'function\' missing for group \'" ..tostring(groupName) .. "\', subFilter: \'" ..tostring(subfilterName).."\'")
         return nil
     end
+    local showFilterDropdownMenuOnRightMouseAtSubFilterButton = settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton
+
     local filterResetAtStartDelay = subfilterButtonData.filterResetAtStartDelay
     local filterStartCallback = subfilterButtonData.filterStartCallback
     local filterEndCallback = subfilterButtonData.filterEndCallback
@@ -547,10 +589,12 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
     button:SetAnchor(RIGHT, self.control, RIGHT, anchorX, 0)
     button:SetClickSound(SOUNDS.MENU_BAR_CLICK)
 
+    --[[
     local function OnClicked(thisButton)
         if(not thisButton.clickable) then return end
         self:ActivateButton(thisButton)
     end
+    ]]
 
     local function OnMouseEnter(thisButton)
         ZO_Tooltips_ShowTextTooltip(thisButton, TOP, AF.strings[subfilterName])
@@ -569,9 +613,79 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
         highlight:SetHidden(true)
     end
 
-    button:SetHandler("OnClicked", OnClicked)
     button:SetHandler("OnMouseEnter", OnMouseEnter)
     button:SetHandler("OnMouseExit", OnMouseExit)
+
+    local function OnMouseUp(thisButton, mouseButton, upInside, ctrl, alt, shift, command)
+        if upInside then
+            local clickable = thisButton.clickable
+            if clickable then
+                --local doClearMenu = false
+                local active = self:GetCurrentButton() == thisButton
+                local isLeftMouseUp = (mouseButton == MOUSE_BUTTON_INDEX_LEFT) or false
+                local isRightMouseUp = (mouseButton == MOUSE_BUTTON_INDEX_RIGHT) or false
+
+                --Is the dropdown plugin filter combobox open, but not anchored to the dropdown but some other
+                --control (of the subfilterBar)? Hide it
+                local dropdown = self.dropdown
+                --local comboBox = dropdown.m_comboBox
+                if isLeftMouseUp or isRightMouseUp then
+                --[[
+                    local menuVisible = IsMenuVisible()
+                    local menuOwner = GetMenuOwner()
+AF._menuOwner = menuOwner
+AF._menuVisible = menuVisible
+AF._comboBox = comboBox
+AF._dropdown = dropdown
+                    if menuVisible == true then
+d("[AF]Menu shown. Anchored to: " ..tostring(menuOwner:GetName()))
+                        if menuOwner ~= dropdown then
+                            doClearMenu = true
+                        end
+                    end
+                    --Hide currently opened menu
+                    if doClearMenu == true then
+d(">>clearing menu!")
+                        ClearMenu()
+                    end
+                    ]]
+                    ClearMenu()
+                end
+                if isLeftMouseUp then
+                    if not active and not ctrl and not alt and not shift and not command then
+                        --Activate the button first
+                        self:ActivateButton(thisButton)
+                    end
+
+                elseif isRightMouseUp then
+                    if showFilterDropdownMenuOnRightMouseAtSubFilterButton == true then
+                        if not active then
+                            --Activate the button first
+                            self:ActivateButton(thisButton)
+                        end
+                        -->This below will show the left/right click menu of the filter dropdown
+                        --Set the anchor control for the dropdown to the current subfilterButton
+                        --Show the context menu of the filter plugins dropdown: Left mouse button click on the dropdown
+                        zo_callLater(function()
+                            self.anchorZOMenuOfDropdownFiltersToControl = thisButton
+                            local mouseButtonToUse = (shift == true and MOUSE_BUTTON_INDEX_RIGHT) or MOUSE_BUTTON_INDEX_LEFT
+                            self.dropdown.dropdownOnMouseUpHandlerFunc(dropdown, mouseButtonToUse, true)
+                            --Remove the anchor control again so next dropdown opens at the combobox control
+                            self.anchorZOMenuOfDropdownFiltersToControl = nil
+                        end, 50)
+                    end
+
+                end
+            end
+        end
+    end
+    local function OnClicked(thisButton)
+        --OnMouseUp handles this alone!
+        if showFilterDropdownMenuOnRightMouseAtSubFilterButton == true then return end
+        OnMouseUp(thisButton, MOUSE_BUTTON_INDEX_LEFT, true, IsControlKeyDown(), IsAltKeyDown(), IsShiftKeyDown(), IsCommandKeyDown())
+    end
+    button:SetHandler("OnMouseUp", OnMouseUp)
+    button:SetHandler("OnClicked", OnClicked)
 
     button.name = subfilterName
     button.groupName = groupName
