@@ -1,9 +1,9 @@
 ## Title: Advanced Filters
 ## Author: Randactyl & Baertram
-## Version: 1.6.1.1
-## AddOnVersion: 1611
-## APIVersion: 100035 101031
-## DependsOn: LibAddonMenu-2.0>=32 LibCustomMenu>=700 LibFilters-3.0>=321
+## Version: 1.6.1.4
+## AddOnVersion: 1614
+## APIVersion: 101032 101033
+## DependsOn: LibAddonMenu-2.0>=32 LibCustomMenu>=711 LibFilters-3.0>=321
 ## OptionalDependsOn: AwesomeGuildStore CraftBagExtended LibMotifCategories>=2
 ## SavedVariables: AdvancedFilters_Settings
 

@@ -73,6 +73,17 @@ local strings = {
     Triune = util.Localize(SI_ITEMTRAITTYPE30),
     Protective = util.Localize(SI_ITEMTRAITTYPE32),
 
+    --Companion traits
+    Aggressive = util.Localize(SI_ITEMTRAITTYPE47),
+    Augmented = util.Localize(SI_ITEMTRAITTYPE49),
+    Bolstered = util.Localize(SI_ITEMTRAITTYPE50),
+    Focused = util.Localize(SI_ITEMTRAITTYPE45),
+    Prolific = util.Localize(SI_ITEMTRAITTYPE44),
+    Quickened = util.Localize(SI_ITEMTRAITTYPE43),
+    Shattering = util.Localize(SI_ITEMTRAITTYPE46),
+    Soothing = util.Localize(SI_ITEMTRAITTYPE48),
+    Vigorous = util.Localize(SI_ITEMTRAITTYPE51),
+
     --CONSUMABLES
     Crown = util.Localize(SI_ITEMTYPE57),
     Food = util.Localize(SI_ITEMTYPE4),
@@ -205,6 +216,14 @@ local strings = {
     lamShowDropdownSelectedReminderAnimationTT = "Glow the dropdown box as you change to a subfilter bar, where the dropdown box filter is selected and is not showing the \'".. util.Localize(SI_ITEMFILTERTYPE0) .. "\' entry",
     lamShowDropdownLastSelectedEntries = "Show filter dropdown selection history",
     lamShowDropdownLastSelectedEntriesTT = "Right click the filter dropdown box to show a list of the last 10 selected dropdown entries below the standard context menu entries. Click an history entry to select it again (if the current subfilterbar's dropdown box provides this entry as the history is created cross-subfilterbars)!",
+    lamHideCharBoundAtBankDeposit = "Hide char bound items at bank",
+    lamHideCharBoundAtBankDepositTT = "Hide character bound items at the bank deposit tab",
+    lamShowFilterDropdownMenuOnRightMouse   = "|t150.000000%:150.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t: Show dropdown box filters at button",
+    lamShowFilterDropdownMenuOnRightMouseTT = "Show the same filters, which the dropdown box filters would show if you open it at the current subfilter button.\n\n|t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t: Show normal plugin filters menu\nSHIFT key + |t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t: Show right click plugin filters menu",
+    lamHeaderVisual = "Visual",
+    lamHeaderFilterCategory = "Filter categories",
+    lamHeaderSubfilter = "Subfilter buttons",
+    lamHeaderDropdownFilterbox = "Dropdown filter box",
     lamDebugOutput = "Debug",
     lamDebugOutputTT = "Shows some debug messages into the chat/DebugLogViewer UI.",
     lamDebugSpamOutput = "Debug Spam",
@@ -266,6 +285,17 @@ strings.Triune_Ring = strings.Triune .. ringStr
 strings.Protective_Ring = strings.Protective .. ringStr
 strings.All_Ring = strings.All .. ringStr
 strings.None_Ring = strings.None .. ringStr
+--Companion
+strings.Aggressive_Ring = strings.Aggressive ..ringStr
+strings.Augmented_Ring = strings.Augmented ..ringStr
+strings.Bolstered_Ring = strings.Bolstered ..ringStr
+strings.Focused_Ring = strings.Focused ..ringStr
+strings.Prolific_Ring = strings.Prolific ..ringStr
+strings.Quickened_Ring = strings.Quickened ..ringStr
+strings.Shattering_Ring = strings.Shattering ..ringStr
+strings.Soothing_Ring = strings.Soothing ..ringStr
+strings.Vigorous_Ring = strings.Vigorous ..ringStr
+
 local neckStr = " (" .. strings.Neck .. ")"
 strings.Arcane_Neck = strings.Arcane .. neckStr
 strings.Bloodthirsty_Neck = strings.Bloodthirsty .. neckStr
@@ -280,6 +310,16 @@ strings.Triune_Neck = strings.Triune .. neckStr
 strings.Protective_Neck = strings.Protective .. neckStr
 strings.All_Neck = strings.All .. neckStr
 strings.None_Neck = strings.None .. neckStr
+--Companion
+strings.Aggressive_Neck = strings.Aggressive ..neckStr
+strings.Augmented_Neck = strings.Augmented ..neckStr
+strings.Bolstered_Neck = strings.Bolstered ..neckStr
+strings.Focused_Neck = strings.Focused ..neckStr
+strings.Prolific_Neck = strings.Prolific ..neckStr
+strings.Quickened_Neck = strings.Quickened ..neckStr
+strings.Shattering_Neck = strings.Shattering ..neckStr
+strings.Soothing_Neck = strings.Soothing ..neckStr
+strings.Vigorous_Neck = strings.Vigorous ..neckStr
 
 --AdvancedFilters Prefix
 strings.AFPREFIX        = afPrefix

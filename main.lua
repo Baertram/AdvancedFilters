@@ -6,12 +6,13 @@ local changeFilterCallsAfterFirstOpenWasBank = 0
 local vanillaUIChangesToSearchBarsWereDone = false
 AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 
+local apiVersion = GetAPIVersion()
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
 --______________________________________________________________________________________________________________________
---TODO Last updated: 2021-06-15
---Max todos: #64
+--TODO Last updated: 2021-08-06
+--Max todos: #71
 
 --#14 Drag & drop item at vendor buyback inventory list throws error:
 --[[
@@ -65,21 +66,39 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
 ]]
 
 
+--#65: 2021-08-06: Bug, Baertram: Bank deposit shows subfiletrs enabled for normal weapons/armor if they are belonging to companion
+--#66: 2021-07-26: Bug, Maxermaxx: There may be something wrong with the grey-out function.
+--The sub-filter bar is grayed out in bank and house crates in the junk subfilter, although there are filterable items.
+--Any items. Such as
+--|H1:item:71738:30:1:0:0:0:0:0:0:0:0:0:0:0:0:25:0:0:0:0:0|h|h
+--|H1:item:27036:2:19:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h
+--|H1:item:27112:175:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h
+
+
+
+
 ------------------------------------------------------------------------------------------------------------------------
---WORKING ON - Last updated: 2021-06-15
+--WORKING ON - Last updated: 2021-08-06
+--#65
+--#66
+--#67
+--#68
+--#69
+--#70
+--#71
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.1.0 - Current 1.6.1.1 - Changed 2021-06-15
+--  UPDATE INFORMATION: since AF 1.6.1.2 - Current 1.6.1.3
 --______________________________________________________________________________________________________________________
-
 
 --______________________________________________________________________________________________________________________
 --                                                  ADDED
 --______________________________________________________________________________________________________________________
---
---
---
+--#67 Added support for LibCustomMenu's itemType (main menu or submenu) to filter plugins
+--#69: Added setting: Right click a subfilter button to show the dropdown filters menu. SHIFT + right click the subfilter
+--button to show the "Select all" / "Invert selection" dropdown filter plugin context menu
+--#72: SHIFT + left click the dropdown filter plugin box to select the "Select all" entry
 --
 --
 --
@@ -92,13 +111,15 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
 --______________________________________________________________________________________________________________________
 --                                                  Changed
 --______________________________________________________________________________________________________________________
+--#70: Dropdown filter box tooltip only shows for selected entries which got truncated
 
 --______________________________________________________________________________________________________________________
 --                                                  FIXED
 --______________________________________________________________________________________________________________________
---#63: House bank companion item filter shows error message
---#64: Bank companion item filter always greys out even if items are banked
-
+--#65: Bank deposit shows subfilters enabled for normal weapons/armor if they are belonging to companion
+--#68: Companion shields filter below weapons instead of armor
+--#71: ZOs BUG! Using the text search and splitting a stack does not update the inventories afterwards. AF will now try
+--to circumvent this and run a text search update, if pending searches are given, after the stack split dialog closes.
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -452,7 +473,7 @@ local function InitializeHooks()
             end
 
             --For debugging
-            AF.currentayoutData = layoutData
+            AF.currentLayoutData = layoutData
 
             local list = self.list
             if not list and self.inventories ~= nil and self.inventories[invTypeUpdateListAnchor] ~= nil then
@@ -1885,6 +1906,29 @@ local function InitializeHooks()
         return false
     end)
 
+    --Fixes, API version dependent!
+    if apiVersion <= 101031 then
+        --Stack split dialog does not update the inventory poperly if text search was filtering the stacked item before
+        local isStackSplitActive = false
+        local onlyRegisterOnHideOnce = false
+        local stackSplitDialogCustomControl = ESO_Dialogs["SPLIT_STACK"].customControl
+        ZO_PreHookHandler(stackSplitDialogCustomControl, "OnEffectivelyShown", function()
+--d("[AF]Dialog SPLIT_STACK:OnEffectivelyShown")
+            isStackSplitActive = true
+            if not onlyRegisterOnHideOnce then
+--d(">>>registered OnHide once")
+                ZO_PostHookHandler(stackSplitDialogCustomControl, "OnHide", function()
+                    if not isStackSplitActive then return end
+                    isStackSplitActive = false
+                    --Fix the stack split if a text search was done before -> Update the filters to show new splitted stack!
+                    zo_callLater(function()
+                        TEXT_SEARCH_MANAGER:ExecutePendingContextSearches() end,
+                    250)
+                end)
+                onlyRegisterOnHideOnce = true
+            end
+        end)
+    end
 
 end --function InitializeHooks()
 --======================================================================================================================

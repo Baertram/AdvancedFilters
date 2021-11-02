@@ -94,6 +94,11 @@ function AF.LAMSettingsMenu()
             },
             --==============================================================================
             {
+                type = 'header',
+                name = strings.lamHeaderVisual,
+            },
+            --==============================================================================
+            {
                 type = "checkbox",
                 name = strings.lamHideItemCount,
                 tooltip = strings.lamHideItemCountTT,
@@ -119,6 +124,11 @@ function AF.LAMSettingsMenu()
             },
             --==============================================================================
             {
+                type = 'header',
+                name = strings.lamHeaderFilterCategory,
+            },
+            --==============================================================================
+            {
                 type = "checkbox",
                 name = strings.lamHideSubFilterLabel,
                 tooltip = strings.lamHideSubFilterLabelTT,
@@ -130,6 +140,11 @@ function AF.LAMSettingsMenu()
             },
             --==============================================================================
             {
+                type = 'header',
+                name = strings.lamHeaderSubfilter,
+            },
+            --==============================================================================
+            {
                 type = "checkbox",
                 name = strings.lamGrayOutSubFiltersWithNoItems,
                 tooltip = strings.lamGrayOutSubFiltersWithNoItemsTT,
@@ -138,6 +153,34 @@ function AF.LAMSettingsMenu()
                     AF.settings.grayOutSubFiltersWithNoItems = value
                 end,
                 default = defSettings.grayOutSubFiltersWithNoItems,
+            },
+            --==============================================================================
+            {
+                type = "checkbox",
+                name = strings.lamHideCharBoundAtBankDeposit,
+                tooltip = strings.lamHideCharBoundAtBankDepositTT,
+                getFunc = function() return settings.hideCharBoundAtBankDeposit end,
+                setFunc = function(value)
+                    AF.settings.hideCharBoundAtBankDeposit = value
+                end,
+                default = defSettings.hideCharBoundAtBankDeposit,
+            },
+            --==============================================================================
+            {
+                type = "checkbox",
+                name = strings.lamShowFilterDropdownMenuOnRightMouse,
+                tooltip = strings.lamShowFilterDropdownMenuOnRightMouseTT,
+                getFunc = function() return settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton end,
+                setFunc = function(value)
+                    AF.settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton = value
+                end,
+                default = defSettings.showFilterDropdownMenuOnRightMouseAtSubFilterButton,
+                requiresReload = true,
+            },
+            --==============================================================================
+            {
+                type = 'header',
+                name = strings.lamHeaderDropdownFilterbox,
             },
             --==============================================================================
             {
