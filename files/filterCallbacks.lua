@@ -2,6 +2,7 @@ AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
 
 local util = AF.util
+local ugil = util.GetItemLink
 
 local debugSpam = AF.debugSpam
 
@@ -18,7 +19,7 @@ local gilii     = GetItemLinkInfo
 local gilfti    = GetItemLinkFilterTypeInfo
 local gilti     = GetItemLinkTraitInfo
 local giliid    = GetItemLinkItemId
-
+local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Lookup tables
@@ -109,7 +110,7 @@ AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
         local oldSlotJunk = slot.isJunk
         if oldSlotJunk ~= nil and oldSlotJunk == true then slot.isJunk = nil end
         if not slot.filterData then
-            slot.filterData = { GetItemLinkFilterTypeInfo(itemLink) }
+            slot.filterData = { gilfti(itemLink) }
         end
         local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
         --Reset the slot's junk flag
@@ -156,7 +157,7 @@ local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk, addFil
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -185,7 +186,7 @@ local function GetFilterCallbackForArmorType(filterTypes, checkOnlyJunk, addFilt
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -214,7 +215,7 @@ local function GetFilterCallbackForGear(filterTypes, armorTypes, checkOnlyJunk, 
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -258,7 +259,7 @@ local function GetFilterCallbackForJewelry(filterTypes, itemTraitType, checkOnly
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -290,7 +291,7 @@ local function GetFilterCallbackForClothing(checkOnlyJunk, addFilterTypesToMatch
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -324,7 +325,7 @@ local function GetFilterCallbackForTrophy(checkOnlyJunk, itemTypeDisplayCategory
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -343,7 +344,7 @@ local function GetFilterCallbackForFence(checkOnlyJunk, itemTypeDisplayCategory)
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         local itemType = gilit(itemLink)
@@ -360,7 +361,7 @@ local function GetFilterCallbackForStolen(checkOnlyJunk, itemTypeDisplayCategory
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
         if IsItemLinkStolen(itemLink) then
             if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -499,7 +500,7 @@ local function GetFilterCallbackForProvisioningIngredient(ingredientType)
             ["45523"] = "Old", --Old Emperor Grapes^p
             ["45524"] = "Old", --Old Imperial Mash
         }
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
         if gilit(itemLink) ~= ITEMTYPE_INGREDIENT then return false end
         local itemId = giliid(itemLink)
@@ -515,7 +516,7 @@ local function GetFilterCallbackForStyleMaterial(categoryConst, checkOnlyJunk)
         if not util.LibMotifCategories then return true end
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
         if categoryConst == util.LibMotifCategories:GetMotifCategory(itemLink) then
             return true
@@ -530,14 +531,13 @@ local function GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sS
 
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if(not sItemTypes and not sSpecializedItemTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
+        if not sItemTypes and not sSpecializedItemTypes then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if sSpecializedItemTypes ~= nil and type(sSpecializedItemTypes) == "number" then
-            itemTypeDisplayCategory = sSpecializedItemTypes
-            sSpecializedItemTypes = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory(itemTypeDisplayCategory)
+        if sSpecializedItemTypes == nil and itemTypeDisplayCategory ~= nil then
+            sSpecializedItemTypes = IFUgsitbitdc(itemTypeDisplayCategory)
         end
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
 
@@ -564,14 +564,13 @@ local function GetFilterCallbackForSpecializedItemtype(sSpecializedItemTypes, ch
         checkOnlyJunk = checkOnlyJunk or false
         checkItemTypeToo = checkItemTypeToo or false
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if not sSpecializedItemTypes then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
+        if not sSpecializedItemTypes and not itemTypeDisplayCategory then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if type(sSpecializedItemTypes) == "number" then
-            itemTypeDisplayCategory = sSpecializedItemTypes
-            sSpecializedItemTypes = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory(itemTypeDisplayCategory)
+        if sSpecializedItemTypes == nil then
+            sSpecializedItemTypes = IFUgsitbitdc(itemTypeDisplayCategory)
         end
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
 
@@ -594,7 +593,7 @@ local function GetFilterCallbackForDefinedSpecializedOrItemType(specializedItemT
         checkOnlyJunk = checkOnlyJunk or false
         slot = checkCraftingStationSlot(slot, slotIndex)
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
@@ -618,7 +617,7 @@ end
 local function GetFilterCallbackForQuestItems()
     return function(slot, slotIndex)
         slot = checkCraftingStationSlot(slot, slotIndex)
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
         return true
     end
@@ -644,12 +643,16 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeTheseItemIds
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if(not filterTypes) then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
+        if not filterTypes and not itemTypeDisplayCategory then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = util.GetItemLink(slot)
+        local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
+        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then
+            return false
+        else
+            if not filterTypes then return true end
+        end
 
         local itemId = giliid(itemLink)
         local itemType = gilit(itemLink)
@@ -1051,11 +1054,11 @@ local subfilterCallbacks = {
         Provisioning = {
             filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}),
             dropdownCallbacks = {
-                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
+                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
                 },
-                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT)
+                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT)
                 },
-                {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT)},
+                {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT)},
             },
         },
         JewelryCrafting = {
@@ -1668,25 +1671,15 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
         FoodIngredient = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype({
-                SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE,
-            }),
+            filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
             dropdownCallbacks = {},
         },
         DrinkIngredient = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype({
-                SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_TEA,
-                SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC,
-            }),
+            filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT),
             dropdownCallbacks = {},
         },
         RareIngredient = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_INGREDIENT_RARE}),
+            filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT),
             dropdownCallbacks = {},
         },
         FurnishingMat = {
@@ -2171,9 +2164,7 @@ local subfilterCallbacks = {
         },
         ]]
         Consumable = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
-                                                ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_TROPHY,
-                                                ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_GROUP_REPAIR}, true, itemIds.lockpick, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE),
+            filterCallback = GetFilterCallback(nil, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE),
             dropdownCallbacks = {
                 {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Food", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_FOOD}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
@@ -2215,11 +2206,13 @@ local subfilterCallbacks = {
                 {name = "ArmorTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ARMOR_TRAIT}, true)},
                 {name = "WeaponTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_WEAPON_TRAIT}, true)},
                 {name = "JewelryAllTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT, ITEMTYPE_JEWELRY_TRAIT}, true)},
-                {name = "Furnishings", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING})},
+                {name = "Furnishings", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({ITEMTYPE_FURNISHING_MATERIAL, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ALCHEMY, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_BLACKSMITHING,
+                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_CLOTHIER, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_ENCHANTING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_JEWELRYCRAFTING,
+                                                SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_PROVISIONING, SPECIALIZED_ITEMTYPE_FURNISHING_MATERIAL_WOODWORKING})},
             },
         },
         Furnishings = {
-            filterCallback = GetFilterCallbackForSpecializedItemtype(ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, true, nil, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING),
+            filterCallback = GetFilterCallbackForSpecializedItemtype(nil, true, nil, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING),
             dropdownCallbacks = {
                 {name = "CraftingStation", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_CRAFTING_STATION})},
                 {name = "Light", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_FURNISHING_LIGHT})},
@@ -2246,9 +2239,7 @@ local subfilterCallbacks = {
         },
         ]]
         Miscellaneous = {
-            filterCallback    = GetFilterCallback({ ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON, ITEMTYPE_SOUL_GEM, ITEMTYPE_SIEGE, ITEMTYPE_LURE,
-                                                    ITEMTYPE_TOOL, ITEMTYPE_TROPHY, ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_TREASURE, ITEMTYPE_TRASH, ITEMTYPE_DISGUISE,
-                                                    ITEMTYPE_TABARD }, true, itemIds.repairtools, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS),
+            filterCallback    = GetFilterCallback(nil, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS),
             dropdownCallbacks = {
                 { name = "Glyphs", showIcon = true, filterCallback = GetFilterCallback({ ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON }, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS) },
                 { name = "SoulGem", showIcon = true, filterCallback = GetFilterCallback({ ITEMTYPE_SOUL_GEM }, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS) },

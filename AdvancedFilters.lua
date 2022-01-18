@@ -6,7 +6,7 @@ local changeFilterCallsAfterFirstOpenWasBank = 0
 local vanillaUIChangesToSearchBarsWereDone = false
 AF.vanillaUIChangesToSearchBarsWereDone = vanillaUIChangesToSearchBarsWereDone
 
-local apiVersion = GetAPIVersion()
+--local apiVersion = GetAPIVersion()
 ---==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
 --                                                  TODO - BEGIN
@@ -63,16 +63,6 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
 ]]
 
 
---#66: 2021-07-26: Bug, Maxermaxx: There may be something wrong with the grey-out function.
---The sub-filter bar is grayed out in bank and house crates in the junk subfilter, although there are filterable items.
---Any items. Such as
---|H1:item:71738:30:1:0:0:0:0:0:0:0:0:0:0:0:0:25:0:0:0:0:0|h|h
---|H1:item:27036:2:19:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h
---|H1:item:27112:175:1:0:0:0:0:0:0:0:0:0:0:0:0:36:0:0:0:0:0|h|h
-
-
---#72: 2022-01-18: Bug, Baertram, itemtype fackelkäfer laterne: 56 (ITEMTYPE_TREASURE), 2550 (SPECIALIZED_ITEMTYPE_TREASURE) wird unter Consumables angezeigt in Junk?
-
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +72,6 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
 ------------------------------------------------------------------------------------------------------------------------
 --CURRENTLY WORKING ON - Last updated: 2022-01-18
 --#66
---#72
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -101,6 +90,7 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
 
 -- FIXED
 -- French translations, thanks to Jakez31
+--#66 Bank junk filter did not enable subfilter buttons properly
 --#72 Treasure itemType was shown below Consumables at the Junk tab
 
 ---==========================================================================================================================================================================
