@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.1.4"
+AF.version = "1.6.1.5"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -45,7 +45,7 @@ AF.defaultSettings = {
 
 --Libraries
 AF.util = AF.util or {}
-local util = AF.util
+--local util = AF.util
 
 --Libraries: See file libraries.lua
 
@@ -999,6 +999,7 @@ AF.filterBarAlternativeInventoryLayoutData = filterBarAlternativeInventoryLayout
 
 --SUBFILTER BAR BUTTONS
 --The subfilter bars button names
+--> Attention: Make sure to maintain file filterCallbacks.lua, table "subfilterCallbacks" too if you change the table below!
 local subfilterButtonNames = {
     [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {
         AF_CONST_ALL,
