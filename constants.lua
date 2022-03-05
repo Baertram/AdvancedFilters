@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.1.5"
+AF.version = "1.6.1.6"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -74,7 +74,8 @@ local scenesForChecks = {
     bank            = "bank",
     guildBank       = "guildBank",
     guildStoreSell  = "tradinghouse",
-    fence           = "fence_keyboard"
+    fence           = "fence_keyboard",
+    universalDecon  = "universalDeconstructionSceneKeyboard",
 }
 AF.scenesForChecks = scenesForChecks
 --local sceneNameStoreVendor      = ""
@@ -107,6 +108,7 @@ AF.ZOsControlNames = {
     subTabs                 =   "SubTabs",
     active                  =   "Active",
     questItemsOnly          =   "QuestItemsOnly",
+    craftingTypes           =   "CraftingTypes",
 }
 local ZOsControlNames = AF.ZOsControlNames
 local filterDividerSuffix = ZOsControlNames.filterDivider
@@ -141,6 +143,11 @@ local controlsForChecks = {
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
     companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
+    universalDecon          = UNIVERSAL_DECONSTRUCTION,
+    universalDeconPanel     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel,
+    universalDeconPanelInv     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory,
+    universalDeconPanelInvControl = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory.control,
+    universalDeconScene     = UNIVERSAL_DECONSTRUCTION_KEYBOARD_SCENE,
 }
 --Smithing
 controlsForChecks.refinementPanel       =   controlsForChecks.smithing.refinementPanel
@@ -188,7 +195,14 @@ local inventories = {
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
-INVENTORY_TYPE_VENDOR_BUY = 900
+INVENTORY_TYPE_VENDOR_BUY =                         900
+--New defined universal deconstruction inventory type (only known by AdvancedFilters)
+INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL =       901
+INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR =     902
+INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS =   903
+INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY =   904
+INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS =    905
+
 
 --ITEMFILTERTYPES
 --Get the current maximum itemFilterType
@@ -239,12 +253,15 @@ AF.maxItemFilterType = counter
 --NAME STRINGS (for the LibFilters filterTags)
 --The names of the inventories. Needed to build the unique subfilter panel names.
 local inventoryNames = {
+    --ZOs inventory types
     [INVENTORY_BACKPACK]        = "PlayerInventory",
+    [INVENTORY_CRAFT_BAG]       = "CraftBag",
     [INVENTORY_QUEST_ITEM]      = "PlayerInventoryQuest",
     [INVENTORY_BANK]            = "PlayerBank",
     [INVENTORY_GUILD_BANK]      = "GuildBank",
-    [INVENTORY_CRAFT_BAG]       = "CraftBag",
-    [INVENTORY_TYPE_VENDOR_BUY] = "VendorBuy",
+    [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
+
+    --LibFilters crafting filterTypes
     [LF_SMITHING_CREATION]      = "SmithingCreate",
     [LF_SMITHING_REFINE]        = "SmithingRefine",
     [LF_SMITHING_DECONSTRUCT]   = "SmithingDeconstruction",
@@ -257,10 +274,19 @@ local inventoryNames = {
     [LF_JEWELRY_RESEARCH]       = "JewelryCraftingResearch",
     [LF_ENCHANTING_CREATION]    = "EnchantingCreation",
     [LF_ENCHANTING_EXTRACTION]  = "EnchantingExtraction",
-    [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
     [LF_RETRAIT]                = "Retrait",
+
+    --LibFilters other filterTypes
     [LF_QUICKSLOT]              = "QuickSlot",
     [LF_INVENTORY_COMPANION]    = "CompanionInventory",
+
+    --AdvancedFilters custom created inventory types
+    [INVENTORY_TYPE_VENDOR_BUY] =                       "VendorBuy",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     "UniversalDeconAll",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   "UniversalDeconArmor",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = "UniversalDeconWeapons",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = "UniversalDeconJewelry",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  "UniversalDeconGlyphs",
 }
 AF.inventoryNames = inventoryNames
 
@@ -484,6 +510,28 @@ local subfilterBarsShouldOnlyBeShownSpecial = {
     }
 }
 AF.subfilterBarsShouldOnlyBeShownSpecial = subfilterBarsShouldOnlyBeShownSpecial
+
+--Universal deconstruction mapping
+local subfilterBarInventorytypesOfUniversalDecon = {
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     true,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   true,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = true,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = true,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  true,
+}
+AF.subfilterBarInventorytypesOfUniversalDecon = subfilterBarInventorytypesOfUniversalDecon
+
+local universalDeconSelectedTabToAFInventoryType = {
+    ["all"] =           INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL,
+    ["armor"] =         INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR,
+    ["weapons"] =       INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS,
+    ["jewelry"] =       INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY,
+    ["enchantments"] =  INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS,
+}
+AF.universalDeconSelectedTabToAFInventoryType = universalDeconSelectedTabToAFInventoryType
+
+AF.panelIdSupportedAtDeconNPC = nil --util.LibFilters.mapping.universalDeconLibFiltersFilterTypeSupported will be updated in function util.HideInventoryControls
+
 
 --Inventory types which should not be updated via function ChangeFilter in PLAYER_INVENTORY
 --[[
@@ -805,7 +853,38 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
         },
     },
-
+    --Universal deconstruction
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+        },
+    },
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
+            [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
+            [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
+        },
+    },
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
+            [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
+        },
+    },
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {},
+        },
+    },
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {},
+        },
+    },
 }
 AF.subfilterGroups = subfilterGroups
 
@@ -843,6 +922,12 @@ local mapInvTypeToLibFiltersFilterType = {
     [INVENTORY_BANK]            = LF_BANK_WITHDRAW,
     [INVENTORY_HOUSE_BANK]      = LF_HOUSE_BANK_WITHDRAW,
     [INVENTORY_GUILD_BANK]      = LF_GUILDBANK_WITHDRAW,
+    --Universal deconstruction
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     LF_SMITHING_DECONSTRUCT,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   LF_SMITHING_DECONSTRUCT,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = LF_SMITHING_DECONSTRUCT,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = LF_JEWELRY_DECONSTRUCT,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  LF_ENCHANTING_EXTRACTION,
 }
 AF.mapInvTypeToLibFiltersFilterType = mapInvTypeToLibFiltersFilterType
 
@@ -870,12 +955,15 @@ AF.mapInvTypeToInvTypeBefore = mapInvTypeToInvTypeBefore
 
 --The filter bar parent controls
 local filterBarParents = {
+    --ZOs vanilla inventories
     [inventoryNames[INVENTORY_BACKPACK]]        = GetControl(controlsForChecks.inv, filterDividerSuffix),
+    [inventoryNames[INVENTORY_CRAFT_BAG]]       = GetControl(controlsForChecks.craftBag, filterDividerSuffix),
     [inventoryNames[INVENTORY_QUEST_ITEM]]      = GetControl(controlsForChecks.inv, filterDividerSuffix),
     [inventoryNames[INVENTORY_BANK]]            = GetControl(controlsForChecks.bank, filterDividerSuffix),
     [inventoryNames[INVENTORY_GUILD_BANK]]      = GetControl(controlsForChecks.guildBank, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
-    [inventoryNames[INVENTORY_CRAFT_BAG]]       = GetControl(controlsForChecks.craftBag, filterDividerSuffix),
+    [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
+
+    --LibFilters crafting filterTypes
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
     [inventoryNames[LF_SMITHING_REFINE]]        = GetControl(controlsForChecks.smithing.refinementPanel.inventory.control, filterDividerSuffix),
     [inventoryNames[LF_SMITHING_DECONSTRUCT]]   = GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, filterDividerSuffix),
@@ -888,10 +976,18 @@ local filterBarParents = {
     [inventoryNames[LF_JEWELRY_RESEARCH]]       = GetControl(controlsForChecks.smithing.researchPanel.control, buttonDividerSuffix),
     [inventoryNames[LF_ENCHANTING_CREATION]]    = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
     [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
+    --LibFilters other filterTypes
     [inventoryNames[LF_QUICKSLOT]]              = GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
     [inventoryNames[LF_INVENTORY_COMPANION]]    = GetControl(controlsForChecks.companionInv.control, filterDividerSuffix),
+
+    --AdvancedFilters custom inventoryTypes
+    [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL]] =     GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR]] =   GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS]] =  GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
 }
 AF.filterBarParents = filterBarParents
 
@@ -942,9 +1038,11 @@ local filterBarParentControlsToHide = {
     [LF_SMITHING_DECONSTRUCT]   = {
         --ZO_SmithingTopLevelDeconstructionPanelInventoryButtonDivider
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
     },
     [LF_JEWELRY_DECONSTRUCT]    = {
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
+        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
     },
     [LF_SMITHING_RESEARCH]  = researchFilterBarParentControlsToHide,
     [LF_JEWELRY_RESEARCH]   = researchFilterBarParentControlsToHide,
@@ -953,6 +1051,7 @@ local filterBarParentControlsToHide = {
     },
     [LF_ENCHANTING_EXTRACTION]  = {
         GetControl(controlsForChecks.enchanting.inventory.control, buttonDividerSuffix),
+        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
     },
     [LF_RETRAIT]  = {
         GetControl(controlsForChecks.retrait.inventory.control, buttonDividerSuffix),
@@ -1332,6 +1431,8 @@ local craftingTablePanels = {
     [LF_ENCHANTING_EXTRACTION]  = controlsForChecks.enchantExtractPanel,
     --Retrait
     [LF_RETRAIT]                = controlsForChecks.retraitPanel,
+    --Universal Deconstruction
+    ["universalDeconstruction"] = controlsForChecks.universalDeconPanel,
 }
 AF.craftingTablePanels = craftingTablePanels
 

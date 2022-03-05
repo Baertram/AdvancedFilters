@@ -62,16 +62,26 @@ InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: f
  Report comment to moderator
 ]]
 
+--#73 2022-02-06, bug, Beartram: Opening enchanting (extract) table with AF and FCOIS and FCOCraftFilter enabled
+--[[
+user:/AddOns/AdvancedFilters/files/util.lua:2128: attempt to index a nil value
+|rstack traceback:
+user:/AddOns/AdvancedFilters/files/util.lua:2128: in function 'util.GetCraftingTablePanelIncludeBankedCheckbox'
+|caaaaaa<Locals> filterPanelId = 7, ZOsControlNames = [table:1]{tabs = "Tabs", questItemsOnly = "QuestItemsOnly", active = "Active", searchFilters = "SearchFilters", subTabs = "SubTabs", textSearch = "TextSearch", includeBankedCheckbox = "IncludeBanked", filterDivider = "FilterDivider", title = "Title", searchDivider = "SearchDivider", buttonDivider = "ButtonDivider"}, includeBankedCBoxName = "IncludeBanked" </Locals>|r
+user:/AddOns/AdvancedFilters/files/util.lua:1175: in function 'util.RefreshSubfilterBar'
+|caaaaaa<Locals> subfilterBar = [table:2]{name = "PlayerInventory_All", libFilters_filterType = 1, inventoryType = 1}, calledFromExternalAddonName = "", settings = [table:3]{}, debugSpam = F, debugSpamExcludeRefreshSubfilterBar = T, inventoryType = 1, craftingType = 3, isNoCrafting = F, realInvTypes = [table:4]{1 = 1}, grayOutSubFiltersWithNoItems = T, abortSubfilterBarRefresh = F, onlyEnableAllSubfilterBarButtons = F, isVendorBuyInv = F, isCompanionInv = F, hideCharBound = F, subFilterBarFilterInfo = [table:5]{libFiltersPanelId = 7, isTrade = F, isMailSendPanel = F, isLaunderPanel = F, isCompanionInvButtonActive = F, isGuildStoreSellPanel = F, isCompanionInv = F, isRetraitStation = F, isJunkInvButtonActive = F, isBankDepositPanel = F, isHouseBankDepositPanel = F, isJunkButtonActive = F, isVendorBuy = F, isGuildBankDepositPanel = F, isFencePanel = F, isVendorPanel = F}, libFiltersPanelId = 7, isMailSendPanel = F, isVendorBuy = F, isVendorPanel = F </Locals>|r
+user:/AddOns/AdvancedFilters/files/util.lua:72: in function 'Update'
+]]
+
 
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2022-01-18
---Max todos: #72
+--TODO Last updated: 2022-02-06
+--Max todos: #73
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 --CURRENTLY WORKING ON - Last updated: 2022-01-18
---#66
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -137,6 +147,15 @@ local enchantingBaseVar = controlsForChecks.enchantingBaseVar
 local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
 local companionInvVar = controlsForChecks.companionInv
+local store = controlsForChecks.store
+
+--local universalDecon = controlsForChecks.universalDecon
+local universalDeconPanel = controlsForChecks.universalDeconPanel
+local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
+local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvControl
+local universalDeconScene = controlsForChecks.universalDeconScene
+local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
+local universalDeconSelectedTabToAFInventoryType = AF.universalDeconSelectedTabToAFInventoryType
 
 --local functions for speedup
 local util = AF.util
@@ -564,13 +583,19 @@ local function InitializeHooks()
         end
         ----------------------------------------------------------------------------------------------------------------
         --ReAnchor other controls so that the subfilter bar will be shown properly
+        local isUniversalDeconPanelShown
+        local getCraftingTablePanelIncludeBankedCheckbox = util.GetCraftingTablePanelIncludeBankedCheckbox
         local function reAnchorIncludeBankedItemsCheckbox(filterPanelId, subFilterBarHeight)
             --d("[AF]reAnchorIncludeBankedItemsCheckbox")
             --FCOCraftFilter enabled? Then do nothing as it will hide the checkbox!
             --if FCOCraftFilter ~= nil then return end
             --Currently the checkbox is only shown at the crafting panels
-            if not util.IsCraftingPanelShown() then return end
             filterPanelId = filterPanelId or util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+            isUniversalDeconPanelShown = isUniversalDeconPanelShown or util.LibFilters.IsUniversalDeconstructionPanelShown
+            util.IsUniversalDeconPanelShown = isUniversalDeconPanelShown
+            local isUniversalDecon = isUniversalDeconPanelShown(filterPanelId)
+
+            if not util.IsCraftingPanelShown() and not isUniversalDecon then return end
             --d(">filterPanelId: " ..tostring(filterPanelId))
             local ZOsControlNames = AF.ZOsControlNames
             --[[
@@ -584,7 +609,8 @@ local function InitializeHooks()
                             parentCtrl = craftingTablePanelInv.control
                         end
             ]]
-            local includeBankedCbox, parentCtrl = util.GetCraftingTablePanelIncludeBankedCheckbox(filterPanelId)
+            getCraftingTablePanelIncludeBankedCheckbox = getCraftingTablePanelIncludeBankedCheckbox or util.GetCraftingTablePanelIncludeBankedCheckbox
+            local includeBankedCbox, parentCtrl, universalDeconCraftTypeFilterDDBox = getCraftingTablePanelIncludeBankedCheckbox(filterPanelId, isUniversalDecon)
             if includeBankedCbox and parentCtrl then
                 --Unanchor the filterDivider control
                 local includeBankedCBoxFilterDividerName = ZOsControlNames.filterDivider
@@ -598,6 +624,12 @@ local function InitializeHooks()
                 --SetAnchor(AnchorPosition myPoint, object anchorTargetControl, AnchorPosition anchorControlsPoint, number offsetX, number offsetY)
                 includeBankedCbox:ClearAnchors()
                 includeBankedCbox:SetAnchor(TOPLEFT, parentCtrl, TOPLEFT, 0, subFilterBarHeight-5)
+
+                --Universal deconstruction
+                if isUniversalDecon and universalDeconCraftTypeFilterDDBox ~= nil then
+                    universalDeconCraftTypeFilterDDBox:ClearAnchors()
+                    universalDeconCraftTypeFilterDDBox:SetHidden(true)
+                end
             end
         end
         ----------------------------------------------------------------------------------------------------------------
@@ -760,6 +792,7 @@ local function InitializeHooks()
         --if new bar exists
         local craftingInv
         local isCraftingInventoryType = false
+        local isUniversalDecon = false
         local subFilterBarHeight
         if subfilterBar then
             local isCraftingPanel = IsCraftingPanelShown()
@@ -790,7 +823,10 @@ local function InitializeHooks()
             subFilterBarHeight = subfilterBar.control:GetHeight()
             --set proper inventory anchor displacement
             if subfilterBar.inventoryType == INVENTORY_TYPE_VENDOR_BUY then
-                UpdateListAnchors(STORE_WINDOW, subFilterBarHeight, subfilterBar, false)
+                UpdateListAnchors(store, subFilterBarHeight, subfilterBar, false)
+            elseif subfilterBarInventorytypesOfUniversalDecon[subfilterBar.inventoryType] then
+                isUniversalDecon = true
+                UpdateListAnchors(universalDeconPanelInv, subFilterBarHeight, subfilterBar, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
             elseif invType == LF_INVENTORY_COMPANION then
@@ -817,7 +853,10 @@ local function InitializeHooks()
             util.RemoveAllFilters()
             --set original inventory anchor displacement
             if invType == INVENTORY_TYPE_VENDOR_BUY then
-                UpdateListAnchors(STORE_WINDOW, 0, nil, false)
+                UpdateListAnchors(store, 0, nil, false)
+            elseif subfilterBarInventorytypesOfUniversalDecon[invType] then
+                isUniversalDecon = true
+                UpdateListAnchors(universalDeconPanelInv, 0, nil, false)
             elseif invType == LF_QUICKSLOT then
                 UpdateListAnchors(quickslotVar, 0, nil, false)
             elseif invType == LF_INVENTORY_COMPANION then
@@ -837,7 +876,7 @@ local function InitializeHooks()
             end
         end
         --Reanchor the checkbox "Include banked items" at the crafting panels
-        if isCraftingInventoryType then
+        if isCraftingInventoryType or isUniversalDecon then
             subFilterBarHeight = (subfilterBar and subfilterBar.control:GetHeight()) or 50
             reAnchorIncludeBankedItemsCheckbox(nil, subFilterBarHeight)
         end
@@ -920,14 +959,14 @@ local function InitializeHooks()
 
                 if inventoryType == INVENTORY_TYPE_VENDOR_BUY then
                     --Check if currentFilter is a function and then try to resolve the real filtervalue below it
-                    local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(AF.currentInventoryType, STORE_WINDOW.currentFilter)
+                    local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(AF.currentInventoryType, store.currentFilter)
                     if customInventoryFilterButtonsItemType then
                         if AF.settings.debugSpam then d("[AF]ChangeFilterCrafting-Found custom inventory: " .. tostring(customInventoryFilterButtonsItemType)) end
                     end
                     ThrottledUpdate("ShowSubfilterBar_" .. inventoryType, 10,
-                            ShowSubfilterBar, STORE_WINDOW.currentFilter, nil, customInventoryFilterButtonsItemType)
+                            ShowSubfilterBar, store.currentFilter, nil, customInventoryFilterButtonsItemType)
 
-                    inventoryControl = STORE_WINDOW.control
+                    inventoryControl = store.control
                 else
                     -- fragmentType = "Inv"
                     --local currentFilter = playerInvVar.inventories[inventoryTypeUpdated].currentFilter
@@ -952,7 +991,7 @@ local function InitializeHooks()
                         --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
                         local currentCBFilter = util.GetCurrentFilter(inventoryType)
                         local afCBCurrentFilter = AF.craftBagCurrentFilter
---d("[AF]CraftBag fragment showing, currentFilter: " ..tostring(currentFilter) ..", currentFilterCB: " .. tostring(currentCBFilter) .. ", afCBCurrentFilter: " .. tostring(afCBCurrentFilter))
+                        --d("[AF]CraftBag fragment showing, currentFilter: " ..tostring(currentFilter) ..", currentFilterCB: " .. tostring(currentCBFilter) .. ", afCBCurrentFilter: " .. tostring(afCBCurrentFilter))
                         --Overwrite the inventory type for the function ShowSubfilterBar so that addons like AwesomeGuildStore, which add the CraftBag Fragment to
                         --the guild sore sell tab, won't cause 2 subfilterbars to be shown: 1st normal inv. 2nd craftbag. Where the missing invType at teh ShowSubfilterBar function
                         --will make the addon use AF.currentInventoryType and thus produces a combination of normal inv's currentfilter + CraftBag inventory subfilter bars -> Error message!
@@ -1145,7 +1184,7 @@ local function InitializeHooks()
     --Filter changing function for normal inventories
     --Recognizes if a button like armor/weapons/material/... was changed at the inventory (which is a filter change internally)
     local function ChangeFilterInventory(self, filterTab)
---d("[AF]ChangeFilterInventory")
+        --d("[AF]ChangeFilterInventory")
         local debugSpam = AF.settings.debugSpam
         AF.currentInventoryTypeOverride = nil
         --self: playerInvVar, filterTab: playerInvVar.filterTab
@@ -1358,7 +1397,7 @@ local function InitializeHooks()
         --ThrottledUpdate("RefreshItemCount_" .. invType,
         --        50, util.updateInventoryInfoBarCountLabel, invType, false)
     end
-    ZO_PreHook(STORE_WINDOW, "ChangeFilter", ChangeFilterVendor)
+    ZO_PreHook(store, "ChangeFilter", ChangeFilterVendor)
     ]]
 
     --=== SMITHING =========================================================================================================
@@ -1573,6 +1612,84 @@ local function InitializeHooks()
     --> See function HookEnchantingOnModeUpdated above at the filter changes (needed there as well already for CraftStoreFixedAndImproved fixes!)
     SecurePostHook(enchantingBaseVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self.enchantingMode) end)
 
+
+    --=== UNIVERSAL DECONSTRUCTION ==========================================================================================================
+    --Attention: It does not fire "again" if the scene was hidden, and is re-shown! So manually check this via the scene
+    if ZO_UNIVERSAL_DECONSTRUCTION_FILTER_TYPES ~= nil then
+        local detectActiveUniversalDeconstructionTab
+        --Callback function - Will fire at each change of any filter tab
+        local function onUniversalDeconstructionFilterChangedCallback(tab)
+            local showError = false
+            --Get the filterType by help of the current tab
+            detectActiveUniversalDeconstructionTab = detectActiveUniversalDeconstructionTab or util.LibFilters.DetectActiveUniversalDeconstructionTab
+            local libFiltersFilterType = detectActiveUniversalDeconstructionTab(nil, tab.key)
+            if libFiltersFilterType == nil then
+                showError = true
+            end
+            --Get the inventoryType of AF
+            local invType = universalDeconSelectedTabToAFInventoryType[tab.key]
+            if not invType then
+                showError = true
+            end
+            local craftingType = GetCraftingType()
+            local currentFilter = universalDeconPanelInv.currentFilter
+            if not currentFilter then
+                showError = true
+            end
+            local customInventoryFilterButtonsItemType = util.CheckForCustomInventoryFilterBarButton(invType, currentFilter)
+
+            local subfilterGroup = AF.subfilterGroups[invType]
+            if not subfilterGroup then
+                showError = true
+            end
+            local currentSubfilterBar = subfilterGroup and subfilterGroup.currentSubfilterBar
+            local subFilterBarName = currentSubfilterBar and currentSubfilterBar.name
+
+            if showError then
+                showChatDebug("universalDeconOnFilterChangedCallback - BEGIN", "InventoryType: " ..tostring(invType) .. ", craftingType: " ..tostring(craftingType) .. ", currentFilter: " .. tostring(currentFilter) .. ", libFiltersFilterType: " ..tostring(libFiltersFilterType) ..", subfilterBarName: " ..tostring(subFilterBarName))
+                return
+            end
+
+            --Update the shown SubfilterBar now
+            ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 50,
+                    ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType)
+
+            subfilterGroup = AF.subfilterGroups[invType]
+            if not subfilterGroup then return end
+            zo_callLater(function()
+                currentSubfilterBar = subfilterGroup.currentSubfilterBar
+                if not currentSubfilterBar then return end
+                ThrottledUpdate("RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                        RefreshSubfilterBar, currentSubfilterBar)
+            end, 50)
+        end
+
+        --Callback raise function
+        local function universalDeconOnFilterChangedCallback(tab, craftingTypes, includeBanked)
+            onUniversalDeconstructionFilterChangedCallback(tab)
+        end
+        --Add the universal deconstruction filter changed callback
+        universalDeconPanel:RegisterCallback("OnFilterChanged", universalDeconOnFilterChangedCallback)
+
+
+        --Scene check OnShown/OnHide
+        local wasUniversalDeconSceneHidden = false
+        universalDeconScene:RegisterCallback("StateChange", function(oldState, newState)
+            if newState == SCENE_SHOWN then
+                --Was the scene hidden before?
+                if wasUniversalDeconSceneHidden == true then
+                    wasUniversalDeconSceneHidden = false
+                    --Update the shown subfilterBar now as the OnFilterChanged callback does not fire!
+                    local tabFilterData = universalDeconPanelInv:GetCurrentFilter()
+                    onUniversalDeconstructionFilterChangedCallback(tabFilterData)
+                end
+
+            --elseif newState == SCENE_HIDING then
+            elseif newState == SCENE_HIDDEN then
+                wasUniversalDeconSceneHidden = true
+            end
+        end)
+    end
 
     --=== RETRAIT ==========================================================================================================
     --Retrait
@@ -1816,7 +1933,7 @@ local function InitializeHooks()
     --=== SMITHING - Checkbox "Include banked items" ========================================================================================
     --After checking/Unchecking the checkbox "Include banked items" the number of items filtered should be updated
     local function refreshSubFilterBarAfterIncludeBankedItemsCBChange(invType)
---"[AF]refreshSubFilterBarAfterIncludeBankedItemsCBChange - invType: " ..tostring(invType))
+        --"[AF]refreshSubFilterBarAfterIncludeBankedItemsCBChange - invType: " ..tostring(invType))
         local inventoryType = invType or AF.currentInventoryType
         --Refresh the actual subfilterbar now, with a 300ms delay as the inventory needs to update it's contents first
         zo_callLater(function()

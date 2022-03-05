@@ -20,6 +20,7 @@ local gilfti    = GetItemLinkFilterTypeInfo
 local gilti     = GetItemLinkTraitInfo
 local giliid    = GetItemLinkItemId
 local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
+local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndRunFilterFunction
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Lookup tables
@@ -729,13 +730,13 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         dropdownCallbacks = {
             {name = AF_CONST_ALL,
-             filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
              filterCallback = GetFilterCallback(nil),
             },
         },
         dropdownSubmenuCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
             dropdownSubmenuCallbacks = {},
@@ -839,7 +840,7 @@ local subfilterCallbacks = {
     Jewelry = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -847,7 +848,7 @@ local subfilterCallbacks = {
             filterForAll = {
                 equipTypes = {EQUIP_TYPE_NECK},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end,
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK}),
             --Not shown in the normal dropdown filter boxes as the name must be "dropdownCallbacks" for that! But kept to be used in the subMenu, see "AF_SpecialDropdownCallbacks"!
             dropdownCallbacks = {
@@ -856,29 +857,29 @@ local subfilterCallbacks = {
                 [1] = {
                     submenuName = "Neck",
                     callbackTable = {
-                        {name = "All", showIcon=true, addString = "Neck",           filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK})},
-                        {name = "Arcane", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ARCANE)},
-                        {name = "Bloodthirsty", showIcon=true, addString = "Neck",  filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY)},
-                        {name = "Harmony", showIcon=true, addString = "Neck",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_HARMONY)},
-                        {name = "Healthy", showIcon=true, addString = "Neck",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_HEALTHY)},
-                        {name = "Infused", showIcon=true, addString = "Neck",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_INFUSED)},
-                        {name = "Intricate", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_INTRICATE)},
-                        {name = "Ornate", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ORNATE)},
-                        {name = "Protective", showIcon=true, addString = "Neck",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE)},
-                        {name = "Robust", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
-                        {name = "Swift", showIcon=true, addString = "Neck",         filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
-                        {name = "Triune", showIcon=true, addString = "Neck",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
+                        {name = "All", showIcon=true, addString = "Neck",           filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK})},
+                        {name = "Arcane", showIcon=true, addString = "Neck",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ARCANE)},
+                        {name = "Bloodthirsty", showIcon=true, addString = "Neck",  filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY)},
+                        {name = "Harmony", showIcon=true, addString = "Neck",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_HARMONY)},
+                        {name = "Healthy", showIcon=true, addString = "Neck",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_HEALTHY)},
+                        {name = "Infused", showIcon=true, addString = "Neck",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_INFUSED)},
+                        {name = "Intricate", showIcon=true, addString = "Neck",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_INTRICATE)},
+                        {name = "Ornate", showIcon=true, addString = "Neck",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ORNATE)},
+                        {name = "Protective", showIcon=true, addString = "Neck",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE)},
+                        {name = "Robust", showIcon=true, addString = "Neck",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
+                        {name = "Swift", showIcon=true, addString = "Neck",         filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
+                        {name = "Triune", showIcon=true, addString = "Neck",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
                         --Companion
-                        {name = "Aggressive", showIcon=true, addString = "Neck",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
-                        {name = "Augmented", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
-                        {name = "Bolstered", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
-                        {name = "Focused", showIcon=true, addString = "Neck",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
-                        {name = "Quickened", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
-                        {name = "Shattering", showIcon=true, addString = "Neck",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
-                        {name = "Soothing", showIcon=true, addString = "Neck",      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
-                        {name = "Vigorous", showIcon=true, addString = "Neck",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
+                        {name = "Aggressive", showIcon=true, addString = "Neck",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
+                        {name = "Augmented", showIcon=true, addString = "Neck",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
+                        {name = "Bolstered", showIcon=true, addString = "Neck",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
+                        {name = "Focused", showIcon=true, addString = "Neck",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
+                        {name = "Quickened", showIcon=true, addString = "Neck",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
+                        {name = "Shattering", showIcon=true, addString = "Neck",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
+                        {name = "Soothing", showIcon=true, addString = "Neck",      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
+                        {name = "Vigorous", showIcon=true, addString = "Neck",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
 
-                        {name = "None", showIcon=true, addString = "Neck",          filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_NONE)},
+                        {name = "None", showIcon=true, addString = "Neck",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_NONE)},
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
                     subfilters = {"All",},
@@ -898,7 +899,7 @@ local subfilterCallbacks = {
             filterForAll = {
                 equipTypes = {EQUIP_TYPE_RING},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end,
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING}),
             dropdownCallbacks = {
             },
@@ -906,29 +907,29 @@ local subfilterCallbacks = {
                 [1] = {
                     submenuName = "Ring",
                     callbackTable = {
-                        {name = "All", showIcon=true, addString = "Ring",           filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING})},
-                        {name = "Arcane", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ARCANE)},
-                        {name = "Bloodthirsty", showIcon=true, addString = "Ring",  filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY)},
-                        {name = "Harmony", showIcon=true, addString = "Ring",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_HARMONY)},
-                        {name = "Healthy", showIcon=true, addString = "Ring",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_HEALTHY)},
-                        {name = "Infused", showIcon=true, addString = "Ring",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_INFUSED)},
-                        {name = "Intricate", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_INTRICATE)},
-                        {name = "Ornate", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ORNATE)},
-                        {name = "Protective", showIcon=true, addString = "Ring",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE)},
-                        {name = "Robust", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
-                        {name = "Swift", showIcon=true, addString = "Ring",         filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
-                        {name = "Triune", showIcon=true, addString = "Ring",        filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
+                        {name = "All", showIcon=true, addString = "Ring",           filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING})},
+                        {name = "Arcane", showIcon=true, addString = "Ring",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ARCANE)},
+                        {name = "Bloodthirsty", showIcon=true, addString = "Ring",  filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY)},
+                        {name = "Harmony", showIcon=true, addString = "Ring",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_HARMONY)},
+                        {name = "Healthy", showIcon=true, addString = "Ring",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_HEALTHY)},
+                        {name = "Infused", showIcon=true, addString = "Ring",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_INFUSED)},
+                        {name = "Intricate", showIcon=true, addString = "Ring",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_INTRICATE)},
+                        {name = "Ornate", showIcon=true, addString = "Ring",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ORNATE)},
+                        {name = "Protective", showIcon=true, addString = "Ring",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE)},
+                        {name = "Robust", showIcon=true, addString = "Ring",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_ROBUST)},
+                        {name = "Swift", showIcon=true, addString = "Ring",         filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_SWIFT)},
+                        {name = "Triune", showIcon=true, addString = "Ring",        filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_TRIUNE)},
                         --Companion
-                        {name = "Aggressive", showIcon=true, addString = "Ring",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
-                        {name = "Augmented", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
-                        {name = "Bolstered", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
-                        {name = "Focused", showIcon=true, addString = "Ring",       filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
-                        {name = "Quickened", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
-                        {name = "Shattering", showIcon=true, addString = "Ring",    filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
-                        {name = "Soothing", showIcon=true, addString = "Ring",      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
-                        {name = "Vigorous", showIcon=true, addString = "Ring",     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
+                        {name = "Aggressive", showIcon=true, addString = "Ring",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE)},
+                        {name = "Augmented", showIcon=true, addString = "Ring",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_AUGMENTED)},
+                        {name = "Bolstered", showIcon=true, addString = "Ring",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_BOLSTERED)},
+                        {name = "Focused", showIcon=true, addString = "Ring",       filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_FOCUSED)},
+                        {name = "Quickened", showIcon=true, addString = "Ring",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_QUICKENED)},
+                        {name = "Shattering", showIcon=true, addString = "Ring",    filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SHATTERING)},
+                        {name = "Soothing", showIcon=true, addString = "Ring",      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_SOOTHING)},
+                        {name = "Vigorous", showIcon=true, addString = "Ring",     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_WEAPON_VIGOROUS)},
 
-                        {name = "None", showIcon=true, addString = "Ring",          filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_NONE)},
+                        {name = "None", showIcon=true, addString = "Ring",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_NONE)},
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
                     subfilters = {"All",},
@@ -1244,7 +1245,7 @@ local subfilterCallbacks = {
     WeaponsSmithing = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -1252,25 +1253,25 @@ local subfilterCallbacks = {
             filterForAll = {
                 filterTypes = {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}) end,
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}), {WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER},
             dropdownCallbacks = {
-                {name = "Axe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_AXE})},
-                {name = "Hammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_HAMMER})},
-                {name = "Sword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
-                {name = "Dagger", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_DAGGER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
+                {name = "Axe", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_AXE})},
+                {name = "Hammer", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_HAMMER})},
+                {name = "Sword", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
+                {name = "Dagger", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_DAGGER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
         },
         TwoHand = {
             filterForAll = {
                 filterTypes = {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}) end,
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
             dropdownCallbacks = {
-                {name = "TwoHandAxe", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE})},
-                {name = "TwoHandHammer", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
-                {name = "TwoHandSword", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
+                {name = "TwoHandAxe", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_AXE) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE})},
+                {name = "TwoHandHammer", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
+                {name = "TwoHandSword", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
         },
     },
@@ -1278,7 +1279,7 @@ local subfilterCallbacks = {
     WeaponsWoodworking = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -1286,32 +1287,32 @@ local subfilterCallbacks = {
             filterForAll = {
                 itemTypes = {WEAPONTYPE_BOW},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end,
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
             dropdownCallbacks = {
-                {name = "Bow", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
+                {name = "Bow", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
             },
         },
         DestructionStaff = {
             filterForAll = {
                 itemTypes = {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, {WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}) end,
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
             dropdownCallbacks = {
-                {name = "Fire", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FIRE_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF})},
-                {name = "Frost", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FROST_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
-                {name = "Lightning", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_LIGHTNING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
+                {name = "Fire", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FIRE_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF})},
+                {name = "Frost", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FROST_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
+                {name = "Lightning", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_LIGHTNING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
         },
         HealStaff = {
             filterForAll = {
                 itemTypes = {WEAPONTYPE_HEALING_STAFF},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end,
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
             dropdownCallbacks = {
-                {name = "HealStaff", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
+                {name = "HealStaff", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
             },
         },
     },
@@ -1325,7 +1326,7 @@ local subfilterCallbacks = {
     ArmorSmithing = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -1333,16 +1334,16 @@ local subfilterCallbacks = {
             filterForAll = {
                 armorTypes = {ARMORTYPE_HEAVY},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_HEAVY) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_HEAVY) end,
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = {
-                {name = "Head", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-                {name = "Chest", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-                {name = "Shoulders", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-                {name = "Hand", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-                {name = "Waist", showIcon=true,     filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-                {name = "Legs", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-                {name = "Feet", showIcon=true,      filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+                {name = "Head", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
+                {name = "Chest", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
+                {name = "Shoulders", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
+                {name = "Hand", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
+                {name = "Waist", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
+                {name = "Legs", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
+                {name = "Feet", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
             },
         },
     },
@@ -1363,7 +1364,7 @@ local subfilterCallbacks = {
     ArmorClothier = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -1371,32 +1372,32 @@ local subfilterCallbacks = {
             filterForAll = {
                 armorTypes = {ARMORTYPE_LIGHT},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_LIGHT) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_LIGHT) end,
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = {
-                {name = "Head", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_LIGHT})},
-                {name = "Chest", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_LIGHT})},
-                {name = "Shoulders", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_LIGHT})},
-                {name = "Hand", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_LIGHT})},
-                {name = "Waist", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_LIGHT})},
-                {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
-                {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
+                {name = "Head", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_LIGHT})},
+                {name = "Chest", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_LIGHT})},
+                {name = "Shoulders", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_LIGHT})},
+                {name = "Hand", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_LIGHT})},
+                {name = "Waist", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_LIGHT})},
+                {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
+                {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
             },
         },
         Medium = {
             filterForAll = {
                 armorTypes = {ARMORTYPE_MEDIUM},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_MEDIUM) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_MEDIUM) end,
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
             dropdownCallbacks = {
-                {name = "Head", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_MEDIUM})},
-                {name = "Chest", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_MEDIUM})},
-                {name = "Shoulders", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_MEDIUM})},
-                {name = "Hand", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_MEDIUM})},
-                {name = "Waist", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_MEDIUM})},
-                {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
-                {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
+                {name = "Head", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_MEDIUM})},
+                {name = "Chest", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_MEDIUM})},
+                {name = "Shoulders", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_MEDIUM})},
+                {name = "Hand", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_MEDIUM})},
+                {name = "Waist", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_MEDIUM})},
+                {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
+                {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
             },
         },
     },
@@ -1417,7 +1418,7 @@ local subfilterCallbacks = {
     ArmorWoodworking = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(true, nil) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
@@ -1425,10 +1426,10 @@ local subfilterCallbacks = {
             filterForAll = {
                 equipTypes = {EQUIP_TYPE_OFF_HAND},
             },
-            filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end,
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end,
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
             dropdownCallbacks = {
-                {name = "Shield", showIcon=true, filterStartCallback = function() util.CheckForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
+                {name = "Shield", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
         },
     },
