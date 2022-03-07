@@ -5,6 +5,9 @@ local util = AF.util
 local BuildDropdownCallbacks = AF.util.BuildDropdownCallbacks
 local showChatDebug = AF.showChatDebug
 
+local getCurrentFilterTypeForInventory =        util.GetCurrentFilterTypeForInventory
+local getSubFilterGroupsLibFiltersFilterType =  util.GetSubFilterGroupsLibFiltersFilterType
+
 
 --Subfilter bar class
 AF.AF_FilterBar = ZO_Object:Subclass()
@@ -101,7 +104,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         local button = selfVar:GetCurrentButton()
         if not button then return end
         --Get the current LibFilters filterPanelId
-        local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+        local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
 
         --Build a new dropdown entry based on given submenu data (mapping filterCallback -> callback func etc.).
         --Will re-use the existing dropdown entry if not-inverted, else it will create a new copy for the inverted data
@@ -136,8 +139,8 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             end
             ]]
 --AF._lastFilterButton = button
-            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
-            local filterType = util.GetCurrentFilterTypeForInventory(selfVar:GetInventoryType())
+            local l_filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
+            local filterType = getCurrentFilterTypeForInventory(selfVar:GetInventoryType())
 --d(">[AF]l_filterPanelIdActive: " ..tostring(l_filterPanelIdActive) .. ", filterType: " ..tostring(filterType))
             local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
             local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
@@ -208,8 +211,8 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         local function selectDropdownEntry(entry)
             if entry == nil or entry == "" then return end
             --AF._lastSelectedEntry = entry
-            local filterType = util.GetCurrentFilterTypeForInventory(selfVar:GetInventoryType())
-            local l_filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+            local filterType = getCurrentFilterTypeForInventory(selfVar:GetInventoryType())
+            local l_filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
 
             --Is the entry inverted?
             if entry.isInverted == true then
@@ -423,7 +426,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         --local self = p_comboBox
 
         --Get the current LibFilters filterPanelId
-        local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+        local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
 
         for i = 1, #p_comboBox.m_sortedItems do
             -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
@@ -490,7 +493,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                             p_comboBox.m_selectedItemData.filterEndCallback       = callbackEntry.filterEndCallback
                             p_comboBox.m_selectedItemData.nameWithoutIcon         = nameOfEntryWithoutIcon
                             --Get the current LibFilters filterPanelId
-                            local filterPanelIdActiveAsContextMenuEntryCallbackFires = util.GetCurrentFilterTypeForInventory(AF.currentInventoryType)
+                            local filterPanelIdActiveAsContextMenuEntryCallbackFires = getCurrentFilterTypeForInventory(AF.currentInventoryType)
                             button.previousDropdownSelection = button.previousDropdownSelection or {}
                             button.previousDropdownSelection[filterPanelIdActiveAsContextMenuEntryCallbackFires] = p_comboBox.m_selectedItemData
 
@@ -859,7 +862,7 @@ function AF_FilterBar:ActivateButton(newButton)
         --end
     end
     --Get the current's inventory filterType
-    local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryTypeOfFilterBar)
+    local filterPanelIdActive = getCurrentFilterTypeForInventory(inventoryTypeOfFilterBar)
     if filterPanelIdActive == nil then
         --if doDebugOutput or debugSpam then
             d("===============================================")
@@ -888,7 +891,7 @@ function AF_FilterBar:ApplyDropdownSelection(newButton)
     local inventoryType = AF.currentInventoryType or self:GetInventoryType()
     util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryType)
     if inventoryType == nil then return end
-    local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryType)
+    local filterPanelIdActive = getCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
     --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used again or a dropdown value is reapllied via ActivateButton function
     --util.ResetExternalDropdownFilterPluginsIsFiltering()
@@ -936,7 +939,7 @@ function AF_FilterBar:UpdateLastSelectedDropdownEntries(subfilterBarButton, call
     local inventoryType = AF.currentInventoryType or self:GetInventoryType()
     if inventoryType == nil then return end
     --d(">inventoryType: " ..tostring(inventoryType))
-    local filterPanelIdActive = util.GetCurrentFilterTypeForInventory(inventoryType)
+    local filterPanelIdActive = getCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
 d(">filterPanelIdActive: " ..tostring(filterPanelIdActive))
     AF.currentlySelectedDropDownEntry = AF.currentlySelectedDropDownEntry or util.GetActiveSubfilterBarSelectedDropdownFilterData(inventoryType)
@@ -1029,9 +1032,9 @@ function AF.CreateSubfilterBars()
                     end
                     if inventoryNames[inventoryType] and tradeSkillNames[tradeSkillType] and filterTypeNames[itemFilterType] and subfilterButtonNames[itemFilterType] then
                         --Get the LibFilters filtertype of the currently active filterbar
-                        local libFiltersFilterType = util.GetSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
+                        local libFiltersFilterType = getSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
                         --Build the subfilterBar with the buttons now
-                        local subfilterBar = AF.AF_FilterBar:New(
+                        local subfilterBar = AF_FilterBar:New(
                                 libFiltersFilterType,
                                 inventoryNames[inventoryType],
                                 tradeSkillNames[tradeSkillType],

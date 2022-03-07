@@ -530,6 +530,17 @@ local universalDeconSelectedTabToAFInventoryType = {
 }
 AF.universalDeconSelectedTabToAFInventoryType = universalDeconSelectedTabToAFInventoryType
 
+--[[
+local universalDeconKeyToAFFilterType = {
+    ["all"] =           ,
+    ["armor"] =         ,
+    ["weapons"] =       ,
+    ["jewelry"] =       ,
+    ["enchantments"] =  ,
+}
+AF.universalDeconKeyToAFFilterType = universalDeconKeyToAFFilterType
+]]
+
 AF.panelIdSupportedAtDeconNPC = nil --util.LibFilters.mapping.universalDeconLibFiltersFilterTypeSupported will be updated in function util.HideInventoryControls
 
 
@@ -859,19 +870,19 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
         },
     },
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
+            [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
+        },
+    },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
             [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
             [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
-        },
-    },
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
-        [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
-            [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
         },
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = {
@@ -882,6 +893,7 @@ local subfilterGroups = {
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] = {
         [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
             [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {},
         },
     },
@@ -924,8 +936,8 @@ local mapInvTypeToLibFiltersFilterType = {
     [INVENTORY_GUILD_BANK]      = LF_GUILDBANK_WITHDRAW,
     --Universal deconstruction
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     LF_SMITHING_DECONSTRUCT,
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   LF_SMITHING_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = LF_SMITHING_DECONSTRUCT,
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   LF_SMITHING_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = LF_JEWELRY_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  LF_ENCHANTING_EXTRACTION,
 }
@@ -984,8 +996,8 @@ local filterBarParents = {
     --AdvancedFilters custom inventoryTypes
     [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
     [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL]] =     GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR]] =   GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
     [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
+    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR]] =   GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
     [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
     [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS]] =  GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
 }
@@ -1064,6 +1076,7 @@ local filterBarParentControlsToHide = {
     }
 }
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
+
 
 --The fragment controls which contain the inventory layoutData tables
 -->Used for e.g. the vanilla UI searchFilter bars, to disable them (hide them)
@@ -1585,6 +1598,7 @@ local craftingTableAFFilterType2ESOFilterType = {
     },
 }
 AF.mapIFT2CSFT = craftingTableAFFilterType2ESOFilterType
+
 
 --Map the ESO filter type (selected filter button at the crafting table, or selected subfilter button, e.g. weapons) to the
 --itemfilter type that is used for the AdvancedFilters filters (shown items)

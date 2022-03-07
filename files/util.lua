@@ -16,6 +16,7 @@ local displayName = GetDisplayName()
 local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
 --local universaldDeconScene = controlsForChecks.universalDeconScene
 local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
+local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
 local detectActiveUniversalDeconstructionTab
 local mapAFInvTypeToLibFiltersFilterType
 local filterBarParentControlsToHide
@@ -293,6 +294,20 @@ local isCompanionInventoryShown = util.IsCompanionInventoryShown
 
 
 --======================================================================================================================
+-- -v- Quickslot filter functions                                                                                  -v-
+--======================================================================================================================
+--Create the key from the collectibleData table, used as table key in the subfilterBars at LF_QUICKSLOT and used as
+--currentFilter key
+function util.getAFQuickSlotCollectibleKey(categoryData)
+    return AF_QS_PREFIX..categoryData.categoryId .. "_" .. categoryData.categoryIndex .. "_" .. categoryData.categorySpecialization
+end
+local getAFQuickSlotCollectibleKey = util.getAFQuickSlotCollectibleKey
+--======================================================================================================================
+-- -^- Inventory filter functions                                                                                  -^-
+--======================================================================================================================
+
+
+--======================================================================================================================
 -- -v- Inventory filter functions                                                                                  -v-
 --======================================================================================================================
 local function getActiveUniversalDeconstructionPanelFilterType(invType)
@@ -381,7 +396,13 @@ function util.GetCurrentFilter(invType)
     if invType == INVENTORY_TYPE_VENDOR_BUY then
         currentFilter = controlsForChecks.store.currentFilter
     elseif subfilterBarInventorytypesOfUniversalDecon[invType] then
-        currentFilter = universalDeconPanelInv.currentFilter --todo ???
+        --[[
+        local key = universalDeconPanelInv:GetCurrentFilter().key
+        currentFilter = universalDeconKeyToAFFilterType[key]
+        ]]
+        currentFilter = universalDeconPanelInv.AF_currentFilter
+d(">util.GetCurrentFilter: " ..tos(currentFilter))
+
     elseif isCraftingInventoryType then
         local craftingInv = subfilterBar and getInventoryFromCraftingPanel(subfilterBar.inventoryType)
         if not craftingInv then return end
@@ -400,8 +421,9 @@ function util.GetCurrentFilter(invType)
     end
     return currentFilter
 end
+local getCurrentFilter = util.GetCurrentFilter
 
-function util.GetInvTypeCurrentFilter(invType, currentFilter)
+function util.GetInvTypeCurrentQuickslotFilter(invType, currentFilter)
     local currentFilterToUse
     --Quickslot
     if invType == LF_QUICKSLOT then
@@ -409,7 +431,7 @@ function util.GetInvTypeCurrentFilter(invType, currentFilter)
         --subtable extraInfo with a collectible category id etc.
         if type(currentFilter) == "table" then
             if currentFilter.extraInfo ~= nil then
-                currentFilterToUse = util.getAFQuickSlotCollectibleKey(currentFilter.extraInfo)
+                currentFilterToUse = getAFQuickSlotCollectibleKey(currentFilter.extraInfo)
             else
                 --Use the descriptor as currentFilter
                 if currentFilter.descriptor ~= ITEM_TYPE_DISPLAY_CATEGORY_ALL then
@@ -441,12 +463,13 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
         --local currentFilterForVendorBuy =
         controlsForChecks.store.currentFilter = currentFilter
     elseif subfilterBarInventorytypesOfUniversalDecon[invType] then
-        universalDeconPanelInv.currentFilter = currentFilter --todo ???
+        universalDeconPanelInv.AF_currentFilter = currentFilter
+d(">updated universalInv.AF_currentFilter: " .. tos(currentFilter))
     elseif isCraftingInventoryType then
         craftingInv.currentFilter = currentFilter
     elseif invType == LF_QUICKSLOT then
         --CurrentFilter is a table
-        --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentFilter(invType, currentFilter)
+        --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentQuickslotFilter(invType, currentFilter)
         AF.controlsForChecks.quickslot.currentFilter = currentFilter
     elseif invType == LF_INVENTORY_COMPANION then
         --CurrentFilter is a table
@@ -499,13 +522,14 @@ function util.HideInventoryControls(filterType, delay)
         util.IsUniversalDeconPanelShown = isUniversalDeconPanelShown
         local isUniversalDecon = isUniversalDeconPanelShown(filterType)
 
---d("[AF]util.HideInventoryControls - filterType: " ..tos(filterType).. ", delay: " ..tos(delay))
+--d("[AF]util.HideInventoryControls - filterType: " ..tos(filterType).. ", delay: " ..tos(delay) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
         local controlsToHide = filterBarParentControlsToHide[filterType]
 
         local function doHideNow(controlToHide)
-            --d(">Trying to hide: " .. tos(controlToHide:GetName()))
+--d(">Trying to hide: " .. tos(controlToHide:GetName()))
             if controlToHide.IsHidden and not controlToHide:IsHidden() and controlToHide.SetHidden then
                 controlToHide:SetHidden(true)
+--d(">>hidden")
                 --d(">>hidden!")
                 --else
                 --d("<<was already hidden!")
@@ -513,7 +537,8 @@ function util.HideInventoryControls(filterType, delay)
         end
 
         local function hideControlsNow(p_controlsToHide)
-            for idxOrName, controlToHide in ipairs(p_controlsToHide) do
+            for idxOrName, controlToHide in pairs(p_controlsToHide) do
+--d(">>idxOrName: " ..tos(idxOrName))
                 if controlToHide ~= nil then
                     if AF.settings.debugSpam then if controlToHide.GetName then d(">Trying to hide idx: " ..tos(idxOrName) .." = " .. tos(controlToHide:GetName())) end end
                     if not isUniversalDecon then
@@ -624,6 +649,7 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
     if realInvType4 ~= nil then realInvTypes = realInvTypes or {} table.insert(realInvTypes, realInvType4) end
     return realInvTypes
 end
+local mapLibFiltersInventoryTypeToRealInventoryType = util.MapLibFiltersInventoryTypeToRealInventoryType
 --======================================================================================================================
 -- -^- Mapping functions                                                                                            -^-
 --======================================================================================================================
@@ -1322,6 +1348,7 @@ function util.AbortSubfilterRefresh(inventoryType)
     if AF.settings.debugSpam then d("[AF]util.AbortSubfilterRefresh - invType: " ..tos(inventoryType) .. ", abort: " ..tos(doAbort)) end
     return doAbort
 end
+local abortSubfilterRefresh = util.AbortSubfilterRefresh
 
 --Refresh the subfilter button bar and disable non-given/non-matching subfilter buttons ("grey-out" the buttons)
 function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
@@ -1347,7 +1374,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     --Setting to gray out the buttons is enbaled?
     local grayOutSubFiltersWithNoItems  = settings.grayOutSubFiltersWithNoItems
     --Reactivate all subfilterbar buttons if they were disabled
-    local abortSubfilterBarRefresh = util.AbortSubfilterRefresh(inventoryType)
+    local abortSubfilterBarRefresh = abortSubfilterRefresh(inventoryType)
     local onlyEnableAllSubfilterBarButtons = false
     local isVendorBuyInv = (inventoryType == INVENTORY_TYPE_VENDOR_BUY) or false
     local isCompanionInv = (inventoryType == LF_INVENTORY_COMPANION) or false
@@ -1357,7 +1384,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     --Abort the subfilterBar refresh method? Or check for crafting inventory types and return the correct inventory types then
     if abortSubfilterBarRefresh == true or isCompanionInv == true then
         --Try to map the fake inventory type from LibFilters to the real ingame inventory type
-        realInvTypes = util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
+        realInvTypes = mapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         if realInvTypes == nil and not isVendorBuyInv then
             --Reactivate all subfilterbar buttons if they were disabled
             onlyEnableAllSubfilterBarButtons = true
@@ -1720,7 +1747,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
-    local playerInvVar      = controlsForChecks.playerInv
+    local playerInvVar = controlsForChecks.playerInv
 
     --Check if filters apply to the subfilter and change the color of the subfilter button
     for _, button in ipairs(subfilterBar.subfilterButtons) do
@@ -1747,7 +1774,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     for _, realInvType in pairs(realInvTypes) do
                         if breakInventorySlotsLoopNow then break end
                         breakInventorySlotsLoopNow = false
-                        inventory = playerInvVar.inventories[realInvType]
+                        if isUniversalDecon then
+                            inventory = universalDeconPanelInv
+                            currentFilter = inventory.AF_currentFilter
+                        else
+                            inventory = playerInvVar.inventories[realInvType]
+                        end
                         if inventory ~= nil and inventory.slots ~= nil then
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
                             if isNoCrafting then
@@ -1796,7 +1828,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
 
                     --Vendor buy panel
                 elseif bagVendorBuy ~= nil and isVendorBuy == true then
-                    currentFilter = util.GetCurrentFilter(inventoryType)
+                    currentFilter = getCurrentFilter(inventoryType)
                     checkBagContentsNow(nil, bagVendorBuy, INVENTORY_TYPE_VENDOR_BUY, button)
                 end -- if not isVendorBuyInv then
             end -- if button.name ~= AF_CONST_ALL then
@@ -2419,6 +2451,34 @@ end
 
 
 --======================================================================================================================
+-- -v- Universal Deconstruction functions                                                                           -v-
+--======================================================================================================================
+--[[
+function util.MapItemFilterType2UniversalDeconstructionFilterType(itemFilterType, filterPanelId, craftingType)
+    if filterPanelId == nil then return end
+    local mapIFT2UDFT = AF.mapIFT2UDFT
+    if craftingType == nil then craftingType = getCraftingType() end
+    if itemFilterType == nil or craftingType == nil or mapIFT2UDFT[filterPanelId] == nil
+            or mapIFT2UDFT[filterPanelId][craftingType] == nil
+            or mapIFT2UDFT[filterPanelId][craftingType][itemFilterType] == nil then return end
+    return mapIFT2UDFT[filterPanelId][craftingType][itemFilterType]
+end
+]]
+
+function util.MapUniversalDeconstructionFilterType2ItemFilterType(tabKey)
+    if tabKey == nil then return end
+    local filterData = universalDeconPanelInv.filter.filter
+    if filterData.filterTypes ~= nil then
+        return filterData.filterTypes
+    end
+    return filterData.itemFilterTypes
+end
+--======================================================================================================================
+-- -^- Universal Deconstruction functions                                                                           -^-
+--======================================================================================================================
+
+
+--======================================================================================================================
 -- -v- Filter plugin for the filterBar dropdown box functions                                                       -v-
 --======================================================================================================================
 --[[
@@ -2455,8 +2515,8 @@ function util.CheckIfIsCustomAddonInventoryFilterButtonItemFilterType(invType)
     local customInventoryFilterButton2ItemType = AF.customInventoryFilterButton2ItemType
     if not customInventoryFilterButton2ItemType then return false end
     --Get the currentFilter of the inventory
-    local currentFilter = util.GetCurrentFilter(invType)
-    if not currentFilter then return false end
+    local currentFilter = getCurrentFilter(invType)
+    if not currentFilter or type(currentFilter) == "table" then return false end
     for otherAddonName, customItemFilterType in pairs(customInventoryFilterButton2ItemType) do
         if customItemFilterType == currentFilter then return true end
     end
@@ -2580,11 +2640,6 @@ function util.ReApplyDropdownFilter()
     end
 end
 
---Create the key from the collectibleData table, used as table key in the subfilterBars at LF_QUICKSLOT and used as
---currentFilter key
-function util.getAFQuickSlotCollectibleKey(categoryData)
-    return AF_QS_PREFIX..categoryData.categoryId .. "_" .. categoryData.categoryIndex .. "_" .. categoryData.categorySpecialization
-end
 
 --======================================================================================================================
 --======================================================================================================================
