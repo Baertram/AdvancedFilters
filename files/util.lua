@@ -2468,8 +2468,8 @@ end
 function util.MapUniversalDeconstructionFilterType2ItemFilterType(tabKey)
     if tabKey == nil then return end
     local filterData = universalDeconPanelInv.filter.filter
-    if filterData.filterTypes ~= nil then
-        return filterData.filterTypes
+    if filterData.itemTypes ~= nil then
+        return filterData.itemTypes
     end
     return filterData.itemFilterTypes
 end
