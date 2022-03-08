@@ -401,7 +401,7 @@ function util.GetCurrentFilter(invType)
         currentFilter = universalDeconKeyToAFFilterType[key]
         ]]
         currentFilter = universalDeconPanelInv.AF_currentFilter
-d(">util.GetCurrentFilter: " ..tos(currentFilter))
+--d(">util.GetCurrentFilter: " ..tos(currentFilter))
 
     elseif isCraftingInventoryType then
         local craftingInv = subfilterBar and getInventoryFromCraftingPanel(subfilterBar.inventoryType)
@@ -464,7 +464,7 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
         controlsForChecks.store.currentFilter = currentFilter
     elseif subfilterBarInventorytypesOfUniversalDecon[invType] then
         universalDeconPanelInv.AF_currentFilter = currentFilter
-d(">updated universalInv.AF_currentFilter: " .. tos(currentFilter))
+--d(">updated universalInv.AF_currentFilter: " .. tos(currentFilter))
     elseif isCraftingInventoryType then
         craftingInv.currentFilter = currentFilter
     elseif invType == LF_QUICKSLOT then
