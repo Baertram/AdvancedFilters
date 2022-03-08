@@ -1712,15 +1712,12 @@ local function InitializeHooks()
 --d("<subfilter Group is missing")
                 return
             end
-            --todo: Remove comment to apply the resfresh and the disabling/grey out of the subfilterBar buttons again
-            --[[
             zo_callLater(function()
                 local currentSubfilterBar = subfilterGroup.currentSubfilterBar
                 if not currentSubfilterBar then return end
                 ThrottledUpdate("RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-                        RefreshSubfilterBar, currentSubfilterBar)
+                        RefreshSubfilterBar, currentSubfilterBar, false, true, tab)
             end, 10)
-            ]]
         end
 
         --Callback raise function

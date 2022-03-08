@@ -652,6 +652,41 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
     return realInvTypes
 end
 local mapLibFiltersInventoryTypeToRealInventoryType = util.MapLibFiltersInventoryTypeToRealInventoryType
+
+
+function util.MapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
+    if tabKey == nil then return nil end
+    local mapLibFiltersInvToRealInvType1 = {
+        ["all"]          = INVENTORY_BACKPACK,
+        ["weapons"]      = INVENTORY_BACKPACK,
+        ["armor"]        = INVENTORY_BACKPACK,
+        ["jewelry"]      = INVENTORY_BACKPACK,
+        ["enchantments"] = INVENTORY_BACKPACK,
+    }
+    local mapLibFiltersInvToRealInvType2 = {
+        ["all"]          = INVENTORY_BANK,
+        ["weapons"]      = INVENTORY_BANK,
+        ["armor"]        = INVENTORY_BANK,
+        ["jewelry"]      = INVENTORY_BANK,
+        ["enchantments"] = INVENTORY_BANK,
+    }
+    local mapLibFiltersInvToRealInvType3 = {
+        ["all"]          = INVENTORY_HOUSE_BANK,
+        ["weapons"]      = INVENTORY_HOUSE_BANK,
+        ["armor"]        = INVENTORY_HOUSE_BANK,
+        ["jewelry"]      = INVENTORY_HOUSE_BANK,
+        ["enchantments"] = INVENTORY_HOUSE_BANK,
+    }
+    local realInvType1 = mapLibFiltersInvToRealInvType1[tabKey] or nil
+    local realInvType2 = mapLibFiltersInvToRealInvType2[tabKey] or nil
+    local realInvType3 = mapLibFiltersInvToRealInvType3[tabKey] or nil
+    local realInvTypes
+    if realInvType1 ~= nil then realInvTypes = realInvTypes or {} table.insert(realInvTypes, realInvType1) end
+    if realInvType2 ~= nil then realInvTypes = realInvTypes or {} table.insert(realInvTypes, realInvType2) end
+    if realInvType3 ~= nil then realInvTypes = realInvTypes or {} table.insert(realInvTypes, realInvType3) end
+    return realInvTypes
+end
+local mapUniversalDeconTabKeyToRealInventoryTypes = util.MapUniversalDeconTabKeyToRealInventoryTypes
 --======================================================================================================================
 -- -^- Mapping functions                                                                                            -^-
 --======================================================================================================================
@@ -1353,7 +1388,7 @@ end
 local abortSubfilterRefresh = util.AbortSubfilterRefresh
 
 --Refresh the subfilter button bar and disable non-given/non-matching subfilter buttons ("grey-out" the buttons)
-function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
+function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isUniversalDecon, activeUniversalTab)
     calledFromExternalAddonName = calledFromExternalAddonName or ""
     local settings = AF.settings
     local debugSpam = settings.debugSpam
@@ -1369,7 +1404,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local bagVendorBuyFilterTypes
     if debugSpam then
         d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting))
+        d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
         AF._currentSubfilterBarAtRefreshCheck = subfilterBar
     end
 
@@ -1380,7 +1415,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
     local onlyEnableAllSubfilterBarButtons = false
     local isVendorBuyInv = (inventoryType == INVENTORY_TYPE_VENDOR_BUY) or false
     local isCompanionInv = (inventoryType == LF_INVENTORY_COMPANION) or false
-    local isUniversalDecon = subfilterBarInventorytypesOfUniversalDecon[inventoryType] or false --todo ???
+    if isUniversalDecon == nil then
+        isUniversalDecon = subfilterBarInventorytypesOfUniversalDecon[inventoryType] or false
+    end
     local hideCharBound = settings.hideCharBoundAtBankDeposit
 
     --Abort the subfilterBar refresh method? Or check for crafting inventory types and return the correct inventory types then
@@ -1402,6 +1439,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
             AF._bagVendorBuy = bagVendorBuy
             AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
         end
+    elseif isUniversalDecon == true then
+        local tabKey = (activeUniversalTab ~= nil and activeUniversalTab.key) or universalDeconPanelInv:GetCurrentFilter().key
+        if tabKey == nil then return end
+        realInvTypes = mapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
     else
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
@@ -1776,18 +1817,15 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                     for _, realInvType in pairs(realInvTypes) do
                         if breakInventorySlotsLoopNow then break end
                         breakInventorySlotsLoopNow = false
-                        if isUniversalDecon then
-                            inventory = universalDeconPanelInv
-                            currentFilter = inventory.AF_currentFilter
-                        else
-                            inventory = playerInvVar.inventories[realInvType]
-                        end
+                        inventory = playerInvVar.inventories[realInvType]
                         if inventory ~= nil and inventory.slots ~= nil then
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
-                            if isNoCrafting then
+                            if isNoCrafting and not isUniversalDecon then
                                 currentFilter = inventory.currentFilter
                                 --d(">invType: " ..tos(realInvType) .. ", currentFilter: " .. tos(currentFilter))
-                            else
+                            elseif isUniversalDecon then
+                                currentFilter = getCurrentFilter(inventoryType)
+                            --else
                                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
                                 --Todo: Thus the filter is always marked as "passed". Is this correct and does it work properly? To test!
                                 --Todo: Enable this section again if currentFilter is needed further down in this function!
@@ -1799,7 +1837,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName)
                             end -- if isNoCrafting then
                             inventorySlots = inventory.slots
 
-                            --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
+                                --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
                             for bag, bagData in pairs(inventorySlots) do
                                 if breakInventorySlotsLoopNow then break end
                                 checkBagContentsNow(bag, bagData, realInvType, button)
