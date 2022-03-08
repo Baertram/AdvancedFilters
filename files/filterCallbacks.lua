@@ -106,7 +106,7 @@ end
 
 local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory)
     if slot ~= nil and itemLink ~= nil and itemTypeDisplayCategory ~= nil then
-AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
+--AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
         --Prevent only comparison against junk itemTypeDisplayCategory
         local oldSlotJunk = slot.isJunk
         if oldSlotJunk ~= nil and oldSlotJunk == true then slot.isJunk = nil end
@@ -118,7 +118,7 @@ AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
         if oldSlotJunk ~= nil then
             slot.isJunk = oldSlotJunk
         end
-AF._lastSlotAfter = slot
+--AF._lastSlotAfter = slot
         if not isSlotFilterDataInItemTypeDisplayCategory then return false end
     end
     return true
@@ -722,13 +722,19 @@ end
 -- Constant re-usable dropdown callback tables
 ---------------------------------------------------------------------------------------------------------------------------
 local armorTypeDropdownCallbacks = {
-    {name = "Head", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-    {name = "Chest", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-    {name = "Shoulders", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-    {name = "Hand", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-    {name = "Waist", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-    {name = "Legs", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-    {name = "Feet", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+    {name = "Head",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
+    {name = "Chest",        showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
+    {name = "Shoulders",    showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
+    {name = "Hand",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
+    {name = "Waist",        showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
+    {name = "Legs",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
+    {name = "Feet",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+}
+
+local glyphTypesDropdownCallbacks = {
+    {name = "ArmorGlyph",   showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR})},
+    {name = "JewelryGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_JEWELRY})},
+    {name = "WeaponGlyph",  showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_WEAPON})},
 }
 
 
@@ -1166,11 +1172,7 @@ local subfilterCallbacks = {
         },
         Glyphs = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON}),
-            dropdownCallbacks = {
-                {name = "ArmorGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR})},
-                {name = "JewelryGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_JEWELRY})},
-                {name = "WeaponGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_WEAPON})},
-            },
+            dropdownCallbacks = glyphTypesDropdownCallbacks,
         },
         SoulGem = {
             filterCallback = GetFilterCallback({ITEMTYPE_SOUL_GEM}),
@@ -2427,11 +2429,7 @@ local subfilterCallbacks = {
         --Glyphs
         Glyphs = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON}),
-            dropdownCallbacks = {
-                {name = "ArmorGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR})},
-                {name = "JewelryGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_JEWELRY})},
-                {name = "WeaponGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_WEAPON})},
-            },
+            dropdownCallbacks = glyphTypesDropdownCallbacks,
         },
 
     }, --ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL
