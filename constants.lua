@@ -1162,8 +1162,7 @@ local subfilterButtonNames = {
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {
         --"Vanity", --> Moved to Miscelaneous
-        "Shield", "Clothing", "LightArmor", "Medium",
-        "Heavy", AF_CONST_ALL,
+        "Shield", "Clothing", "Heavy", "Medium", "LightArmor", AF_CONST_ALL,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {
         "Neck", "Ring", AF_CONST_ALL,
@@ -1172,7 +1171,7 @@ local subfilterButtonNames = {
         "Heavy", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {
-        "LightArmor", "Medium", AF_CONST_ALL,
+        "Medium", "LightArmor", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {
         "Shield", AF_CONST_ALL,
@@ -1234,7 +1233,7 @@ local subfilterButtonNames = {
         "FurnishingMat", "Plating", "RefinedMaterialJewelry", "RawPlating", "RawMaterialJewelry", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {
-        "Ring", "Neck", AF_CONST_ALL,
+        "Neck", "Ring", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_REFINE_JEWELRY] = {
         "RawMaterialJewelry", "RawPlating", "JewelryRawTrait", AF_CONST_ALL,
@@ -1247,7 +1246,7 @@ local subfilterButtonNames = {
         "JewelryAllTrait", "WeaponTrait", "ArmorTrait", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_RETRAIT_ARMOR] = {
-        "Shield", "LightArmor", "Medium", "Heavy", AF_CONST_ALL,
+        "Shield", "Heavy", "Medium", "LightArmor", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_RETRAIT_WEAPONS] = {
         "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
@@ -1284,7 +1283,7 @@ local subfilterButtonNames = {
         "Neck", "Ring", AF_CONST_ALL
     },
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {
-        "WeaponGlyph", "ArmorGlyph", "JewelryGlyph", AF_CONST_ALL
+        "JewelryGlyph", "ArmorGlyph", "WeaponGlyph", AF_CONST_ALL
     },
 
     --CUSTOM ADDON TABs

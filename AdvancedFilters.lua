@@ -1547,8 +1547,12 @@ local function InitializeHooks()
         local debugSpam = AF.settings.debugSpam
         zo_callLater(function()
             local invType = AF.currentInventoryType
-            local craftingType = GetCraftingType()
-            local currentFilter = mapCraftingStationFilterType2ItemFilterType(self.owner.enchantingMode, invType, craftingType)
+            local craftingType = CRAFTING_TYPE_ENCHANTING --GetCraftingType()
+            local currentFilter = mapCraftingStationFilterType2ItemFilterType(self.owner:GetEnchantingMode(), invType, craftingType)
+
+--d("[AF]ChangeFilterEnchanting - currentFilter: " ..tos(currentFilter) .. ", currentInventoryType: " .. tos(invType) .. ", craftingType: " ..tos(craftingType))
+
+
             --Check if currentFilter is a function and then try to resolve the real filtervalue below it
             local customInventoryFilterButtonsItemType = checkForCustomInventoryFilterBarButton(AF.currentInventoryType, currentFilter)
             if debugSpam then
@@ -1582,6 +1586,7 @@ local function InitializeHooks()
             d("....................................................>")
             d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tos(mode))
         end
+--d("[AF]ENCHANTING:OnModeUpdated, enchantingMode: " .. tos(mode))
         --[[
             --Enchanting modes
             ENCHANTING_MODE_CREATION = 1
@@ -1644,7 +1649,8 @@ local function InitializeHooks()
     ZO_PreHook(enchantingVar.inventory, "ChangeFilter", ChangeFilterEnchanting)
 
     --> See function HookEnchantingOnModeUpdated above at the filter changes (needed there as well already for CraftStoreFixedAndImproved fixes!)
-    SecurePostHook(enchantingBaseVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self.enchantingMode) end)
+    --enchantingBaseVar -> not working properly anymore
+    SecurePostHook(enchantingVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self:GetEnchantingMode()) end)
 
 
     --=== UNIVERSAL DECONSTRUCTION ==========================================================================================================
