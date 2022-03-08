@@ -95,6 +95,8 @@ local bankInvTypes = {
 }
 AF.bankInvTypes = bankInvTypes
 
+local universalDeconStr = "UniversalDecon"
+
 --Include bank checkbox name
 AF.ZOsControlNames = {
     includeBankedCheckbox   =   "IncludeBanked",
@@ -206,7 +208,7 @@ INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS =    905
 
 --ITEMFILTERTYPES
 --Get the current maximum itemFilterType
-AF.maxItemFilterType = ITEM_TYPE_DISPLAY_CATEGORY_MAX_VALUE -- 41 is the maximum at API 100035 "Blackwood"
+AF.maxItemFilterType = ITEM_TYPE_DISPLAY_CATEGORY_MAX_VALUE -- 41 (ITEM_TYPE_DISPLAY_CATEGORY_COMPANION) is the maximum since API 100034 "Blackwood"
 --Build new "virtual" itemfiltertypes for crafting stations so one can distinguish the different subfilter bars
 local itemFilterTypesDefinedForAdvancedFilters = {
     --Refine
@@ -234,6 +236,12 @@ local itemFilterTypesDefinedForAdvancedFilters = {
     ITEMFILTERTYPE_AF_RETRAIT_ARMOR                 = 0,
     ITEMFILTERTYPE_AF_RETRAIT_WEAPONS               = 0,
     ITEMFILTERTYPE_AF_RETRAIT_JEWELRY               = 0,
+    --Universal Deconstruction
+    ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL           = 0,
+    ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS       = 0,
+    ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR         = 0,
+    ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY       = 0,
+    ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS        = 0,
 }
 local counter = AF.maxItemFilterType
 for itemFilterTypeName, _ in pairs(itemFilterTypesDefinedForAdvancedFilters) do
@@ -282,11 +290,11 @@ local inventoryNames = {
 
     --AdvancedFilters custom created inventory types
     [INVENTORY_TYPE_VENDOR_BUY] =                       "VendorBuy",
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     "UniversalDeconAll",
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   "UniversalDeconArmor",
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = "UniversalDeconWeapons",
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = "UniversalDeconJewelry",
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  "UniversalDeconGlyphs",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     universalDeconStr .. "All",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   universalDeconStr .. "Armor",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = universalDeconStr .. "Weapons",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = universalDeconStr .. "Jewelry",
+    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  universalDeconStr .. "Glyphs",
 }
 AF.inventoryNames = inventoryNames
 
@@ -351,6 +359,13 @@ local filterTypeNames = {
     [ITEMFILTERTYPE_AF_RETRAIT_JEWELRY]             = "JewelryRetrait",
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUICKSLOT]        = "QuickSlot",
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT]  = "QuickSlotQuest",
+
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL]         = "All" ..universalDeconStr,
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]     = "Weapons" ..universalDeconStr,
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]       = "Armor" ..universalDeconStr,
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = "Jewelry" ..universalDeconStr,
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = "Glyphs" ..universalDeconStr,
+
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER]         = "HarvensStolenFilter",
@@ -523,23 +538,21 @@ AF.subfilterBarInventorytypesOfUniversalDecon = subfilterBarInventorytypesOfUniv
 
 local universalDeconSelectedTabToAFInventoryType = {
     ["all"] =           INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL,
-    ["armor"] =         INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR,
     ["weapons"] =       INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS,
+    ["armor"] =         INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR,
     ["jewelry"] =       INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY,
     ["enchantments"] =  INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS,
 }
 AF.universalDeconSelectedTabToAFInventoryType = universalDeconSelectedTabToAFInventoryType
 
---[[
 local universalDeconKeyToAFFilterType = {
-    ["all"] =           ,
-    ["armor"] =         ,
-    ["weapons"] =       ,
-    ["jewelry"] =       ,
-    ["enchantments"] =  ,
+    ["all"] =           ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL,
+    ["weapons"] =       ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS,
+    ["armor"] =         ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR,
+    ["jewelry"] =       ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY,
+    ["enchantments"] =  ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS,
 }
 AF.universalDeconKeyToAFFilterType = universalDeconKeyToAFFilterType
-]]
 
 AF.panelIdSupportedAtDeconNPC = nil --util.LibFilters.mapping.universalDeconLibFiltersFilterTypeSupported will be updated in function util.HideInventoryControls
 
@@ -867,34 +880,27 @@ local subfilterGroups = {
     --Universal deconstruction
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL] = {},
         },
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEMFILTERTYPE_AF_WEAPONS_SMITHING] = {},
-            [ITEMFILTERTYPE_AF_WEAPONS_WOODWORKING] = {},
+            [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]      = {},
         },
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEMFILTERTYPE_AF_ARMOR_CLOTHIER] = {},
-            [ITEMFILTERTYPE_AF_ARMOR_SMITHING] = {},
-            [ITEMFILTERTYPE_AF_ARMOR_WOODWORKING] = {},
+            [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]        = {},
         },
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEMFILTERTYPE_AF_JEWELRY_CRAFTING] = {},
+            [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]      = {},
         },
     },
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] = {
         [CRAFTING_TYPE_INVALID] = {
-            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
-            [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {},
+            [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {},
         },
     },
 }
@@ -1258,7 +1264,29 @@ local subfilterButtonNames = {
     },
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT] = {
         AF_CONST_ALL,
-    }
+    },
+
+    --Universal Deconstruction
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL]         = {
+        "Glyphs",
+        "Ring", "Neck",
+        "Shield", "Medium", "Heavy", "LightArmor",
+        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand",
+        AF_CONST_ALL
+    },
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]     = {
+        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
+    },
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]       = {
+        "Shield", "Medium", "LightArmor", "Heavy", AF_CONST_ALL,
+    },
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = {
+        "Ring", "Neck", AF_CONST_ALL
+    },
+    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {
+        "WeaponGlyph", "ArmorGlyph", "JewelryGlyph", AF_CONST_ALL
+    },
+
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER] = {
@@ -1387,6 +1415,10 @@ local subfilterButtonEntriesNotForDropdownCallback = {
         ["replaceWith"] = "Body",
     },
 }
+local subfilterButtonEntriesNotForDropdownCallbackArmorBodyReplacement = subfilterButtonEntriesNotForDropdownCallback[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]
+--Enable the same combined "body" subfilter for the Unievrsal Deconstruction Armor subfilter dropdown entries
+subfilterButtonEntriesNotForDropdownCallback[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL] =   subfilterButtonEntriesNotForDropdownCallbackArmorBodyReplacement
+subfilterButtonEntriesNotForDropdownCallback[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR] = subfilterButtonEntriesNotForDropdownCallbackArmorBodyReplacement
 AF.subfilterButtonEntriesNotForDropdownCallback = subfilterButtonEntriesNotForDropdownCallback
 
 --CRAFTBAG

@@ -2453,7 +2453,6 @@ end
 --======================================================================================================================
 -- -v- Universal Deconstruction functions                                                                           -v-
 --======================================================================================================================
---[[
 function util.MapItemFilterType2UniversalDeconstructionFilterType(itemFilterType, filterPanelId, craftingType)
     if filterPanelId == nil then return end
     local mapIFT2UDFT = AF.mapIFT2UDFT
@@ -2463,15 +2462,37 @@ function util.MapItemFilterType2UniversalDeconstructionFilterType(itemFilterType
             or mapIFT2UDFT[filterPanelId][craftingType][itemFilterType] == nil then return end
     return mapIFT2UDFT[filterPanelId][craftingType][itemFilterType]
 end
-]]
 
-function util.MapUniversalDeconstructionFilterType2ItemFilterType(tabKey)
+function util.MapUniversalDeconstructionFilterType2ItemFilterType(tab)
+    if tab == nil then return end
+    local tabKey = tab.key
     if tabKey == nil then return end
-    local filterData = universalDeconPanelInv.filter.filter
-    if filterData.itemTypes ~= nil then
-        return filterData.itemTypes
+    local AFuniversalDeconItemFilterTypeByTabKey = universalDeconKeyToAFFilterType[tabKey]
+--d(">tab found, key: " .. tos(tabKey) .. ", itemFilterType: " ..tos(AFuniversalDeconItemFilterTypeByTabKey))
+    --todo
+    --universalDeconPanelInv.AF_currentFilter should contain the currently selected itemFilterType e.g. ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS
+    --and the currently selected subFilterBar's itemFilterType needs to be determined somehow here!
+
+    --[[
+    local filterData = universalDeconPanelInv.filter and universalDeconPanelInv.filter.filter
+    if filterData then
+        d(">filterData found")
+        --Enchantments -> itemTypes of the 3 glyph types
+        if filterData.itemTypes ~= nil then
+            d(">filterData itemTypes found")
+            --todo How to select the correct one? Store the selected glyp subfilter at UNIVERSAL_DECONSTRUCTION.currentFilter at best!
+            --filterData.itemTypes[1]
+            return ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING
+        end
+        if filterData.itemFilterTypes ~= nil then
+            d(">filterData itemFilterTypes found")
+            return filterData.itemFilterTypes[1]
+        end
     end
-    return filterData.itemFilterTypes
+    --All selected
+    return ITEM_TYPE_DISPLAY_CATEGORY_ALL
+    ]]
+    return AFuniversalDeconItemFilterTypeByTabKey
 end
 --======================================================================================================================
 -- -^- Universal Deconstruction functions                                                                           -^-

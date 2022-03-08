@@ -159,7 +159,7 @@ local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvCo
 local universalDeconScene = controlsForChecks.universalDeconScene
 local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
 local universalDeconSelectedTabToAFInventoryType = AF.universalDeconSelectedTabToAFInventoryType
-local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
+--local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
 local isUniversalDeconPanelShown
 
 
@@ -1653,30 +1653,27 @@ local function InitializeHooks()
         local detectActiveUniversalDeconstructionTab
         --Callback function - Will fire at each change of any filter tab
         local function onUniversalDeconstructionFilterChangedCallback(tab)
-d("[AF]onUniversalDeconstructionFilterChangedCallback -key: " ..tos(tab.key))
+--d("[AF]onUniversalDeconstructionFilterChangedCallback -key: " ..tos(tab.key))
             local showError = false
             --Get the filterType by help of the current tab
             detectActiveUniversalDeconstructionTab = detectActiveUniversalDeconstructionTab or util.LibFilters.DetectActiveUniversalDeconstructionTab
             local tabKey = tab.key
             local libFiltersFilterType = detectActiveUniversalDeconstructionTab(nil, tabKey)
-d(">filterType: " ..tos(libFiltersFilterType))
+--d(">filterType: " ..tos(libFiltersFilterType))
             if libFiltersFilterType == nil then
                 showError = true
             end
             --Get the inventoryType of AF
             local invType = universalDeconSelectedTabToAFInventoryType[tabKey]
-d(">invType: " ..tos(invType))
+--d(">invType: " ..tos(invType))
             if not invType then
                 showError = true
             end
             AF.currentInventoryType = invType
 
             local craftingType = GetCraftingType()
-            local currentFilter = universalDeconPanelInv.AF_currentFilter
-            if currentFilter == nil then
-                currentFilter = mapUniversalDeconstructionFilterType2ItemFilterType(tabKey)
-            end
-d(">currentFilter: " ..tos(currentFilter))
+            local currentFilter = mapUniversalDeconstructionFilterType2ItemFilterType(tab)
+--d(">currentFilter: " ..tos(currentFilter))
             --[[
             if not currentFilter then
                 showError = true
@@ -1701,7 +1698,7 @@ d(">currentFilter: " ..tos(currentFilter))
             hideInventoryControls(nil, 0)
 
             --Update the shown SubfilterBar now
-            ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 50,
+            ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 0,
                     ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType, invType, true)
 
             local subfilterGroup = AF.subfilterGroups[invType]
@@ -1709,12 +1706,15 @@ d(">currentFilter: " ..tos(currentFilter))
 --d("<subfilter Group is missing")
                 return
             end
+            --todo: Remove comment to apply the resfresh and the disabling/grey out of the subfilterBar buttons again
+            --[[
             zo_callLater(function()
                 local currentSubfilterBar = subfilterGroup.currentSubfilterBar
                 if not currentSubfilterBar then return end
                 ThrottledUpdate("RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
                         RefreshSubfilterBar, currentSubfilterBar)
-            end, 50)
+            end, 10)
+            ]]
         end
 
         --Callback raise function
@@ -2066,7 +2066,7 @@ local function presetCraftingStationHookVariables()
 end
 
 local function presetUniversalDeconstructionHookVariables()
-    universalDeconPanelInv.AF_currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_ALL
+    universalDeconPanelInv.AF_currentFilter = ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL
 end
 
 local function onEndCraftingStationInteract(eventCode, craftSkill)
@@ -2241,12 +2241,12 @@ local function createDropdownBoxCallbackFunctionKeys()
     local subfilterButtonNames = AF.subfilterButtonNames
     local filterTypeNames = AF.filterTypeNames
     local subfilterButtonEntriesNotForDropdownCallback = AF.subfilterButtonEntriesNotForDropdownCallback
-    for subfilterButtonKey, subfilterButtonData in pairs(subfilterButtonNames) do
-        local dropDownCallbackKeyName = filterTypeNames[subfilterButtonKey] or ""
+    for subfilterButtonKeyItemFilterTypeOrString, subfilterButtonData in pairs(subfilterButtonNames) do
+        local dropDownCallbackKeyName = filterTypeNames[subfilterButtonKeyItemFilterTypeOrString] or ""
         if dropDownCallbackKeyName ~= "" then
             keys[dropDownCallbackKeyName] = {}
             local keysDropDownCallbackKeyName = keys[dropDownCallbackKeyName]
-            local doNotAddToDropdownCallbacks = subfilterButtonEntriesNotForDropdownCallback[subfilterButtonKey]
+            local doNotAddToDropdownCallbacks = subfilterButtonEntriesNotForDropdownCallback[subfilterButtonKeyItemFilterTypeOrString]
             local replacementWasAdded = false
             --Loop over the subfilterButtonData and get each key, except the ALL entry
             for _, keyName in ipairs(subfilterButtonData) do
@@ -2297,6 +2297,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
 
     --Create additional subfilterButtonBars for dynamic content like the quickslot collectible filters
     createAdditionalSubFilterGroups()
+    --Create the dropdownBox entry keys for entries like "Body" which combine multiple others like "light", "heavy", "medium"
     createDropdownBoxCallbackFunctionKeys()
 
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_PlayerActivated", EVENT_PLAYER_ACTIVATED,   AF.checkForOtherAddonErrors)

@@ -1,12 +1,21 @@
 AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
 
+local tos = tostring
+
 local util = AF.util
 local BuildDropdownCallbacks = AF.util.BuildDropdownCallbacks
 local showChatDebug = AF.showChatDebug
 
 local getCurrentFilterTypeForInventory =        util.GetCurrentFilterTypeForInventory
 local getSubFilterGroupsLibFiltersFilterType =  util.GetSubFilterGroupsLibFiltersFilterType
+local checkSpecialInventoryTypesAndUpdateCurrentInventoryType = util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType
+local checkIfNoSubfilterBarShouldBeShown = util.CheckIfNoSubfilterBarShouldBeShown
+local applyFilter = util.ApplyFilter
+
+local universalDeconSelectedTabToAFInventoryType = AF.universalDeconSelectedTabToAFInventoryType
+local mapGroupNameToFilterType = util.MapGroupNameToFilterType
+local mapMultipleGroupSubfiltersToCombinedSubfilter = util.MapMultipleGroupSubfiltersToCombinedSubfilter
 
 
 --Subfilter bar class
@@ -39,7 +48,7 @@ end
 
 function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfilterNames, excludeTheseButtons)
     local settings = AF.settings
-    if settings.debugSpam then d("=============================================\n[AF]AF_FilterBarInitialize - inventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames)) end
+    if settings.debugSpam then d("=============================================\n[AF]AF_FilterBarInitialize - inventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames)) end
 
     --get upper anchor position for subfilter bar
     --Fix for patch 6.2.7 2020-11-23 ZOs added their own subFilter bars with Markarth patch and thus the subfilterbars are
@@ -51,11 +60,11 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     local parents = AF.filterBarParents
     local parent = parents[inventoryName]
     if parent == nil then
-        d("[AdvancedFilters] ERROR: Parent for subfilterbar missing! InventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames))
+        d("[AdvancedFilters] ERROR: Parent for subfilterbar missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
         --[[
             else
                 if parent.GetName then
-                    d(">parent name: " ..tostring(parent:GetName()))
+                    d(">parent name: " ..tos(parent:GetName()))
                 end
         ]]
     end
@@ -75,7 +84,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     if AF.strings and AF.strings[AF_CONST_ALL] then
         allText = AF.strings[AF_CONST_ALL]
     else
-        showChatDebug("AF_FilterBar:Initialize", "AF.strings missing for: " ..tostring(AF_CONST_ALL) .. ", language: " .. tostring(AF.clientLang) .. ", inventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " ..tostring(tradeSkillname) .. ",groupName: " ..tostring(groupName))
+        showChatDebug("AF_FilterBar:Initialize", "AF.strings missing for: " ..tos(AF_CONST_ALL) .. ", language: " .. tos(AF.clientLang) .. ", inventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " ..tos(tradeSkillname) .. ",groupName: " ..tos(groupName))
     end
     self.label:SetText(allText)
 
@@ -117,7 +126,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             newSelectedItem = currentlySelectedDropdownItem
             newSelectedItem.filterResetAtStart = currentlySelectedDropdownItem.filterResetAtStart  -- For AF.util.ApplyFilter
             newSelectedItem.filterResetAtStartDelay = currentlySelectedDropdownItem.filterResetAtStartDelay  -- For AF.util.ApplyFilter
-            --d("[AF]invertFilter at dropdown-filterResetAtStart: " ..tostring(newSelectedItem.filterResetAtStart) .. ", filterResetAtStartDelay: " ..tostring(currentlySelectedDropdownItem.filterResetAtStartDelay))
+            --d("[AF]invertFilter at dropdown-filterResetAtStart: " ..tos(newSelectedItem.filterResetAtStart) .. ", filterResetAtStartDelay: " ..tos(currentlySelectedDropdownItem.filterResetAtStartDelay))
 
             newSelectedItem.filterStartCallback = currentlySelectedDropdownItem.filterStartCallback -- For AF.util.ApplyFilter
             newSelectedItem.filterEndCallback = currentlySelectedDropdownItem.filterEndCallback -- For AF.util.ApplyFilter
@@ -129,7 +138,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 
         --Invert the dropdown box entry's callback function and call it afterwards
         local function invertDropdownEntryAndCallCallback(skipReset, overrideToInvert)
---d("[AF]invertDropdownEntryAndCallCallback-skipReset: " ..tostring(skipReset) .. ", overrideToInvert: " ..tostring(overrideToInvert))
+--d("[AF]invertDropdownEntryAndCallCallback-skipReset: " ..tos(skipReset) .. ", overrideToInvert: " ..tos(overrideToInvert))
             skipReset = skipReset or false
             --Reset the external filter plugin isFiltered variable. They will be set again as the filter plugin is used
             --again, or a dropdown value is re-applied via ActivateButton function
@@ -141,13 +150,13 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 --AF._lastFilterButton = button
             local l_filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
             local filterType = getCurrentFilterTypeForInventory(selfVar:GetInventoryType())
---d(">[AF]l_filterPanelIdActive: " ..tostring(l_filterPanelIdActive) .. ", filterType: " ..tostring(filterType))
+--d(">[AF]l_filterPanelIdActive: " ..tos(l_filterPanelIdActive) .. ", filterType: " ..tos(filterType))
             local lastSelectedItem = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[l_filterPanelIdActive]) or nil
             local currentlySelectedDropdownItem = comboBox:GetSelectedItemData()
             if not currentlySelectedDropdownItem then return end
             local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
             if originalCallback == nil then
-                d("[AF]Original callback function of dropdown entry was not found for filterType "..tostring(filterType).."!")
+                d("[AF]Original callback function of dropdown entry was not found for filterType "..tos(filterType).."!")
                 return
             end
             local filterCallback
@@ -202,7 +211,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 
             PlaySound(SOUNDS.MENU_BAR_CLICK)
 
-            util.ApplyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
+            applyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
             selfVar:UpdateLastSelectedDropdownEntries(button, "invertDropdownEntryAndCallCallback")
             return true
         end
@@ -269,7 +278,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                 end
                 --Select the dropdown entry by the eval function (comparing the name) and do not ignore the callback function
                 local oldItem = comboBox_GetItemByEval(comboBox, function(item)
-                    --d("[AF]Compared: \'" ..tostring(entry.name) .. "\' and \'" .. tostring(item.name) .. "\'")
+                    --d("[AF]Compared: \'" ..tos(entry.name) .. "\' and \'" .. tos(item.name) .. "\'")
                     if entry.name == item.name then
                         return item
                     end
@@ -309,7 +318,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                         end
                         --AF._newItem = newSelectedItem
                         --Apply the filter of the now selected itemdata and apply the callback
-                        util.ApplyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
+                        applyFilter(newSelectedItem, AF_CONST_DROPDOWN_FILTER, true, filterType)
                     end
                 end
             end
@@ -339,9 +348,9 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         --Right mouse button
         elseif mouseButton == MOUSE_BUTTON_INDEX_RIGHT then
             --Add the context menu dropdown filter box menu for "All" and "Invert" and "last selected history" entries
-            --d("[AF]filterPanelIdActive at filter plugin dropdown right click: " ..tostring(filterPanelIdActive))
+            --d("[AF]filterPanelIdActive at filter plugin dropdown right click: " ..tos(filterPanelIdActive))
             --Add the currently active filtername to the dropdown "Invert" entry
-            --if settings.debugSpam then d("[AF]AF_FilterBar:Initialize - DropdownOnMouseUpHandler, 2: " .. tostring(button.name) .. ", filterPanelId: " ..tostring(filterPanelIdActive)) end
+            --if settings.debugSpam then d("[AF]AF_FilterBar:Initialize - DropdownOnMouseUpHandler, 2: " .. tos(button.name) .. ", filterPanelId: " ..tos(filterPanelIdActive)) end
             local previousDropdownSelection = (button.previousDropdownSelection ~= nil and button.previousDropdownSelection[filterPanelIdActive]) or nil
             local currentActiveFilterName = previousDropdownSelection.name or ""
             local invertFilterText = string.format(AF.strings.InvertDropdownFilter, currentActiveFilterName)
@@ -463,7 +472,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     nameOfEntryWithIcon = nameOfEntry
                 end
                 if not nameOfEntry or nameOfEntry == "" then
-                    d("[AdvancedFilters] ERROR: FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tostring(inventoryName) .. ", tradeSkillname: " .. tostring(tradeSkillname) .. ", groupName: " ..tostring(groupName) .. ", subfilterNames: " .. tostring(subfilterNames))
+                    d("[AdvancedFilters] ERROR: FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
                 end
                 local entry
                 if callbackEntry.itemType ~= nil and callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
@@ -476,16 +485,16 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     entry = {
                         label = nameOfEntryWithIcon,
                         callback = function()
-                            util.ApplyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
-                            selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tostring(nameOfEntry))
+                            applyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
+                            selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tos(nameOfEntry))
                             button.forceNextDropdownRefresh = true
                             p_comboBox.m_selectedItemText:SetText(nameOfEntryWithIcon)
                             p_comboBox.m_selectedItemData = p_comboBox:CreateItemEntry(nameOfEntryWithIcon,
                                     function(p_l_comboBox, itemName, item, selectionChanged)
-                                        util.ApplyFilter(callbackEntry,
+                                        applyFilter(callbackEntry,
                                                 AF_CONST_DROPDOWN_FILTER,
                                                 selectionChanged or button.forceNextDropdownRefresh)
-                                        selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tostring(p_comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tostring(nameOfEntry))
+                                        selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(p_comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tos(nameOfEntry))
                                     end)
                             p_comboBox.m_selectedItemData.filterResetAtStartDelay = callbackEntry.filterResetAtStartDelay
                             p_comboBox.m_selectedItemData.filterResetAtStart      = callbackEntry.filterResetAtStart
@@ -529,7 +538,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
         end
         if not doNotAddButtonNow then
             self:AddSubfilter(groupName, subfilterName)
-            --elseif settings.debugSpam then d(">>>Not adding button: " .. tostring(subfilterName) .. ", at inventory: " .. tostring(inventoryName) .. ", groupName: " .. tostring(groupName))
+            --elseif settings.debugSpam then d(">>>Not adding button: " .. tos(subfilterName) .. ", at inventory: " .. tos(inventoryName) .. ", groupName: " .. tos(groupName))
         end
     end
 end
@@ -538,7 +547,7 @@ end
 function AF_FilterBar:AddSubfilter(groupName, subfilterName)
     local iconPath = AF.textures[subfilterName]
     if iconPath == nil then
-        d("[AdvancedFilters] ERROR - AddSubfilter: Texture for subfilter " .. tostring(subfilterName) .. " is missing! Please add textures." .. tostring(subfilterName) .. " to file textures.lua.")
+        d("[AdvancedFilters] ERROR - AddSubfilter: Texture for subfilter " .. tos(subfilterName) .. " is missing! Please add textures." .. tos(subfilterName) .. " to file textures.lua.")
         return
     end
     local icon = {
@@ -547,22 +556,22 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
         over    = string.format(iconPath, "over"),
     }
     local settings = AF.settings
-    if settings.debugSpam then d("[AF_FilterBar:AddSubfilter]groupName: " ..tostring(groupName) .. ", subfilterName: " ..tostring(subfilterName)) end
+    if settings.debugSpam then d("[AF_FilterBar:AddSubfilter]groupName: " ..tos(groupName) .. ", subfilterName: " ..tos(subfilterName)) end
     if AF.subfilterCallbacks[groupName] == nil then
-        d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'data\' missing for group \'" ..tostring(groupName).."\'")
+        d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'data\' missing for group \'" ..tos(groupName).."\'")
         return nil
     end
     if AF.subfilterCallbacks[groupName][subfilterName] == nil then
         --Check if the groupName's filterType got a replacement subfilterName and thus the data is missing
         --e.g. LightArmor, Heavy, Clothing, ... -> Body
-        local filterType = util.MapGroupNameToFilterType(groupName)
+        local filterType = mapGroupNameToFilterType(groupName)
         local showError = true
         if filterType then
-            local replacementSubfilterName = util.MapMultipleGroupSubfiltersToCombinedSubfilter(filterType, subfilterName)
+            local replacementSubfilterName = mapMultipleGroupSubfiltersToCombinedSubfilter(filterType, subfilterName)
             if replacementSubfilterName and replacementSubfilterName ~= "" then showError = false end
         end
         if showError then
-            d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'data\' missing for group \'" ..tostring(groupName) .. "\', subFilter: \'" ..tostring(subfilterName).."\'")
+            d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'data\' missing for group \'" ..tos(groupName) .. "\', subFilter: \'" ..tos(subfilterName).."\'")
         end
         return nil
     end
@@ -570,7 +579,7 @@ function AF_FilterBar:AddSubfilter(groupName, subfilterName)
     --Set the button's callback functions for start, start with delay, normal and end
     local callback = subfilterButtonData.filterCallback
     if callback == nil then
-        d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'function\' missing for group \'" ..tostring(groupName) .. "\', subFilter: \'" ..tostring(subfilterName).."\'")
+        d("[AdvancedFilters] ERROR - AddSubfilter: Subfilter callback \'function\' missing for group \'" ..tos(groupName) .. "\', subFilter: \'" ..tos(subfilterName).."\'")
         return nil
     end
     local showFilterDropdownMenuOnRightMouseAtSubFilterButton = settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton
@@ -641,7 +650,7 @@ AF._menuVisible = menuVisible
 AF._comboBox = comboBox
 AF._dropdown = dropdown
                     if menuVisible == true then
-d("[AF]Menu shown. Anchored to: " ..tostring(menuOwner:GetName()))
+d("[AF]Menu shown. Anchored to: " ..tos(menuOwner:GetName()))
                         if menuOwner ~= dropdown then
                             doClearMenu = true
                         end
@@ -714,7 +723,7 @@ function AF_FilterBar:ActivateButton(newButton)
     if not newButton then return end
     if debugSpam then
         d("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>")
-        d("[AF]ActivateButton: " ..tostring(newButton.name))
+        d("[AF]ActivateButton: " ..tos(newButton.name))
     end
     --------------------------------------------------------------------------------------------------------------------
     local function PopulateDropdown(p_newButton)
@@ -735,7 +744,7 @@ function AF_FilterBar:ActivateButton(newButton)
             end
             local iconForDropdownCallbackEntry = ""
             if showIconsInFilterDropdowns and v.showIcon ~= nil and v.showIcon == true then
-                --d(">v.name: " ..tostring(v.name))
+                --d(">v.name: " ..tos(v.name))
                 local textureName = textures[v.name] or ""
                 if textureName ~= "" then
                     --Remove the placeholder %s
@@ -764,7 +773,7 @@ function AF_FilterBar:ActivateButton(newButton)
             local itemEntryName = AF.strings[dropdownEntryName] or ""
 
             if itemEntryName == "" then
-                d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tostring(dropdownEntryName))
+                d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tos(dropdownEntryName))
                 return nil, nil, nil, nil
             else
                 if showIconsInFilterDropdowns and iconForDropdownCallbackEntry ~= "" then
@@ -797,8 +806,8 @@ function AF_FilterBar:ActivateButton(newButton)
                 if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
                     local itemEntry = ZO_ComboBox:CreateItemEntry(totalDropdownEntryWithIcon,
                             function(comboBox, itemName, item, selectionChanged)
-                                util.ApplyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
-                                self:UpdateLastSelectedDropdownEntries(p_newButton, "PopulateDropdown-DropdownName: " ..tostring(dropdownEntryName) .. ", itemName: " ..tostring(itemName))
+                                applyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
+                                self:UpdateLastSelectedDropdownEntries(p_newButton, "PopulateDropdown-DropdownName: " ..tos(dropdownEntryName) .. ", itemName: " ..tos(itemName))
                             end)
                     itemEntry.filterResetAtStartDelay   = v.filterResetAtStartDelay
                     itemEntry.filterResetAtStart        = v.filterResetAtStart
@@ -814,10 +823,10 @@ function AF_FilterBar:ActivateButton(newButton)
     end
     --------------------------------------------------------------------------------------------------------------------
     local inventoryTypeOfFilterBar = self:GetInventoryType()
-    util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryTypeOfFilterBar)
+    checkSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryTypeOfFilterBar)
 
     --Should the subfilterBar be shown?
-    if util.CheckIfNoSubfilterBarShouldBeShown(nil, inventoryTypeOfFilterBar) then
+    if checkIfNoSubfilterBarShouldBeShown(nil, inventoryTypeOfFilterBar) then
         if debugSpam then d(">[AF]ActivateButton - ABORT: CheckIfNoSubfilterBarShouldBeShown: true") end
         return
     end
@@ -827,7 +836,7 @@ function AF_FilterBar:ActivateButton(newButton)
     if AF.strings and AF.strings[name] then
         nameText = AF.strings[name]
     else
-        showChatDebug("AF_FilterBar:ActivateButton", "AF.strings missing for name: " ..tostring(name) .. ", language: " .. tostring(AF.clientLang))
+        showChatDebug("AF_FilterBar:ActivateButton", "AF.strings missing for name: " ..tos(name) .. ", language: " .. tos(AF.clientLang))
         nameText = "ERROR: n/a"
     end
     self.label:SetText(nameText)
@@ -845,7 +854,7 @@ function AF_FilterBar:ActivateButton(newButton)
     newButton:SetEnabled(false)
 
     --refresh filters
-    util.ApplyFilter(newButton, AF_CONST_BUTTON_FILTER, true, nil, inventoryTypeOfFilterBar) --let the filterType be determined in the function AF.util.ApplyFilter
+    applyFilter(newButton, AF_CONST_BUTTON_FILTER, true, nil, inventoryTypeOfFilterBar) --let the filterType be determined in the function AF.util.ApplyFilter
 
     --set new active button reference
     self.activeButton = newButton
@@ -856,7 +865,7 @@ function AF_FilterBar:ActivateButton(newButton)
     if inventoryTypeOfFilterBar == nil then
         --if doDebugOutput or debugSpam then
             d("===============================================")
-            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
+            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tos(newButton.name))
             d(">ERROR - inventoryType is NIL!")
             d("===============================================")
         --end
@@ -866,7 +875,7 @@ function AF_FilterBar:ActivateButton(newButton)
     if filterPanelIdActive == nil then
         --if doDebugOutput or debugSpam then
             d("===============================================")
-            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tostring(newButton.name))
+            d("[AdvancedFilters]AF_FilterBar:ActivateButton: " .. tos(newButton.name))
             d(">ERROR - filterPanelId is NIL!")
             d("===============================================")
         --end
@@ -889,7 +898,7 @@ function AF_FilterBar:ApplyDropdownSelection(newButton)
     newButton = newButton or self:GetCurrentButton()
     if newButton == nil then return end
     local inventoryType = AF.currentInventoryType or self:GetInventoryType()
-    util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryType)
+    checkSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryType)
     if inventoryType == nil then return end
     local filterPanelIdActive = getCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
@@ -916,12 +925,12 @@ function AF_FilterBar:ApplyDropdownSelection(newButton)
             --local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
             local originalCallback = previousDropdownSelection.callback
             previousDropdownSelection.filterCallback = originalCallback
-            util.ApplyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
+            applyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
             --Select the dropdown entry but do not call the callback function as the filter was updated above already
             self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, true)
         else
             if previousDropdownSelection.filterCallback ~= nil then
-                util.ApplyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
+                applyFilter(previousDropdownSelection, AF_CONST_DROPDOWN_FILTER, true, filterPanelIdActive)
             end
             --Select the dropdown entry and call the callback function
             self.dropdown.m_comboBox:SelectItem(previousDropdownSelection, false)
@@ -932,21 +941,21 @@ end
 --Update last selected history entries of the dropdown boxes?
 function AF_FilterBar:UpdateLastSelectedDropdownEntries(subfilterBarButton, calledFrom)
 --[[
-    d("[AF]UpdateLastSelectedDropdownEntries("..tostring(calledFrom)..") - subFilterBarButton: " ..tostring(subfilterBarButton.name))
+    d("[AF]UpdateLastSelectedDropdownEntries("..tos(calledFrom)..") - subFilterBarButton: " ..tos(subfilterBarButton.name))
     subfilterBarButton = subfilterBarButton or self:GetCurrentButton()
     if subfilterBarButton == nil then return end
     if not AF.settings.showDropdownLastSelectedEntries then return end
     local inventoryType = AF.currentInventoryType or self:GetInventoryType()
     if inventoryType == nil then return end
-    --d(">inventoryType: " ..tostring(inventoryType))
+    --d(">inventoryType: " ..tos(inventoryType))
     local filterPanelIdActive = getCurrentFilterTypeForInventory(inventoryType)
     if filterPanelIdActive == nil then return end
-d(">filterPanelIdActive: " ..tostring(filterPanelIdActive))
+d(">filterPanelIdActive: " ..tos(filterPanelIdActive))
     AF.currentlySelectedDropDownEntry = AF.currentlySelectedDropDownEntry or util.GetActiveSubfilterBarSelectedDropdownFilterData(inventoryType)
     local nameToAddEntry = AF.currentlySelectedDropDownEntry
     if not nameToAddEntry then return end
     --Do not add "All" as history entry
-d(">AF.currentlySelectedDropDownEntry: " ..tostring(nameToAddEntry.name or "n/a"))
+d(">AF.currentlySelectedDropDownEntry: " ..tos(nameToAddEntry.name or "n/a"))
     if not nameToAddEntry.name or (nameToAddEntry.name and (nameToAddEntry.name == util.Localize(SI_ITEMFILTERTYPE0) or nameToAddEntry.name == AF_CONST_ALL)) then return end
     --Create table of last selected entries per LibFilters-3.0 filterPanelId
     AF.settings.subfilterBarDropdownLastSelectedEntries[filterPanelIdActive] = AF.settings.subfilterBarDropdownLastSelectedEntries[filterPanelIdActive] or {}
@@ -955,14 +964,14 @@ d(">AF.currentlySelectedDropDownEntry: " ..tostring(nameToAddEntry.name or "n/a"
     for index, dropdownEntryTable in ipairs(subfilterBarDropdownLastSelectedEntriesAtFilterPanel) do
         if dropdownEntryTable.name and nameToAddEntry.name and dropdownEntryTable.name == nameToAddEntry.name then
             table.remove(subfilterBarDropdownLastSelectedEntriesAtFilterPanel, index)
-d(">>removed \'" .. tostring(dropdownEntryTable.name) .. "\' at index " ..tostring(index))
+d(">>removed \'" .. tos(dropdownEntryTable.name) .. "\' at index " ..tos(index))
         end
     end
     --Insert the current used one at the top
     -- Create a copy of the "entry" table and add it. Else the changes via "invert" context menu will change the entries in the SavedVariables as well!
     -- So we only should use the identifier "name" to compare and find the entries again.
     table.insert(subfilterBarDropdownLastSelectedEntriesAtFilterPanel, 1, ZO_ShallowTableCopy(nameToAddEntry))
-d(">>inserted \'" .. tostring(nameToAddEntry.name) .. "\' at index 1")
+d(">>inserted \'" .. tos(nameToAddEntry.name) .. "\' at index 1")
     --Only keep 10 entries in this history stack
     if #subfilterBarDropdownLastSelectedEntriesAtFilterPanel > 10 then
         table.remove(subfilterBarDropdownLastSelectedEntriesAtFilterPanel, 10)
@@ -1010,6 +1019,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------
 --Create the subfilter bars below the inventory's filters (e.g. the weapons filters from the game will get a subfilter bar with 1hd, 2hd, staffs, shields)
+-->Called at AdvancedFilters_Loaded in EVENT_ADD_ON_LOADED
 function AF.CreateSubfilterBars()
     --local variables for a speedUp on access on addon's global table variables
     local doDebugOutput         = AF.settings.doDebugOutput
@@ -1019,20 +1029,34 @@ function AF.CreateSubfilterBars()
     local filterTypeNames       = AF.filterTypeNames
     local subfilterGroups       = AF.subfilterGroups
     local subfilterButtonNames  = AF.subfilterButtonNames
-    local excludeButtonNamesfromSubFilterBar
-    --Build each subfilterBar for the parent game filter controls
+    local excludeButtonNamesFromSubFilterBar --todo ? Where are those filled ?
+
+    --Build each subfilterBar for the parent filter controls
     for inventoryType, tradeSkillTypeSubFilterGroup in pairs(subfilterGroups) do
+        local doDebug = inventoryType > 900 and true or false
+        if doDebug then
+            d(">inv type: " ..tos(inventoryNames[inventoryType]))
+        end
         for tradeSkillType, subfilterGroup in pairs(tradeSkillTypeSubFilterGroup) do
             for itemFilterType, _ in pairs(subfilterGroup) do
                 if inventoryType and tradeSkillType and itemFilterType then
                     --Exclusion check
                     local excludeTheseButtonsAtThisFilterBar
-                    if excludeButtonNamesfromSubFilterBar and excludeButtonNamesfromSubFilterBar[inventoryType] and excludeButtonNamesfromSubFilterBar[inventoryType][tradeSkillType] and excludeButtonNamesfromSubFilterBar[inventoryType][tradeSkillType][itemFilterType] then
-                        excludeTheseButtonsAtThisFilterBar = excludeButtonNamesfromSubFilterBar[inventoryType][tradeSkillType][itemFilterType]
+                    if excludeButtonNamesFromSubFilterBar and excludeButtonNamesFromSubFilterBar[inventoryType]
+                            and excludeButtonNamesFromSubFilterBar[inventoryType][tradeSkillType]
+                            and excludeButtonNamesFromSubFilterBar[inventoryType][tradeSkillType][itemFilterType] then
+                        excludeTheseButtonsAtThisFilterBar = excludeButtonNamesFromSubFilterBar[inventoryType][tradeSkillType][itemFilterType]
                     end
                     if inventoryNames[inventoryType] and tradeSkillNames[tradeSkillType] and filterTypeNames[itemFilterType] and subfilterButtonNames[itemFilterType] then
                         --Get the LibFilters filtertype of the currently active filterbar
                         local libFiltersFilterType = getSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
+                        if doDebug then
+                        d(">libFiltersFilterType: " ..tos(libFiltersFilterType))
+                            d(inventoryNames[inventoryType])
+                            d(tradeSkillNames[tradeSkillType])
+                            d(filterTypeNames[itemFilterType])
+                            d(subfilterButtonNames[itemFilterType])
+                        end
                         --Build the subfilterBar with the buttons now
                         local subfilterBar = AF_FilterBar:New(
                                 libFiltersFilterType,
@@ -1040,15 +1064,15 @@ function AF.CreateSubfilterBars()
                                 tradeSkillNames[tradeSkillType],
                                 filterTypeNames[itemFilterType],
                                 subfilterButtonNames[itemFilterType],
-                                excludeTheseButtonsAtThisFilterBar                     --subFilterButtons which should not be shown
+                                excludeTheseButtonsAtThisFilterBar      --subFilterButtons which should not be shown
                         )
                         subfilterBar:SetInventoryType(inventoryType)
                         subfilterGroups[inventoryType][tradeSkillType][itemFilterType] = subfilterBar
                     else
-                        if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing names - inventoryName: " ..tostring(inventoryNames[inventoryType]) .. ", tradeSkillName: " .. tostring(tradeSkillNames[tradeSkillType]) .. ", filterTypeName: " .. tostring(filterTypeNames[itemFilterType]) .. ", subfilterButtonName: " .. tostring(subfilterButtonNames[itemFilterType])) end
+                        if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing names - inventoryName: " ..tos(inventoryNames[inventoryType]) .. ", tradeSkillName: " .. tos(tradeSkillNames[tradeSkillType]) .. ", filterTypeName: " .. tos(filterTypeNames[itemFilterType]) .. ", subfilterButtonName: " .. tos(subfilterButtonNames[itemFilterType])) end
                     end
                 else
-                    if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing data - inventoryType: " ..tostring(inventoryType) .. ", tradeSkillType: " .. tostring(tradeSkillType) .. ", itemFilterType: " .. tostring(itemFilterType)) end
+                    if doDebugOutput or debugSpam then d("[AF] ERROR - CreateSubfilterBars, missing data - inventoryType: " ..tos(inventoryType) .. ", tradeSkillType: " .. tos(tradeSkillType) .. ", itemFilterType: " .. tos(itemFilterType)) end
                 end
             end
         end
