@@ -2329,12 +2329,6 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
         },
-        --[[
-        --Moved to Miscelaneous
-        Clothier = {
-            filterCallback = GetFilterCallbackForClothing(),
-        },
-        ]]
         Body = {
             dropdownCallbacks = armorTypeDropdownCallbacks,
         },
@@ -2344,13 +2338,6 @@ local subfilterCallbacks = {
                 {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
         },
-        --[[
-        --Moved to Miscelaneous
-        Vanity = {
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_DISGUISE, EQUIP_TYPE_COSTUME}),
-            dropdownCallbacks = {},
-        },
-        ]]
 
         --Jewelry
         Neck = {
@@ -2390,17 +2377,8 @@ local subfilterCallbacks = {
 
                         {name = "None", showIcon=true, addString = "Neck",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_NONE)},
                     },
-                    filterType = {ITEMFILTERTYPE_ALL},
-                    subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
-                    excludeFilterPanels = {
-                        LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
-                        LF_SMITHING_REFINE,
-                        LF_ALCHEMY_CREATION,
-                        LF_CRAFTBAG,
-                        LF_PROVISIONING_BREW, LF_PROVISIONING_COOK,
-                        LF_QUICKSLOT
-                    },
+                    filterType = {ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL},
+                    subfilters = {"All", "Neck"},
                 },
             }
         },
@@ -2440,17 +2418,8 @@ local subfilterCallbacks = {
 
                         {name = "None", showIcon=true, addString = "Ring",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_NONE)},
                     },
-                    filterType = {ITEMFILTERTYPE_ALL},
-                    subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
-                    excludeFilterPanels = {
-                        LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
-                        LF_SMITHING_REFINE,
-                        LF_ALCHEMY_CREATION,
-                        LF_CRAFTBAG,
-                        LF_PROVISIONING_BREW, LF_PROVISIONING_COOK,
-                        LF_QUICKSLOT
-                    },
+                    filterType = {ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL},
+                    subfilters = {"All", "Ring"},
                 },
             },
         },
@@ -2512,19 +2481,19 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {}, --uses "Body" replacement dropdownCallbacks
         },
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         --[[
         --Moved to Miscelaneous
@@ -2561,7 +2530,6 @@ local subfilterCallbacks = {
             filterForAll = {
                 equipTypes = {EQUIP_TYPE_NECK},
             },
-            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end,
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK}),
             --Not shown in the normal dropdown filter boxes as the name must be "dropdownCallbacks" for that! But kept to be used in the subMenu, see "AF_SpecialDropdownCallbacks"!
             dropdownCallbacks = {
@@ -2594,17 +2562,8 @@ local subfilterCallbacks = {
 
                         {name = "None", showIcon=true, addString = "Neck",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_NECK, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_NECK}, ITEM_TRAIT_TYPE_NONE)},
                     },
-                    filterType = {ITEMFILTERTYPE_ALL},
-                    subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
-                    excludeFilterPanels = {
-                        LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
-                        LF_SMITHING_REFINE,
-                        LF_ALCHEMY_CREATION,
-                        LF_CRAFTBAG,
-                        LF_PROVISIONING_BREW, LF_PROVISIONING_COOK,
-                        LF_QUICKSLOT
-                    },
+                    filterType = {ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY},
+                    subfilters = {"All", "Neck"},
                 },
             }
         },
@@ -2644,17 +2603,8 @@ local subfilterCallbacks = {
 
                         {name = "None", showIcon=true, addString = "Ring",          filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_RING, nil) end, filterCallback = GetFilterCallbackForJewelry({EQUIP_TYPE_RING}, ITEM_TRAIT_TYPE_NONE)},
                     },
-                    filterType = {ITEMFILTERTYPE_ALL},
-                    subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
-                    excludeFilterPanels = {
-                        LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
-                        LF_SMITHING_REFINE,
-                        LF_ALCHEMY_CREATION,
-                        LF_CRAFTBAG,
-                        LF_PROVISIONING_BREW, LF_PROVISIONING_COOK,
-                        LF_QUICKSLOT
-                    },
+                    filterType = {ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY},
+                    subfilters = {"All", "Ring"},
                 },
             },
         },

@@ -1269,8 +1269,8 @@ local subfilterButtonNames = {
     --Universal Deconstruction
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL]         = {
         "Glyphs",
-        "Ring", "Neck",
-        "Shield", "Medium", "Heavy", "LightArmor",
+        "Neck", "Ring",
+        "Shield", "Heavy", "Medium", "LightArmor",
         "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand",
         AF_CONST_ALL
     },
@@ -1278,10 +1278,10 @@ local subfilterButtonNames = {
         "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]       = {
-        "Shield", "Medium", "LightArmor", "Heavy", AF_CONST_ALL,
+        "Shield", "Heavy", "Medium", "LightArmor", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = {
-        "Ring", "Neck", AF_CONST_ALL
+        "Neck", "Ring", AF_CONST_ALL
     },
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {
         "WeaponGlyph", "ArmorGlyph", "JewelryGlyph", AF_CONST_ALL
