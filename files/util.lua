@@ -9,6 +9,8 @@ local tos = tostring
 local strfor = string.format
 
 local controlsForChecks = AF.controlsForChecks
+local researchHorizontalScrollList = controlsForChecks.researchLineList
+
 local displayName = GetDisplayName()
 
 --local universalDecon = controlsForChecks.universalDecon
@@ -2242,6 +2244,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
     -- -^- SMITHING Research horizontal scrolllist?                                                                 -^-
     --==================================================================================================================
 end
+local filterHorizontalScrollList = util.FilterHorizontalScrollList
 
 --Get the current active subfilterBar's button name and then read the filterForAll entry of this button
 --from the subfilterGroups to prefilter the list with some data (e.g. the horizontal research scroll list with EQUIPTYPE_NECK)
@@ -2439,10 +2442,9 @@ function util.CheckForResearchPanelAndRunFilterFunction(runPrefilterForAllSelect
     --if AF.settings.debugSpam then d("[AF]util.CheckForResearchPanelAndRunFilterFunction") end
     --If the research panel is shown:
     --Clear the horizontal list and only show the entries which apply to the selected item type
-    local researchHorizontalScrollList = AF.controlsForChecks.researchLineList
     if researchHorizontalScrollList and researchHorizontalScrollList.control and not researchHorizontalScrollList.control:IsHidden() then
         --Hide entries on the horizontal scroll list of the research panel
-        util.FilterHorizontalScrollList(runPrefilterForAllSelection, researchHorizontalScrollList, filterOrEquipTypes, armorTypes, traitTypes)
+        filterHorizontalScrollList(runPrefilterForAllSelection, researchHorizontalScrollList, filterOrEquipTypes, armorTypes, traitTypes)
     end
 end
 --======================================================================================================================

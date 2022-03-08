@@ -716,6 +716,22 @@ local function GetFilterCallbackForOtherAddon(itemFilterTypeOfTheOtherAddon, che
 end
 ]]
 
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Constant re-usable dropdown callback tables
+---------------------------------------------------------------------------------------------------------------------------
+local armorTypeDropdownCallbacks = {
+    {name = "Head", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
+    {name = "Chest", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
+    {name = "Shoulders", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
+    {name = "Hand", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
+    {name = "Waist", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
+    {name = "Legs", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
+    {name = "Feet", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+}
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Subfilter callback setup table for each entry in constants.lua, table "subfilterButtonNames"
 ---------------------------------------------------------------------------------------------------------------------------
@@ -811,15 +827,7 @@ local subfilterCallbacks = {
         },
         ]]
         Body = {
-            dropdownCallbacks = {
-                {name = "Head", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-                {name = "Chest", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-                {name = "Shoulders", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-                {name = "Hand", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-                {name = "Waist", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-                {name = "Legs", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-                {name = "Feet", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            },
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
@@ -1344,7 +1352,7 @@ local subfilterCallbacks = {
                 {name = "Waist", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
                 {name = "Legs", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
                 {name = "Feet", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            },
+            }
         },
     },
 --=============================================================================================================================================================================================
@@ -2311,15 +2319,15 @@ local subfilterCallbacks = {
         --Armor
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         --[[
         --Moved to Miscelaneous
@@ -2328,15 +2336,7 @@ local subfilterCallbacks = {
         },
         ]]
         Body = {
-            dropdownCallbacks = {
-                {name = "Head", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-                {name = "Chest", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-                {name = "Shoulders", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-                {name = "Hand", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-                {name = "Waist", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-                {name = "Legs", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-                {name = "Feet", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            },
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
@@ -2533,15 +2533,7 @@ local subfilterCallbacks = {
         },
         ]]
         Body = {
-            dropdownCallbacks = {
-                {name = "Head", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
-                {name = "Chest", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
-                {name = "Shoulders", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
-                {name = "Hand", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
-                {name = "Waist", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
-                {name = "Legs", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
-                {name = "Feet", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            },
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
