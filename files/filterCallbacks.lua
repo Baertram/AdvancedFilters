@@ -1809,7 +1809,7 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = armorTypeDropdownCallbacks,
         },
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
