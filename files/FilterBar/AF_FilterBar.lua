@@ -1033,7 +1033,7 @@ function AF.CreateSubfilterBars()
 
     --Build each subfilterBar for the parent filter controls
     for inventoryType, tradeSkillTypeSubFilterGroup in pairs(subfilterGroups) do
-        local doDebug = inventoryType > 900 and true or false
+        local doDebug = false
         if doDebug then
             d(">inv type: " ..tos(inventoryNames[inventoryType]))
         end

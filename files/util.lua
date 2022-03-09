@@ -5,13 +5,16 @@ local AF = AdvancedFilters
 AF.util = AF.util or {}
 local util = AF.util
 
+local displayName = GetDisplayName()
+
 local tos = tostring
 local strfor = string.format
 
 local controlsForChecks = AF.controlsForChecks
 local researchHorizontalScrollList = controlsForChecks.researchLineList
+local checkIfOtherAddonsProvideSubfilterBarRefreshFilters
+local isItemFilterTypeInItemFilterData
 
-local displayName = GetDisplayName()
 
 --local universalDecon = controlsForChecks.universalDecon
 --local universalDeconPanel = controlsForChecks.universalDeconPanel
@@ -1389,6 +1392,9 @@ local abortSubfilterRefresh = util.AbortSubfilterRefresh
 
 --Refresh the subfilter button bar and disable non-given/non-matching subfilter buttons ("grey-out" the buttons)
 function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isUniversalDecon, activeUniversalTab)
+    checkIfOtherAddonsProvideSubfilterBarRefreshFilters = checkIfOtherAddonsProvideSubfilterBarRefreshFilters or util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters
+    isItemFilterTypeInItemFilterData = isItemFilterTypeInItemFilterData or util.IsItemFilterTypeInItemFilterData
+
     calledFromExternalAddonName = calledFromExternalAddonName or ""
     local settings = AF.settings
     local debugSpam = settings.debugSpam
@@ -1418,6 +1424,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     if isUniversalDecon == nil then
         isUniversalDecon = subfilterBarInventorytypesOfUniversalDecon[inventoryType] or false
     end
+    if isUniversalDecon == true then isNoCrafting = true end
     local hideCharBound = settings.hideCharBoundAtBankDeposit
 
     --Abort the subfilterBar refresh method? Or check for crafting inventory types and return the correct inventory types then
@@ -1433,20 +1440,22 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
         if bagWornCheckNeeded == true then
             bagWornItemCache = SHARED_INVENTORY:GetOrCreateBagCache(BAG_WORN)
         end
+    elseif isUniversalDecon == true then
+        local tabKey = (activeUniversalTab ~= nil and activeUniversalTab.key) or universalDeconPanelInv:GetCurrentFilter().key
+        if tabKey == nil then return end
+        realInvTypes = mapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
     elseif isVendorBuyInv == true then
         bagVendorBuy, bagVendorBuyFilterTypes = ZO_StoreManager_GetStoreItems()
         if debugSpam then
             AF._bagVendorBuy = bagVendorBuy
             AF._bagVendorBuyFilterTypes = bagVendorBuyFilterTypes
         end
-    elseif isUniversalDecon == true then
-        local tabKey = (activeUniversalTab ~= nil and activeUniversalTab.key) or universalDeconPanelInv:GetCurrentFilter().key
-        if tabKey == nil then return end
-        realInvTypes = mapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
     else
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
     end
+    AF._realInvTypes = realInvTypes
+
     if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tos(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tos((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tos((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tos(subfilterBar) .. ", bagWornToo?: " ..tos(bagWornItemCache ~= nil)) end
     --Check if a bank/guild bank/house storage is opened, junk button is selected, etc.
     local subFilterBarFilterInfo = getSubFilterBarsFilterTypeInfo(subfilterBar, inventoryType)
@@ -1477,14 +1486,14 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     local includeBankedCbox, includeBankedCboxParentCtrl
     local includeBankedItemsChecked
     if not isNoCrafting then
-        includeBankedCbox, includeBankedCboxParentCtrl = getCraftingTablePanelIncludeBankedCheckbox(libFiltersPanelId)
+        includeBankedCbox, includeBankedCboxParentCtrl = getCraftingTablePanelIncludeBankedCheckbox(libFiltersPanelId, isUniversalDecon)
         --AF._includeBankedCbox = includeBankedCbox
         --AF._parentCtrl = parentCtrl
         if includeBankedCbox and includeBankedCboxParentCtrl then
             --Check if the "include banked items" checkbox is enabled
             -->If not: Check if bagId is bank or subscriber bank and hide the items then
             includeBankedItemsChecked = ZO_CheckButton_IsChecked(includeBankedCbox)
---d("[AF]RefreshSubfilterBar - Found include banked items checkbox, state: " ..tos(includeBankedItemsChecked))
+            --d("[AF]RefreshSubfilterBar - Found include banked items checkbox, state: " ..tos(includeBankedItemsChecked))
         end
     end
     local doIncludeBankCBChecks = includeBankedCbox ~= nil
@@ -1501,6 +1510,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     ------------------------------------------------------------------------------------------------------------------------
     --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
     local function checkBagContentsNow(bag, bagData, realInvType, button)
+        d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">checkBagContentsNow: " ..tos(button.name)) end
         doEnableSubFilterButtonAgain = false
         breakInventorySlotsLoopNow = false
@@ -1519,7 +1529,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
             bagDataToCheck = bagData
         end
         local itemsFound = 0
-        --AF._bagDataToCheck = bagDataToCheck
+        --todo for debugging
+        if isUniversalDecon then
+            AF._bagDataToCheck = bagDataToCheck
+        end
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">currentFilter: " ..tos(currentFilter)) end
         for _, itemData in pairs(bagDataToCheck) do
             breakInventorySlotsLoopNow = false
@@ -1538,15 +1551,16 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
             local slotIndex = itemData.slotIndex
 
             --Another addon uses filters on this LibFilters panelId?
-            local otherAddonUsesFilters = util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters(itemData, realInvType, craftingType, libFiltersPanelId)
+            local otherAddonUsesFilters = checkIfOtherAddonsProvideSubfilterBarRefreshFilters(itemData, realInvType, craftingType, libFiltersPanelId)
             if isNoCrafting then
                 passesCallback = button.filterCallback(itemData)
                 --Like crafting tables the junk inventory got different itemTypes in one section (ITEM_TYPE_DISPLAY_CATEGORY_JUNK = 9). So the filter comparison does not work and the callback should be enough to check.
-                passesFilter = passesCallback and ((not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
-                        --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
-                        --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
-                        or (util.IsItemFilterTypeInItemFilterData(itemData, currentFilter)))
-                        and otherAddonUsesFilters
+                passesFilter = passesCallback and (
+                        (not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
+                                --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
+                                --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
+                                or (isItemFilterTypeInItemFilterData(itemData, currentFilter, ((isUniversalDecon and activeUniversalTab) or nil)))
+                ) and otherAddonUsesFilters
                 --[[
                 if debugSpam and not debugSpamExcludeRefreshSubfilterBar then
                     local itemlink
@@ -1558,6 +1572,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
                 end
                 ]]
+                --todo Remove debug output
+                if isUniversalDecon then
+                    local itemlink = GetItemLink(bagId, slotIndex)
+                    d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
+                end
+
             else
                 passesCallback = button.filterCallback(itemData)
                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
@@ -1760,7 +1780,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         -->Or junk, and junk inventory filter or bank withdraw junk filter button is active
                     else
                         doEnableSubFilterButtonAgain = (not isItemJunk or ((isJunkInvButtonActive or isJunkButtonActive) and isItemJunk))
-                              and ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
+                                and ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
                     end
 
                     ----------------------------------------------------------------------------------------
@@ -1822,10 +1842,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
                             if isNoCrafting and not isUniversalDecon then
                                 currentFilter = inventory.currentFilter
-                                --d(">invType: " ..tos(realInvType) .. ", currentFilter: " .. tos(currentFilter))
                             elseif isUniversalDecon then
                                 currentFilter = getCurrentFilter(inventoryType)
-                            --else
+                                --d(">universalDecon - invType: " ..tos(realInvType) .. ", currentFilter: " .. tos(currentFilter))
+                                --else
                                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
                                 --Todo: Thus the filter is always marked as "passed". Is this correct and does it work properly? To test!
                                 --Todo: Enable this section again if currentFilter is needed further down in this function!
@@ -1837,7 +1857,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                             end -- if isNoCrafting then
                             inventorySlots = inventory.slots
 
-                                --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
+                            --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
                             for bag, bagData in pairs(inventorySlots) do
                                 if breakInventorySlotsLoopNow then break end
                                 checkBagContentsNow(bag, bagData, realInvType, button)
@@ -2036,17 +2056,25 @@ function util.RemoveAllFilters()
 end
 
 --Check if an item's filterData contains an itemFilterType
-function util.IsItemFilterTypeInItemFilterData(slot, currentFilter)
+function util.IsItemFilterTypeInItemFilterData(slot, currentFilter, universalDeconCurrentlySelectedTab)
     if slot == nil or currentFilter == nil then return false end
-    --if itemFilterData == nil or itemFilterType == nil then return false end
-    --[[
-    for _, itemFilterTypeInFilterData in ipairs(itemFilterData) do
-        if itemFilterTypeInFilterData == itemFilterType then return true end
+    local retVar
+    if universalDeconCurrentlySelectedTab ~= nil then
+        local filter = universalDeconCurrentlySelectedTab.filter
+        if filter == nil then filter = universalDeconPanelInv:GetCurrentFilter() end
+        retVar = ZO_UniversalDeconstructionPanel_Shared.IsDeconstructableItem(slot, filter)
+d(">universalDecon IsItemFilterTypeInItemFilterData: " ..tos(retVar))
+    else
+        --if itemFilterData == nil or itemFilterType == nil then return false end
+        --[[
+        for _, itemFilterTypeInFilterData in ipairs(itemFilterData) do
+            if itemFilterTypeInFilterData == itemFilterType then return true end
+        end
+        ]]
+        --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
+        --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
+        retVar = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
     end
-    ]]
-    --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
-    --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
-    local retVar = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
 --[[
     if retVar == true and AF.settings.debugSpam then
 d("[AF]util.IsItemFilterTypeInItemFilterData - passesFilter: true")
