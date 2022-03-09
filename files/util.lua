@@ -2062,8 +2062,13 @@ function util.IsItemFilterTypeInItemFilterData(slot, currentFilter, universalDec
     if universalDeconCurrentlySelectedTab ~= nil then
         local filter = universalDeconCurrentlySelectedTab.filter
         if filter == nil then filter = universalDeconPanelInv:GetCurrentFilter() end
-        retVar = ZO_UniversalDeconstructionPanel_Shared.IsDeconstructableItem(slot, filter)
-d(">universalDecon IsItemFilterTypeInItemFilterData: " ..tos(retVar))
+        retVar = false
+        local isDeconstructable = ZO_UniversalDeconstructionPanel_Shared.IsDeconstructableItem(slot, nil) --2nd param are the craftingTypes of vanilla UI's multiDropDownBox
+        if isDeconstructable == true then
+            --tood check the itemFilterTypes
+            retVar = ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter(slot.bagId, slot.slotIndex, filter)
+        end
+d(">universalDecon isDeconstructable: " ..tos(isDeconstructable) .. ", retVar: " ..tos(retVar))
     else
         --if itemFilterData == nil or itemFilterType == nil then return false end
         --[[
