@@ -1408,16 +1408,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     local bagWornItemCache
     local bagVendorBuy
     local bagVendorBuyFilterTypes
-    if debugSpam then
-        d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
-        AF._currentSubfilterBarAtRefreshCheck = subfilterBar
-    end
 
     --Setting to gray out the buttons is enbaled?
     local grayOutSubFiltersWithNoItems  = settings.grayOutSubFiltersWithNoItems
     --Reactivate all subfilterbar buttons if they were disabled
     local abortSubfilterBarRefresh = abortSubfilterRefresh(inventoryType)
+--d(">abortSubfilterBarRefresh: " ..tos(abortSubfilterBarRefresh))
     local onlyEnableAllSubfilterBarButtons = false
     local isVendorBuyInv = (inventoryType == INVENTORY_TYPE_VENDOR_BUY) or false
     local isCompanionInv = (inventoryType == LF_INVENTORY_COMPANION) or false
@@ -1425,6 +1421,15 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
         isUniversalDecon = subfilterBarInventorytypesOfUniversalDecon[inventoryType] or false
     end
     if isUniversalDecon == true then isNoCrafting = true end
+
+    if debugSpam then
+        d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
+        AF._currentSubfilterBarAtRefreshCheck = subfilterBar
+    end
+
+--d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
+
     local hideCharBound = settings.hideCharBoundAtBankDeposit
 
     --Abort the subfilterBar refresh method? Or check for crafting inventory types and return the correct inventory types then
@@ -1454,7 +1459,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
     end
-    AF._realInvTypes = realInvTypes
+--AF._realInvTypes = realInvTypes
 
     if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tos(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tos((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tos((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tos(subfilterBar) .. ", bagWornToo?: " ..tos(bagWornItemCache ~= nil)) end
     --Check if a bank/guild bank/house storage is opened, junk button is selected, etc.
@@ -1510,7 +1515,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     ------------------------------------------------------------------------------------------------------------------------
     --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
     local function checkBagContentsNow(bag, bagData, realInvType, button)
-        --d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
+--d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon) ..", libFiltersPanelId: " ..tos(libFiltersPanelId))
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">checkBagContentsNow: " ..tos(button.name)) end
         doEnableSubFilterButtonAgain = false
         breakInventorySlotsLoopNow = false
@@ -1573,19 +1578,35 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
 
             else
                 passesCallback = button.filterCallback(itemData)
+
                 --Todo: ItemData.filterData is not reliable at crafting stations as the items are collected from several different bags!
                 --Todo: Thus the filter is always marked as "passed". Is this correct and does it work properly? To test!
                 --> Set the currentFilter = itemData.filterData[1], which should be the itemType of the current item
                 --currentFilter = itemData.filterData[1]
                 passesFilter = passesCallback and otherAddonUsesFilters
+
                 --Do more filter checks for the crafting types, if the filter passes until now
-                if passesFilter then
+                --Enchanting extraction
+                if passesFilter == true then
+                    --Enchanting crafting
+                    if craftingType == CRAFTING_TYPE_ENCHANTING then
+                        --d(">enchanting - passesFilter")
+                        --Enchanting extraction
+                        if libFiltersPanelId == LF_ENCHANTING_EXTRACTION then
+                            if not ZO_SharedSmithingExtraction_IsExtractableItem(itemData) then
+                                d(">not extractable!!!")
+                                passesFilter = false
+                            end
+                        end
+                    end
+                end
+                if passesFilter == true then
+                    --d(">>passesFilter 2")
                     --Jewelry crafting
                     if craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
                         --Jewelry deconstruction
                         if libFiltersPanelId == LF_JEWELRY_DECONSTRUCT then
-                            local itemLink = GetItemLink(bagId, slotIndex)
-                            passesFilter = passesFilter and not IsItemLinkForcedNotDeconstructable(itemLink)
+                            passesFilter = passesFilter and not IsItemLinkForcedNotDeconstructable(GetItemLink(bagId, slotIndex))
                         end
                         --Retrait
                     elseif craftingType == CRAFTING_TYPE_INVALID then
@@ -1597,6 +1618,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                 --Decon/Improvement panel? Golden items are still included in the submenu filters somehow even thought they
                 --cannot be improved any further
                 if passesFilter == true then
+                    --d(">>passesFilter 3")
                     if (libFiltersPanelId == LF_SMITHING_DECONSTRUCT or libFiltersPanelId == LF_JEWELRY_DECONSTRUCT) then
                         if not ZO_SharedSmithingExtraction_IsExtractableItem(itemData) then
                             passesFilter = false
@@ -1610,10 +1632,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
 
                 --Does a "include bank items" checkbox exist and is valid at the crafting table?
                 -->vanilla UI checkbox!
-                if passesFilter == true and doIncludeBankCBChecks ~= nil and includeBankedItemsChecked ~= nil and
-                        (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
+                if passesFilter == true and doIncludeBankCBChecks ~= nil and includeBankedItemsChecked ~= nil
+                        and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
+                    --d(">>passesFilter bank")
                     --Do not include banked items?
                     if includeBankedItemsChecked == false then
+                        d(">>>>banked: passes false")
                         passesFilter = false
                     end
                 end
@@ -1621,9 +1645,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                 --Detect that FCOCraftFilter is activated and use it's own filter function on the subFilter button activated check
                 if passesFilter == true and FCOCF_filtercallbackFunction ~= nil  then
                     passesFilter = FCOCF_filtercallbackFunction(bagId, slotIndex, true)
+                    --d(">>>>FCOCF: passesFilter:  " .. tos(passesFilter))
                 end
-
-
+                --if craftingType == CRAFTING_TYPE_ENCHANTING and passesCallback == true then
+                    --local itemLink = GetItemLink(bagId, slotIndex)
+                    --d(">" .. itemLink .. " passesFilter: " ..tos(passesFilter) ..", passesCallback: " ..tos(passesCallback) .. ", otherAddonUsesFilters: " ..tos(otherAddonUsesFilters) .. ", craftingType: " ..tos(craftingType) .. ",libFiltersPanelId: " ..tos(libFiltersPanelId))
+                --end
                 -- TODO: Check retrait station subfilter buttons greying out properly
                 -- TODO: Check jewelry refine subfilter buttons greying out properly
                 --if passesCallback and passesFilter then
@@ -1694,6 +1721,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                 -->or at junk panel and item is junk
 
                 if isNoCrafting then
+--d("<<IsNoCrafting")
                     --[Bank/Guild Bank deposit]
                     --Item is:
                     -->Not stolen
@@ -1785,7 +1813,8 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     --d(">" .. GetItemLink(bagId, slotIndex) .. " passesCallback: " ..tos(passesCallback) .. ", otherAddonUsesFilters: " .. tos(otherAddonUsesFilters) .. ", passesFilter: " ..tos(passesFilter) .. ", canBeRetraited: " .. tos(CanItemBeRetraited(bagId, slotIndex)) .. " - doEnableSubFilterButtonAgain: " ..tos(doEnableSubFilterButtonAgain))
                     --end
 
-                    itemsFound = itemsFound +1
+                    itemsFound = itemsFound + 1
+--d("<<IsNoCrafting: false, itemsFound: " ..tos(itemsFound))
                     --d("<<< Crafting station: " ..tos(itemsFound))
                     --doEnableSubFilterButtonAgain = not isItemStolen
                     doEnableSubFilterButtonAgain = (itemsFound > 0) or false
@@ -2659,11 +2688,14 @@ function util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters(slotData, inve
     for externalAddonName, callbackFunc in pairs(subfilterRefreshCallbacks) do
         if callbackFunc ~= nil and type(callbackFunc) == "function" then
             local callbackFuncResult = callbackFunc(slotData)
-            --d(">[AF]RefreshSubFilterbar, externalAddonName: " .. tos(externalAddonName) .. ", result: " ..tos(callbackFuncResult))
             retVar = callbackFuncResult
-            if retVar == false then return false end
+            if retVar == false then
+--d(">[AF]RefreshSubFilterbar, externalAddonName: " .. tos(externalAddonName) .. ", result: " ..tos(callbackFuncResult))
+                return false
+            end
         end
     end
+--d(">[AF]RefreshSubFilterbar, result: " ..tos(retVar))
     return retVar
 end
 

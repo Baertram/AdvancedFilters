@@ -1180,7 +1180,7 @@ local subfilterButtonNames = {
         AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING] = {
-        "WeaponGlyph", "ArmorGlyph", "JewelryGlyph", AF_CONST_ALL,
+        "JewelryGlyph", "ArmorGlyph", "WeaponGlyph", AF_CONST_ALL,
     },
     [ITEMFILTERTYPE_COLLECTIBLE] = {
         AF_CONST_ALL,
