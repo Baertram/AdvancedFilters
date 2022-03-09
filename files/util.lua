@@ -1510,7 +1510,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     ------------------------------------------------------------------------------------------------------------------------
     --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
     local function checkBagContentsNow(bag, bagData, realInvType, button)
-        d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
+        --d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">checkBagContentsNow: " ..tos(button.name)) end
         doEnableSubFilterButtonAgain = false
         breakInventorySlotsLoopNow = false
@@ -1528,11 +1528,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
         else
             bagDataToCheck = bagData
         end
+
+        --AF._bagDataToCheck = bagDataToCheck
         local itemsFound = 0
-        --todo for debugging
-        if isUniversalDecon then
-            AF._bagDataToCheck = bagDataToCheck
-        end
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">currentFilter: " ..tos(currentFilter)) end
         for _, itemData in pairs(bagDataToCheck) do
             breakInventorySlotsLoopNow = false
@@ -1572,11 +1570,6 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
                 end
                 ]]
-                --todo Remove debug output
-                if isUniversalDecon then
-                    local itemlink = GetItemLink(bagId, slotIndex)
-                    d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
-                end
 
             else
                 passesCallback = button.filterCallback(itemData)
@@ -2060,15 +2053,15 @@ function util.IsItemFilterTypeInItemFilterData(slot, currentFilter, universalDec
     if slot == nil or currentFilter == nil then return false end
     local retVar
     if universalDeconCurrentlySelectedTab ~= nil then
-        local filter = universalDeconCurrentlySelectedTab.filter
-        if filter == nil then filter = universalDeconPanelInv:GetCurrentFilter() end
         retVar = false
         local isDeconstructable = ZO_UniversalDeconstructionPanel_Shared.IsDeconstructableItem(slot, nil) --2nd param are the craftingTypes of vanilla UI's multiDropDownBox
         if isDeconstructable == true then
-            --tood check the itemFilterTypes
+            --Check the itemFilterTypes
+            local filter = universalDeconCurrentlySelectedTab.filter
+            if filter == nil then filter = universalDeconPanelInv:GetCurrentFilter() end
             retVar = ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter(slot.bagId, slot.slotIndex, filter)
         end
-d(">universalDecon isDeconstructable: " ..tos(isDeconstructable) .. ", retVar: " ..tos(retVar))
+--d(">universalDecon isDeconstructable: " ..tos(isDeconstructable) .. ", retVar: " ..tos(retVar))
     else
         --if itemFilterData == nil or itemFilterType == nil then return false end
         --[[
