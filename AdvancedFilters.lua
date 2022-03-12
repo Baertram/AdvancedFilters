@@ -153,6 +153,7 @@ local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
 
 --local universalDecon = controlsForChecks.universalDecon
+local isUniversalDeconGiven = (controlsForChecks.universalDecon ~= nil and true) or false
 local universalDeconPanel = controlsForChecks.universalDeconPanel
 local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
 local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvControl
@@ -1655,7 +1656,7 @@ local function InitializeHooks()
 
     --=== UNIVERSAL DECONSTRUCTION ==========================================================================================================
     --Attention: It does not fire "again" if the scene was hidden, and is re-shown! So manually check this via the scene
-    if ZO_UNIVERSAL_DECONSTRUCTION_FILTER_TYPES ~= nil then
+    if isUniversalDeconGiven then
         local detectActiveUniversalDeconstructionTab
         --Callback function - Will fire at each change of any filter tab
         local function onUniversalDeconstructionFilterChangedCallback(tab)
@@ -2069,6 +2070,7 @@ local function presetCraftingStationHookVariables()
 end
 
 local function presetUniversalDeconstructionHookVariables()
+    if not isUniversalDeconGiven then return end
     universalDeconPanelInv.AF_currentFilter = ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL
 end
 

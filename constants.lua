@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.1.6"
+AF.version = "1.6.1.8"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -95,6 +95,7 @@ local bankInvTypes = {
 }
 AF.bankInvTypes = bankInvTypes
 
+local isUniversalDeconGiven = (UNIVERSAL_DECONSTRUCTION ~= nil and true) or false
 local universalDeconStr = "UniversalDecon"
 
 --Include bank checkbox name
@@ -145,12 +146,16 @@ local controlsForChecks = {
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
     companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
-    universalDecon          = UNIVERSAL_DECONSTRUCTION,
-    universalDeconPanel     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel,
-    universalDeconPanelInv     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory,
-    universalDeconPanelInvControl = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory.control,
-    universalDeconScene     = UNIVERSAL_DECONSTRUCTION_KEYBOARD_SCENE,
 }
+
+if isUniversalDeconGiven then
+    controlsForChecks.universalDecon          = UNIVERSAL_DECONSTRUCTION
+    controlsForChecks.universalDeconPanel     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel
+    controlsForChecks.universalDeconPanelInv     = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory
+    controlsForChecks.universalDeconPanelInvControl = UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory.control
+    controlsForChecks.universalDeconScene     = UNIVERSAL_DECONSTRUCTION_KEYBOARD_SCENE
+end
+
 --Smithing
 controlsForChecks.refinementPanel       =   controlsForChecks.smithing.refinementPanel
 controlsForChecks.creationPanel         =   controlsForChecks.smithing.creationPanel
@@ -877,33 +882,36 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
         },
     },
+}
+if isUniversalDeconGiven then
+    --Universal Deconstruction
     --Universal deconstruction
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] = {
+    subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL] = {},
         },
-    },
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
+    }
+    subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]      = {},
         },
-    },
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] = {
+    }
+    subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]        = {},
         },
-    },
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = {
+    }
+    subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]      = {},
         },
-    },
-    [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] = {
+    }
+    subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {},
         },
-    },
-}
+    }
+end
 AF.subfilterGroups = subfilterGroups
 
 --INVENTORY TYPES
@@ -1001,12 +1009,14 @@ local filterBarParents = {
 
     --AdvancedFilters custom inventoryTypes
     [inventoryNames[INVENTORY_TYPE_VENDOR_BUY]] = GetControl(controlsForChecks.storeWindow, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL]] =     GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR]] =   GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
-    [inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS]] =  GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix),
 }
+if isUniversalDeconGiven then
+    filterBarParents[inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL]] =     GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix)
+    filterBarParents[inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix)
+    filterBarParents[inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR]] =   GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix)
+    filterBarParents[inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY]] = GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix)
+    filterBarParents[inventoryNames[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS]] =  GetControl(controlsForChecks.universalDeconPanelInvControl, filterDividerSuffix)
+end
 AF.filterBarParents = filterBarParents
 
 --Controls which should be hidden as the filter bar is shown at this panel
@@ -1056,11 +1066,9 @@ local filterBarParentControlsToHide = {
     [LF_SMITHING_DECONSTRUCT]   = {
         --ZO_SmithingTopLevelDeconstructionPanelInventoryButtonDivider
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
-        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
     },
     [LF_JEWELRY_DECONSTRUCT]    = {
         GetControl(controlsForChecks.smithing.deconstructionPanel.inventory.control, buttonDividerSuffix),
-        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
     },
     [LF_SMITHING_RESEARCH]  = researchFilterBarParentControlsToHide,
     [LF_JEWELRY_RESEARCH]   = researchFilterBarParentControlsToHide,
@@ -1069,7 +1077,7 @@ local filterBarParentControlsToHide = {
     },
     [LF_ENCHANTING_EXTRACTION]  = {
         GetControl(controlsForChecks.enchanting.inventory.control, buttonDividerSuffix),
-        ["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix),
+
     },
     [LF_RETRAIT]  = {
         GetControl(controlsForChecks.retrait.inventory.control, buttonDividerSuffix),
@@ -1081,6 +1089,11 @@ local filterBarParentControlsToHide = {
         GetControl(controlsForChecks.companionInv.control, searchDividerSuffix),
     }
 }
+if isUniversalDeconGiven then
+    filterBarParentControlsToHide[LF_SMITHING_DECONSTRUCT]["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix)
+    filterBarParentControlsToHide[LF_JEWELRY_DECONSTRUCT]["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix)
+    filterBarParentControlsToHide[LF_ENCHANTING_EXTRACTION]["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix)
+end
 AF.filterBarParentControlsToHide = filterBarParentControlsToHide
 
 
@@ -1265,27 +1278,6 @@ local subfilterButtonNames = {
         AF_CONST_ALL,
     },
 
-    --Universal Deconstruction
-    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL]         = {
-        "Glyphs",
-        "Neck", "Ring",
-        "Shield", "Heavy", "Medium", "LightArmor",
-        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand",
-        AF_CONST_ALL
-    },
-    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]     = {
-        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
-    },
-    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]       = {
-        "Shield", "Heavy", "Medium", "LightArmor", AF_CONST_ALL,
-    },
-    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = {
-        "Neck", "Ring", AF_CONST_ALL
-    },
-    [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {
-        "JewelryGlyph", "ArmorGlyph", "WeaponGlyph", AF_CONST_ALL
-    },
-
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER] = {
@@ -1293,6 +1285,31 @@ local subfilterButtonNames = {
     }
     ]]
 }
+
+if isUniversalDeconGiven then
+    --Universal Deconstruction
+    subfilterButtonNames[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL]         = {
+        "Glyphs",
+        "Neck", "Ring",
+        "Shield", "Heavy", "Medium", "LightArmor",
+        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand",
+        AF_CONST_ALL
+    }
+    subfilterButtonNames[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS]     = {
+        "HealStaff", "DestructionStaff", "Bow", "TwoHand", "OneHand", AF_CONST_ALL,
+    }
+    subfilterButtonNames[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR]       = {
+        "Shield", "Heavy", "Medium", "LightArmor", AF_CONST_ALL,
+    }
+    subfilterButtonNames[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = {
+        "Neck", "Ring", AF_CONST_ALL
+    }
+    subfilterButtonNames[ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = {
+        "JewelryGlyph", "ArmorGlyph", "WeaponGlyph", AF_CONST_ALL
+    }
+end
+
+
 
 --Dynamic subfilterBar entries, e.g. quickslot -> the collectible subfilterBars. Used in function createAdditionalSubFilterGroups
 --in file main.lua
@@ -1475,9 +1492,12 @@ local craftingTablePanels = {
     [LF_ENCHANTING_EXTRACTION]  = controlsForChecks.enchantExtractPanel,
     --Retrait
     [LF_RETRAIT]                = controlsForChecks.retraitPanel,
-    --Universal Deconstruction
-    ["universalDeconstruction"] = controlsForChecks.universalDeconPanel,
+
 }
+--Universal Deconstruction
+if isUniversalDeconGiven then
+    craftingTablePanels["universalDeconstruction"] = controlsForChecks.universalDeconPanel
+end
 AF.craftingTablePanels = craftingTablePanels
 
 --Does the crafting table use the BAG_WORN in it's inventory checks?
