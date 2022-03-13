@@ -374,10 +374,10 @@ local getCurrentFilterTypeForInventory = util.GetCurrentFilterTypeForInventory
 --differs -> assign the corretc one to the currentInventoryType
 function util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryType)
     local debugSpam = AF.settings.debugSpam
-    if debugSpam then  d("[AF]util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType - invType: " ..tos(inventoryType)) end
+    if debugSpam then d("[AF]util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType - invType: " ..tos(inventoryType)) end
     local specialInventoryTypes = AF.specialInventoryTypes
     if specialInventoryTypes and specialInventoryTypes[inventoryType] == true then
-        if debugSpam then  d("<<<<<<<<<<<<AF.currentInventoryType changed to " ..tos(inventoryType)) end
+        if debugSpam then d("<<<<<<<<<<<<AF.currentInventoryType changed to " ..tos(inventoryType)) end
         AF.currentInventoryType = inventoryType
     end
 end
@@ -1594,7 +1594,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         --Enchanting extraction
                         if libFiltersPanelId == LF_ENCHANTING_EXTRACTION then
                             if not ZO_SharedSmithingExtraction_IsExtractableItem(itemData) then
-                                d(">not extractable!!!")
+                                --d(">not extractable!!!")
                                 passesFilter = false
                             end
                         end
@@ -1637,7 +1637,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     --d(">>passesFilter bank")
                     --Do not include banked items?
                     if includeBankedItemsChecked == false then
-                        d(">>>>banked: passes false")
+                        --d(">>>>banked: passes false")
                         passesFilter = false
                     end
                 end
