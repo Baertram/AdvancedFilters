@@ -4,7 +4,7 @@
 ## AddOnVersion: 1618
 ## APIVersion: 101033 101034
 ## DependsOn: LibAddonMenu-2.0>=32 LibCustomMenu>=711 LibFilters-3.0>=330
-## OptionalDependsOn: CraftBagExtended LibMotifCategories>=2
+## OptionalDependsOn: LibMotifCategories>=2 AwesomeGuildStore
 ## SavedVariables: AdvancedFilters_Settings
 
 constants.lua
