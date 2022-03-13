@@ -1,7 +1,7 @@
 ## Title: Advanced Filters
 ## Author: Randactyl & Baertram
-## Version: 1.6.1.8
-## AddOnVersion: 1618
+## Version: 1.6.1.9
+## AddOnVersion: 1619
 ## APIVersion: 101033 101034
 ## DependsOn: LibAddonMenu-2.0>=32 LibCustomMenu>=711 LibFilters-3.0>=330
 ## OptionalDependsOn: LibMotifCategories>=2
