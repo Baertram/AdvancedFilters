@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.1.9"
+AF.version = "1.6.2.0"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -17,7 +17,6 @@ AF.clientLang = GetCVar("language.2")
 AF.otherAddonsDisallowed = {
     ["MultiCraft"] = true
 }
-
 
 --SavedVariables default settings
 AF.defaultSettings = {

@@ -1651,8 +1651,8 @@ local function InitializeHooks()
 
     --> See function HookEnchantingOnModeUpdated above at the filter changes (needed there as well already for CraftStoreFixedAndImproved fixes!)
     --enchantingBaseVar -> not working properly anymore
-    SecurePostHook(enchantingVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self:GetEnchantingMode()) end)
-
+    --SecurePostHook(enchantingVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self:GetEnchantingMode()) end)
+    SecurePostHook(enchantingBaseVar, "OnModeUpdated", function(self) HookEnchantingOnModeUpdated(self, self:GetEnchantingMode()) end) --ZO_Enchanting hook
 
     --=== UNIVERSAL DECONSTRUCTION ==========================================================================================================
     --Attention: It does not fire "again" if the scene was hidden, and is re-shown! So manually check this via the scene
