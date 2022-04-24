@@ -277,7 +277,7 @@ end
 --Reanchor & hide some controls at the vanilla UI, like the searchBar and box.
 --Based on the baseControl the controls to change are children
 local function reanchorAndHideVanillaUIControls(baseControl)
-d("[AF]reanchorAndHideVanillaUIControls")
+--d("[AF]reanchorAndHideVanillaUIControls")
     if not baseControl then return end
     local ZOsControlNames = AF.ZOsControlNames
     local tabsName = ZOsControlNames.tabs
@@ -290,7 +290,7 @@ d("[AF]reanchorAndHideVanillaUIControls")
     --Tabs
     local tabs = GetControl(baseControl, tabsName)
     if tabs then
-d(">Found tabs: " ..tos(tabs:GetName()))
+--d(">Found tabs: " ..tos(tabs:GetName()))
         local tabsActiveName = ZOsControlNames.active
         local tabsActive = GetControl(tabs, tabsActiveName)
         if tabsActive then
@@ -302,7 +302,7 @@ d(">Found tabs: " ..tos(tabs:GetName()))
     local searchFiltersName = ZOsControlNames.searchFilters
     local searchFilters = GetControl(baseControl, searchFiltersName)
     if searchFilters then
-d(">Found searchFilters: " .. tos(searchFilters:GetName()))
+--d(">Found searchFilters: " .. tos(searchFilters:GetName()))
         --Text search box
         local textSearchName = ZOsControlNames.textSearch
         local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
