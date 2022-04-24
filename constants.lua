@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.2.0"
+AF.version = "1.6.2.1"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -118,6 +118,15 @@ local buttonDividerSuffix = ZOsControlNames.buttonDivider
 local searchDividerSuffix = ZOsControlNames.searchDivider
 local questItemsOnly      = ZOsControlNames.questItemsOnly
 
+
+local quickslotKeyboard                     = QUICKSLOT_KEYBOARD
+local quickslot                             = (quickslotKeyboard ~= nil and quickslotKeyboard.control) or ZO_QuickSlot
+--ctrlVars.QUICKSLOT_WINDOW                   = (quickslotKeyboard ~= nil and quickslotKeyboard) or QUICKSLOT_WINDOW
+--ctrlVars.QUICKSLOT_NAME                     = quickslot:GetName()
+--ctrlVars.QUICKSLOT_CIRCLE  		            = (quickslotKeyboard ~= nil and quickslotKeyboard.wheelControl) or GetControl(ctrlVars.QUICKSLOT, "Circle") --ZO_QuickSlotCircle
+--ctrlVars.QUICKSLOT_LIST			            = (quickslotKeyboard ~= nil and quickslotKeyboard.list) or GetControl(quickslot, listStr) --ZO_QuickSlotList
+
+
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
     playerInv               = PLAYER_INVENTORY,
@@ -133,7 +142,7 @@ local controlsForChecks = {
     craftBag                = ZO_CraftBag,
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
-    quickslot               = QUICKSLOT_WINDOW,
+    quickslot               = (quickslotKeyboard ~= nil and quickslotKeyboard) or QUICKSLOT_WINDOW,
     mailSend                = MAIL_SEND,
     trade                   = TRADE,
     --Keyboard variables
@@ -193,7 +202,7 @@ local inventories = {
         searchBox = ZO_CraftBagSearchFiltersTextSearchBox,
     },
     [LF_QUICKSLOT] = {
-        searchBox = ZO_QuickSlotSearchFiltersTextSearchBox,
+        searchBox = (quickslotKeyboard ~= nil and quickslotKeyboard.searchBox) or ZO_QuickSlotSearchFiltersTextSearchBox,
     },
     [LF_INVENTORY_COMPANION] = {
         searchBox = ZO_CompanionEquipment_Panel_KeyboardSearchFiltersTextSearchBox, --controlsForChecks.companionInv.searchBox
@@ -1003,7 +1012,7 @@ local filterBarParents = {
     [inventoryNames[LF_ENCHANTING_EXTRACTION]]  = GetControl(controlsForChecks.enchanting.inventoryControl, filterDividerSuffix),
     [inventoryNames[LF_RETRAIT]]                = GetControl(controlsForChecks.retrait.inventory.control, filterDividerSuffix),
     --LibFilters other filterTypes
-    [inventoryNames[LF_QUICKSLOT]]              = GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
+    [inventoryNames[LF_QUICKSLOT]]              = (quickslotKeyboard ~= nil and GetControl(quickslotKeyboard.control, filterDividerSuffix)) or GetControl(controlsForChecks.quickslot.container, filterDividerSuffix),
     [inventoryNames[LF_INVENTORY_COMPANION]]    = GetControl(controlsForChecks.companionInv.control, filterDividerSuffix),
 
     --AdvancedFilters custom inventoryTypes
@@ -1082,7 +1091,7 @@ local filterBarParentControlsToHide = {
         GetControl(controlsForChecks.retrait.inventory.control, buttonDividerSuffix),
     },
     [LF_QUICKSLOT] = {
-        GetControl(controlsForChecks.quickslot.container, searchDividerSuffix),
+        (quickslotKeyboard ~= nil and GetControl(quickslotKeyboard.control, searchDividerSuffix)) or GetControl(controlsForChecks.quickslot.container, searchDividerSuffix),
     },
     [LF_INVENTORY_COMPANION] = {
         GetControl(controlsForChecks.companionInv.control, searchDividerSuffix),
@@ -1102,8 +1111,13 @@ local layoutDataFragments = {
     BACKPACK_DEFAULT_LAYOUT_FRAGMENT,
     BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
     BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
-    QUICKSLOT_FRAGMENT,
 }
+if KEYBOARD_QUICKSLOT_FRAGMENT ~= nil then
+    table.insert(layoutDataFragments, KEYBOARD_QUICKSLOT_FRAGMENT)
+else
+    table.insert(layoutDataFragments, QUICKSLOT_FRAGMENT)
+end
+
 AF.layoutDataFragments = layoutDataFragments
 
 --The crafting inventory layoutdata for the filterBar, inventoryList, sortHeader offsets
