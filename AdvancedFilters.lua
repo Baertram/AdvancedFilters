@@ -151,6 +151,7 @@ local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
 local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
+local quickslotFragment = controlsForChecks.quickslotFragment
 
 --local universalDecon = controlsForChecks.universalDecon
 local isUniversalDeconGiven = (controlsForChecks.universalDecon ~= nil and true) or false
@@ -931,7 +932,7 @@ local function InitializeHooks()
             local inventoryControl
             local inventoryTypeUpdated
             --Special treatment for qucisklots
-            if p_fragment == QUICKSLOT_FRAGMENT and inventoryType == LF_QUICKSLOT then
+            if p_fragment == quickslotFragment and inventoryType == LF_QUICKSLOT then
                 if debugSpam then
                     d(">quickslots")
                 end
@@ -1149,7 +1150,7 @@ local function InitializeHooks()
     hookFragment(GUILD_BANK_FRAGMENT, INVENTORY_GUILD_BANK) -- new value is: 5
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
     --hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
-    hookFragment(QUICKSLOT_FRAGMENT, LF_QUICKSLOT)
+    hookFragment(quickslotFragment, LF_QUICKSLOT)
     hookFragment(COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT, LF_INVENTORY_COMPANION)
 
     --=== SCENES ===========================================================================================================

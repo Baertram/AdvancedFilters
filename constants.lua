@@ -121,11 +121,7 @@ local questItemsOnly      = ZOsControlNames.questItemsOnly
 
 local quickslotKeyboard                     = QUICKSLOT_KEYBOARD
 local quickslot                             = (quickslotKeyboard ~= nil and quickslotKeyboard.control) or ZO_QuickSlot
---ctrlVars.QUICKSLOT_WINDOW                   = (quickslotKeyboard ~= nil and quickslotKeyboard) or QUICKSLOT_WINDOW
---ctrlVars.QUICKSLOT_NAME                     = quickslot:GetName()
---ctrlVars.QUICKSLOT_CIRCLE  		            = (quickslotKeyboard ~= nil and quickslotKeyboard.wheelControl) or GetControl(ctrlVars.QUICKSLOT, "Circle") --ZO_QuickSlotCircle
---ctrlVars.QUICKSLOT_LIST			            = (quickslotKeyboard ~= nil and quickslotKeyboard.list) or GetControl(quickslot, listStr) --ZO_QuickSlotList
-
+local quickslotFragment                     = (quickslotKeyboard ~= nil and KEYBOARD_QUICKSLOT_FRAGMENT) or QUICKSLOT_FRAGMENT
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
@@ -143,6 +139,7 @@ local controlsForChecks = {
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
     quickslot               = (quickslotKeyboard ~= nil and quickslotKeyboard) or QUICKSLOT_WINDOW,
+    quickslotFragment       = quickslotFragment,
     mailSend                = MAIL_SEND,
     trade                   = TRADE,
     --Keyboard variables
@@ -1112,11 +1109,7 @@ local layoutDataFragments = {
     BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
     BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
 }
-if KEYBOARD_QUICKSLOT_FRAGMENT ~= nil then
-    table.insert(layoutDataFragments, KEYBOARD_QUICKSLOT_FRAGMENT)
-else
-    table.insert(layoutDataFragments, QUICKSLOT_FRAGMENT)
-end
+table.insert(layoutDataFragments, quickslotFragment)
 
 AF.layoutDataFragments = layoutDataFragments
 
