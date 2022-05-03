@@ -30,7 +30,7 @@ local strings = {
     InvertDropdownFilter = "Inverser le filtre: %s",
 
     --Menu des paramètres LAM
-    lamDescription = "Afficher des boutons de filtre supplémentaires dans les inventaires pour séparer les types d'éléments",
+    lamDescription = "Affiche des boutons de filtre supplémentaires dans les inventaires pour séparer les types d'éléments",
     lamHideItemCount = "Masquer le compteur d'objet",
     lamHideItemCountTT = "Masque le nombre d'objets présents dans la sous-catégorie (affiché entre parenthèses en bas de l'inventaire à côté du nombre d'objet total).",
     lamHideItemCountColor = "Couleur du compteur d'objet",
@@ -56,14 +56,14 @@ local strings = {
     lamHeaderSubfilter = "Boutons de sous-filtre",
     lamHeaderDropdownFilterbox = "Boîte de filtre déroulante",
     lamDebugOutput = "Déboguage",
-    lamDebugOutputTT = "Affiche certains messages de débogage dans le chat utilisateur/DebugLogViewer UI.",
+    lamDebugOutputTT = "Affiche certains messages de débogage dans le Tchat utilisateur/DebugLogViewer UI.",
     lamDebugSpamOutput = "Déboguer les spams",
-    lamDebugSpamOutputTT = "Attention : cela va spammer votre chat/DebugLogViewer UI avec beaucoup de messages d'AdvancedFilters. N'activez cette option que si on vous a dit de le faire !",
+    lamDebugSpamOutputTT = "Attention : cela va spammer votre Tchat/DebugLogViewer UI avec beaucoup de messages d'AdvancedFilters. N'activez cette option que si on vous a dit de le faire !",
     lamDebugSpamExcludeRefreshSubfilterBar = "Exclure: \'Rafraîchir la barre de sous-filtre\'",
     lamDebugSpamExcludeDropdownBoxFilters = "Exclure: \'Filtres déroulants\'",
 
     --Messages d'erreur
-    errorCheckChatPlease    = afPrefixError .. " Veuillez lire le message d'erreur du chat !",
+    errorCheckChatPlease    = afPrefixError .. " Veuillez lire le message d'erreur du Tchat !",
     errorLibraryMissing     = afPrefixError .. " La bibliothèque requise \'%s\' n'est pas chargée. Cet addon ne fonctionnera pas correctement !",
     errorWhatToDo1          = "!> Veuillez répondre aux 4 questions suivantes et envoyer les réponses (et si elles sont données : les variables affichées dans les lignes, en commençant par ->, après les questions) aux commentaires de l'addon AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) Qu'avez-vous fait ?\n2)Où l'avez-vous fait ?\n3)Avez-vous testé si l'erreur se produit uniquement avec l'addon AdvancedFilters et les bibliothèques activées (veuillez tester ceci !) ?\n4)Si l'erreur se produit avec d'autres addons actifs : Quels autres addons utilisiez-vous lorsque l'erreur s'est produite, et êtes-vous en mesure de dire lequel de ceux-ci est à l'origine de l'erreur ?",
