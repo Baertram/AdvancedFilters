@@ -3,7 +3,7 @@
 ## Version: 1.6.2.1
 ## AddOnVersion: 1621
 ## APIVersion: 101033 101034
-## DependsOn: LibAddonMenu-2.0>=33 LibCustomMenu>=713 LibFilters-3.0>=332
+## DependsOn: LibAddonMenu-2.0>=33 LibCustomMenu>=713 LibFilters-3.0>=333
 ## OptionalDependsOn: LibMotifCategories>=2
 ## SavedVariables: AdvancedFilters_Settings
 

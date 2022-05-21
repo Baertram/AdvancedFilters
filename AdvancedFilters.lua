@@ -944,6 +944,9 @@ local function InitializeHooks()
                 inventoryControl = (QUICKSLOT_KEYBOARD ~= nil and quickslotVar.control) or quickslotVar.container
                 inventoryTypeUpdated = LF_QUICKSLOT
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
+                if ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay ~= nil then
+                    ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay:SetHidden(true)
+                end
             end
             if doNormalChecks == true then
                 local libFiltersPanelId
