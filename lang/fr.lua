@@ -1,77 +1,77 @@
--- News check translations by @XXXspartiateXXX 2022/05
-
+--Updated by lexo1000 - 2022-05-25
 local util = AdvancedFilters.util
 local enStrings = AdvancedFilters.ENstrings
-
+local afPrefix = "|cFF0000[AdvancedFilters%s]|r"
 local afPrefixNormal    = enStrings.AFPREFIXNORMAL
 local afPrefixError     = string.format(enStrings.AFPREFIX, " ERREUR")
 
 local strings = {
-    --ARMES
-    OneHand = "Une main",
-    TwoHand = "Deux mains",
-    TwoHandAxe = "2M "..util.Localize(SI_WEAPONTYPE1),
-    TwoHandSword = "2M "..util.Localize(SI_WEAPONTYPE3),
-    TwoHandHammer = "2M "..util.Localize(SI_WEAPONTYPE2),
+    --MISCELLANEOUS
+    Fence = "Volé",
 
-    --CONSOMMABLES
-    Repair = "Réparation",
+    --DROPDOWN CONTEXT MENU
+    ResetToAll           = "Réinitialiser les filtres",
+    InvertDropdownFilter = "Inverser le filtre : %s",
 
-    --MATÉRIAUX
-    Clothier = "Couture",
+    --WEAPON
+    TwoHandAxe = util.Localize(SI_WEAPONTYPE1).." à deux mains",
+    TwoHandSword = util.Localize(SI_WEAPONTYPE3).." à deux mains",
+    TwoHandHammer = util.Localize(SI_WEAPONTYPE2).." à deux mains",
 
-    WeaponTrait = "Trait d'arme",
-    ArmorTrait = "Trait d'armure",
-    Water = "Eau",
-    Oil = "Huile",
-
-    --MENU CONTEXTUEL DÉROULANT
-    ResetToAll           = "Tout réinitialiser",
-    InvertDropdownFilter = "Inverser le filtre: %s",
-
-    --Menu des paramètres LAM
-    lamDescription = "Affiche des boutons de filtre supplémentaires dans les inventaires pour séparer les types d'éléments",
+    --LAM settings menu
+    lamDescription = "",
     lamHideItemCount = "Masquer le compteur d'objet",
-    lamHideItemCountTT = "Masque le nombre d'objets présents dans la sous-catégorie (affiché entre parenthèses en bas de l'inventaire à côté du nombre d'objet total).",
+    lamHideItemCountTT = "Masque le nombre d'objets présents dans la sous-catégorie affiché entre parenthèses en bas de l'inventaire à côté du nombre d'objet total.",
     lamHideItemCountColor = "Couleur du compteur d'objet",
     lamHideItemCountColorTT = "Détermine la couleur du compteur d'objet affiché en bas de l'inventaire.",
-    lamHideSubFilterLabel = "Masquer le nom de la sous-catégorie",
-    lamHideSubFilterLabelTT = "Masque le texte indiquant le nom de la sous-catégorie (affiché en haut de l'inventaire à gauche).",
+    lamHideSubFilterLabel = "Masquer le nom des sous-catégories",
+    lamHideSubFilterLabelTT = "Masque le nom des sous-catégories affiché en haut à gauche de la fenêtre d'inventaire.",
     lamGrayOutSubFiltersWithNoItems = "Désactiver les sous-catégories sans objets",
-    lamGrayOutSubFiltersWithNoItemsTT = "Masque le bouton des sous-catégories ne comportant aucun objet.",
-    lamShowIconsInFilterDropdowns = "Afficher les icônes du menu déroulant",
-    lamShowIconsInFilterDropdownsTT = "Affiche les icônes des sous-catégories d'objet dans la liste déroulante de filtrage par type d'objet.",
-    lamRememberFilterDropdownsLastSelection = "Mémoriser la dernière sélection du menu des filtres",
-    lamRememberFilterDropdownsLastSelectionTT = "Rappelez-vous la dernière liste déroulante de filtre à chaque sous-filtre et panneau de filtre (inventaire, courrier, table d'artisanat, ...) et réappliquez ce filtre dans l'entrée de la liste déroulante si vous revenez à ce panneau de filtre et sous-filtre.\nCeci ne sera PAS enregistré si vous vous déconnecter/faites un rechargement de l'interface utilisateur !",
-    lamShowDropdownSelectedReminderAnimation = "Éclairer la liste déroulante du dernier filtre",
-    lamShowDropdownSelectedReminderAnimationTT = "Fais briller la liste déroulante lorsque vous passez à une barre de sous-filtre, où le filtre de la liste déroulante est sélectionné et n'affiche pas \'".. util.Localize(SI_ITEMFILTERTYPE0) .. "\' l'entrée.",
-    lamShowDropdownLastSelectedEntries = "Afficher l'historique de sélection de la liste déroulante des filtres",
-    lamShowDropdownLastSelectedEntriesTT = "Cliquez avec le bouton droit sur la liste déroulante du filtre pour afficher une liste des 10 dernières entrées de liste déroulante sélectionnées sous les entrées du menu contextuel standard. Cliquez sur une entrée d'historique pour la sélectionner à nouveau (si la liste déroulante de la barre de sous-filtre actuelle fournit cette entrée car l'historique est créé entre les barres de sous-filtre) !",
-    lamHideCharBoundAtBankDeposit = "Masquer les objets liés aux personnages à la banque",
-    lamHideCharBoundAtBankDepositTT = "Masque les éléments liés aux personnages dans l'onglet Dépôt de la banque.",
-    lamShowFilterDropdownMenuOnRightMouse   = "|t150.000000%:150.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t: Afficher les filtres du menu sur le bouton",
-    lamShowFilterDropdownMenuOnRightMouseTT = "Affiche les mêmes filtres, que les filtres de la liste déroulante afficheraient si vous l'ouvriez sur le bouton de sous-filtre actuel.\n\n|t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t : Affiche le menu normal des filtres du plugin\ntouche SHIFT + |t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t : Affiche le menu des filtres du plugin.",
-    lamHeaderVisual = "Visuel",
-    lamHeaderFilterCategory = "Filtrer les catégories",
-    lamHeaderSubfilter = "Boutons de sous-filtre",
-    lamHeaderDropdownFilterbox = "Boîte de filtre déroulante",
-    lamDebugOutput = "Déboguage",
-    lamDebugOutputTT = "Affiche certains messages de débogage dans le Tchat utilisateur/DebugLogViewer UI.",
-    lamDebugSpamOutput = "Déboguer les spams",
-    lamDebugSpamOutputTT = "Attention : cela va spammer votre Tchat/DebugLogViewer UI avec beaucoup de messages d'AdvancedFilters. N'activez cette option que si on vous a dit de le faire !",
-    lamDebugSpamExcludeRefreshSubfilterBar = "Exclure: \'Rafraîchir la barre de sous-filtre\'",
-    lamDebugSpamExcludeDropdownBoxFilters = "Exclure: \'Filtres déroulants\'",
+    lamGrayOutSubFiltersWithNoItemsTT = "Grise le bouton des sous-catégories qui ne contiennent aucun objet.",
+    lamShowIconsInFilterDropdowns = "Afficher les icônes",
+    lamShowIconsInFilterDropdownsTT = "Affiche une icône à côté du nom des filtres dans le menu déroulant des filtres.",
+    lamRememberFilterDropdownsLastSelection = "Enregistrer la dernière sélection du menu des filtres",
+    lamRememberFilterDropdownsLastSelectionTT = "Mémorise le dernier filtre utilisé dans le menu déroulant des filtres et réapplique ce filtre en revenant dans la sous-catégorie d'objet.\n\nL'enregistrement est réinitialisé à la déconnexion ou après un rechargement de l'interface utilisateur.",
+    lamShowDropdownSelectedReminderAnimation = "Mettre en évidence le dernier filtre enregistré",
+    lamShowDropdownSelectedReminderAnimationTT = "Fait briller le menu déroulant sur le dernier filtre enregistré lorsque un filtre autre que |cFFFFFFTout|r est sélectionné.",
+    lamShowDropdownLastSelectedEntries = "Afficher l'historique de sélection de le menu déroulant des filtres",
+    lamShowDropdownLastSelectedEntriesTT = "Cliquez avec le bouton droit sur le menu déroulant du filtre pour afficher une liste des 10 dernières entrées du menu déroulant sélectionné sous les entrées du menu contextuel standard. Cliquez sur une entrée d'historique pour la sélectionner à nouveau (si le menu déroulant de la barre de sous-filtre actuelle fournit cette entrée car l'historique est créé entre les barres de sous-filtre) !",
+    lamHideCharBoundAtBankDeposit = "Masquer les objets liés au personnage",
+    lamHideCharBoundAtBankDepositTT = "Masque les objets liés au personnage dans l'onglet |cFFFFFFDépôt|r de la banque.",
+    lamShowFilterDropdownMenuOnRightMouse   = "Afficher le menu des filtres avec un clic-droit",
+    lamShowFilterDropdownMenuOnRightMouseTT = "Affiche le menu déroulant des filtres en faisant un clic-droit sur le bouton de la sous-catégorie.\n\n|t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t : Affiche le menu déroulant des filtres.\nSHIFT+|t100.000000%:100.000000%:EsoUI/Art/Miscellaneous/icon_RMB.dds|t : Affiche les options du menu déroulant des filtres.",
+    lamHeaderVisual = "Compteur d'objet",
+    lamHeaderFilterCategory = "Nom des sous-catégories",
+    lamHeaderSubfilter = "Bouton des sous-catégories",
+    lamHeaderDropdownFilterbox = "Menu déroulant des filtres",
+    lamDebugOutput = "Activer le déboguage",
+    lamDebugOutputTT = "Affiche les messages de débogage dans la fenêtre de discussion.",
+    lamDebugSpamOutput = "Activer le déboguage avancé",
+    lamDebugSpamOutputTT = "Attention : cela va afficher beaucoup de messages d'AdvancedFilters dans la fenêtre de discussion.",
+    lamDebugSpamExcludeRefreshSubfilterBar = "Exclure \'RefreshSubfilterBar\'",
+    lamDebugSpamExcludeDropdownBoxFilters = "Exclure les filtres \'Dropdownbox\'",
 
-    --Messages d'erreur
-    errorCheckChatPlease    = afPrefixError .. " Veuillez lire le message d'erreur du Tchat !",
-    errorLibraryMissing     = afPrefixError .. " La bibliothèque requise \'%s\' n'est pas chargée. Cet addon ne fonctionnera pas correctement !",
-    errorWhatToDo1          = "!> Veuillez répondre aux 4 questions suivantes et envoyer les réponses (et si elles sont données : les variables affichées dans les lignes, en commençant par ->, après les questions) aux commentaires de l'addon AdvancedFilters @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
-    errorWhatToDo2          = "1) Qu'avez-vous fait ?\n2)Où l'avez-vous fait ?\n3)Avez-vous testé si l'erreur se produit uniquement avec l'addon AdvancedFilters et les bibliothèques activées (veuillez tester ceci !) ?\n4)Si l'erreur se produit avec d'autres addons actifs : Quels autres addons utilisiez-vous lorsque l'erreur s'est produite, et êtes-vous en mesure de dire lequel de ceux-ci est à l'origine de l'erreur ?",
+    --Error messages
+    errorCheckChatPlease    = afPrefixError .. " Veuillez lire le message d'erreur dans la fenêtre de discussion !",
+    errorLibrayMissing      = afPrefixError .. " La librairie \'%s\' requise n'est pas chargée. Cette extension ne fonctionnera pas correctement !",
+    errorWhatToDo1          = "!> Veuillez répondre aux 4 questions suivantes et envoyer les réponses (et si elles sont données : les variables affichées dans les lignes, en commençant par ->, après les questions) dans les commentaires de l'extension AdvancedFilters à l'adresse @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
+    errorWhatToDo2          = "1) Qu'avez-vous fait ?\n2)Où l'avez-vous fait ?\n3)Avez-vous vérifié si l'erreur se produit uniquement avec l'extension AdvancedFilters et si les librairies requises sont activées ?\n4)Si l'erreur se produit avec d'autres extensions actives : Quels autres extensions utilisiez-vous lorsque l'erreur s'est produite, et êtes-vous en mesure de dire laquelle de celle-ci est à l'origine de l'erreur ?",
 
-    --Erreurs dues à d'autres addons
-    errorOtherAddonsMulticraft = afPrefixError .. "Autre addon cassé\'" .. afPrefixNormal .. "\' -> VEUILLEZ DÉSACTIVER CET ADDON: \'MultiCraft\' !",
-    errorOtherAddonsMulticraftLong = "VEUILLEZ DÉSACTIVER CET ADDON \'MultiCraft\' ! " .. afPrefixNormal .. " ne peut pas fonctionner si cet addon est activé. \'Multicraft\' a été remplacé par la propre interface utilisateur multi-artisanat de ZOS, vous n'en avez donc plus besoin !"
+    --Errors because of other addons
+    errorOtherAddonsMulticraft = afPrefixError .. "Une autre extension pose problème\'" .. afPrefixNormal .. "\' -> VEUILLEZ DÉSACTIVER CETTE EXTENSION : \'MultiCraft\'!",
+    errorOtherAddonsMulticraftLong = "VEUILLEZ DÉSACTIVER CETTE EXTENSION\'MultiCraft\'! " .. afPrefixNormal .. " ne peut pas fonctionner si cette extension est activée. \'Multicraft\' a été remplacé par la propre interface utilisateur multi-artisanat du jeu de base, vous n'en avez donc plus besoin !"
 }
+
+--QuickSlots
+strings.BodyMarking = "Corps"
+strings.JewelryPiercing  = strings.Jewelry
+strings.HeadMarking = strings.Head
+strings.Facial = "Facial"
+strings.Hair = "Cheveux"
+strings.Hat = "Chapeaux"
+strings.Skin = "Peaux"
+strings.Polymorph = "Polymorphe"
+strings.Personality = "Personnalités"
 
 setmetatable(strings, {__index = enStrings})
 AdvancedFilters.strings = strings
