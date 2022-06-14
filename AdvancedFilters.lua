@@ -149,6 +149,7 @@ local enchantingVar = controlsForChecks.enchanting
 local enchantingBaseVar = controlsForChecks.enchantingBaseVar
 local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
+local quickslotFragment = controlsForChecks.quickslotFragment
 local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
 
@@ -289,7 +290,7 @@ local function reanchorAndHideVanillaUIControls(baseControl)
     --Tabs
     local tabs = GetControl(baseControl, tabsName)
     if tabs then
---d(">Found tabs")
+--d(">Found tabs: " ..tos(tabs:GetName()))
         local tabsActiveName = ZOsControlNames.active
         local tabsActive = GetControl(tabs, tabsActiveName)
         if tabsActive then
@@ -301,11 +302,12 @@ local function reanchorAndHideVanillaUIControls(baseControl)
     local searchFiltersName = ZOsControlNames.searchFilters
     local searchFilters = GetControl(baseControl, searchFiltersName)
     if searchFilters then
---d(">Found searchFilters")
+--d(">Found searchFilters: " .. tos(searchFilters:GetName()))
         --Text search box
         local textSearchName = ZOsControlNames.textSearch
         local searchFiltersTextSearch = GetControl(searchFilters, textSearchName)
         if searchFiltersTextSearch then
+--d(">>1")
             local searchFilterBoxOffsetY = -10
             if PerfectPixel ~= nil or PP ~= nil then
                 searchFilterBoxOffsetY = 70
@@ -931,16 +933,20 @@ local function InitializeHooks()
             local inventoryControl
             local inventoryTypeUpdated
             --Special treatment for qucisklots
-            if p_fragment == QUICKSLOT_FRAGMENT and inventoryType == LF_QUICKSLOT then
+            if p_fragment == quickslotFragment and inventoryType == LF_QUICKSLOT then
+--d(">quickSlot")
                 if debugSpam then
                     d(">quickslots")
                 end
                 doNormalChecks = false
                 AF.currentInventoryTypeOverride = nil
                 AF.currentInventoryType = LF_QUICKSLOT
-                inventoryControl = quickslotVar.container
+                inventoryControl = (QUICKSLOT_KEYBOARD ~= nil and quickslotVar.control) or quickslotVar.container
                 inventoryTypeUpdated = LF_QUICKSLOT
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
+                if ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay ~= nil then
+                    ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay:SetHidden(true)
+                end
             end
             if doNormalChecks == true then
                 local libFiltersPanelId
@@ -1149,7 +1155,7 @@ local function InitializeHooks()
     hookFragment(GUILD_BANK_FRAGMENT, INVENTORY_GUILD_BANK) -- new value is: 5
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
     --hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
-    hookFragment(QUICKSLOT_FRAGMENT, LF_QUICKSLOT)
+    hookFragment(quickslotFragment, LF_QUICKSLOT)
     hookFragment(COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT, LF_INVENTORY_COMPANION)
 
     --=== SCENES ===========================================================================================================
@@ -1882,31 +1888,68 @@ local function InitializeHooks()
             ThrottledUpdate("ZO_InventoryManagerUpdateFreeSlotsCallback_" .. tos(inventoryType), 100, ZO_InventoryManagerUpdateFreeSlotsCallback, self, inventoryType)
         end
 
-        function ZO_QuickslotManager:UpdateFreeSlots()
-            if AF.settings.debugSpam then d("[AF]ZO_QuickslotManager:UpdateFreeSlots") end
-            local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
-            local numFilteredAndShownItems = #self.list.data
-            local freeSlotsShown = numFilteredAndShownItems or 0
-            local settings = AF.settings
-            local hideItemCount = settings.hideItemCount
+        if ZO_QuickslotManager ~= nil then
+            function ZO_QuickslotManager:UpdateFreeSlots()
+                if AF.settings.debugSpam then d("[AF]ZO_QuickslotManager:UpdateFreeSlots") end
+                local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
+                local numFilteredAndShownItems = #self.list.data
+                local freeSlotsShown = numFilteredAndShownItems or 0
+                local settings = AF.settings
+                local hideItemCount = settings.hideItemCount
 
-            local freeSlotText = ""
-            if(numUsedSlots < numSlots) then
-                freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots)
-            else
-                freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots)
+                local freeSlotText = ""
+                if(numUsedSlots < numSlots) then
+                    freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots)
+                else
+                    freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots)
+                end
+                local newFreeSlotText
+                if freeSlotsShown > 0 and (hideItemCount ~= nil and hideItemCount == false) then
+                    local colorString = ""
+                    local itemCountLabelColor = settings.itemCountLabelColor
+                    local colorStringColorDef = ZO_ColorDef:New(itemCountLabelColor["r"], itemCountLabelColor["g"], itemCountLabelColor["b"], itemCountLabelColor["a"])
+                    colorString = colorStringColorDef:Colorize(colorString .. "(" .. freeSlotsShown .. ")")
+                    newFreeSlotText = zo_strformat("<<1>> <<2>>", freeSlotText, colorString)
+                else
+                    newFreeSlotText = freeSlotText
+                end
+                self.freeSlotsLabel:SetText(newFreeSlotText)
             end
-            local newFreeSlotText
-            if freeSlotsShown > 0 and (hideItemCount ~= nil and hideItemCount == false) then
-                local colorString = ""
-                local itemCountLabelColor = settings.itemCountLabelColor
-                local colorStringColorDef = ZO_ColorDef:New(itemCountLabelColor["r"], itemCountLabelColor["g"], itemCountLabelColor["b"], itemCountLabelColor["a"])
-                colorString = colorStringColorDef:Colorize(colorString .. "(" .. freeSlotsShown .. ")")
-                newFreeSlotText = zo_strformat("<<1>> <<2>>", freeSlotText, colorString)
-            else
-                newFreeSlotText = freeSlotText
+        else
+            function ZO_Quickslot_Keyboard:UpdateFreeSlots()
+                --[[
+                local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+                if numUsedSlots < numSlots then
+                    self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots))
+                else
+                    self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
+                end
+                ]]
+                if AF.settings.debugSpam then d("[AF]ZO_Quickslot_Keyboard:UpdateFreeSlots") end
+                local numUsedSlots, numSlots = playerInvVar:GetNumSlots(INVENTORY_BACKPACK)
+                local numFilteredAndShownItems = #self.list.data
+                local freeSlotsShown = numFilteredAndShownItems or 0
+                local settings = AF.settings
+                local hideItemCount = settings.hideItemCount
+
+                local freeSlotText = ""
+                if(numUsedSlots < numSlots) then
+                    freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots)
+                else
+                    freeSlotText = zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots)
+                end
+                local newFreeSlotText
+                if freeSlotsShown > 0 and (hideItemCount ~= nil and hideItemCount == false) then
+                    local colorString = ""
+                    local itemCountLabelColor = settings.itemCountLabelColor
+                    local colorStringColorDef = ZO_ColorDef:New(itemCountLabelColor["r"], itemCountLabelColor["g"], itemCountLabelColor["b"], itemCountLabelColor["a"])
+                    colorString = colorStringColorDef:Colorize(colorString .. "(" .. freeSlotsShown .. ")")
+                    newFreeSlotText = zo_strformat("<<1>> <<2>>", freeSlotText, colorString)
+                else
+                    newFreeSlotText = freeSlotText
+                end
+                self.freeSlotsLabel:SetText(newFreeSlotText)
             end
-            self.freeSlotsLabel:SetText(newFreeSlotText)
         end
 
         --Overwrite the function UpdateInventorySlots from esoui/esoui/ingame/inventory/inventorytemplates.lua

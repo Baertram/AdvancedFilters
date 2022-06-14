@@ -4,20 +4,20 @@ local enStrings = AdvancedFilters.ENstrings
 local afPrefix = "|cFF0000[AdvancedFilters%s]|r"
 local afPrefixNormal    = enStrings.AFPREFIXNORMAL
 local afPrefixError     = string.format(enStrings.AFPREFIX, " ERREUR")
- 
+
 local strings = {
     --MISCELLANEOUS
     Fence = "Volé",
- 
+
     --DROPDOWN CONTEXT MENU
     ResetToAll           = "Réinitialiser les filtres",
     InvertDropdownFilter = "Inverser le filtre : %s",
-    
+
     --WEAPON
     TwoHandAxe = util.Localize(SI_WEAPONTYPE1).." à deux mains",
     TwoHandSword = util.Localize(SI_WEAPONTYPE3).." à deux mains",
     TwoHandHammer = util.Localize(SI_WEAPONTYPE2).." à deux mains",
- 
+
     --LAM settings menu
     lamDescription = "",
     lamHideItemCount = "Masquer le compteur d'objet",
@@ -50,18 +50,18 @@ local strings = {
     lamDebugSpamOutputTT = "Attention : cela va afficher beaucoup de messages d'AdvancedFilters dans la fenêtre de discussion.",
     lamDebugSpamExcludeRefreshSubfilterBar = "Exclure \'RefreshSubfilterBar\'",
     lamDebugSpamExcludeDropdownBoxFilters = "Exclure les filtres \'Dropdownbox\'",
- 
+
     --Error messages
     errorCheckChatPlease    = afPrefixError .. " Veuillez lire le message d'erreur dans la fenêtre de discussion !",
     errorLibrayMissing      = afPrefixError .. " La librairie \'%s\' requise n'est pas chargée. Cette extension ne fonctionnera pas correctement !",
     errorWhatToDo1          = "!> Veuillez répondre aux 4 questions suivantes et envoyer les réponses (et si elles sont données : les variables affichées dans les lignes, en commençant par ->, après les questions) dans les commentaires de l'extension AdvancedFilters à l'adresse @www.esoui.com:\nhttps://bit.ly/2lSbb2A",
     errorWhatToDo2          = "1) Qu'avez-vous fait ?\n2)Où l'avez-vous fait ?\n3)Avez-vous vérifié si l'erreur se produit uniquement avec l'extension AdvancedFilters et si les librairies requises sont activées ?\n4)Si l'erreur se produit avec d'autres extensions actives : Quels autres extensions utilisiez-vous lorsque l'erreur s'est produite, et êtes-vous en mesure de dire laquelle de celle-ci est à l'origine de l'erreur ?",
- 
+
     --Errors because of other addons
     errorOtherAddonsMulticraft = afPrefixError .. "Une autre extension pose problème\'" .. afPrefixNormal .. "\' -> VEUILLEZ DÉSACTIVER CETTE EXTENSION : \'MultiCraft\'!",
     errorOtherAddonsMulticraftLong = "VEUILLEZ DÉSACTIVER CETTE EXTENSION\'MultiCraft\'! " .. afPrefixNormal .. " ne peut pas fonctionner si cette extension est activée. \'Multicraft\' a été remplacé par la propre interface utilisateur multi-artisanat du jeu de base, vous n'en avez donc plus besoin !"
 }
- 
+
 --QuickSlots
 strings.BodyMarking = "Corps"
 strings.JewelryPiercing  = strings.Jewelry
@@ -72,6 +72,6 @@ strings.Hat = "Chapeaux"
 strings.Skin = "Peaux"
 strings.Polymorph = "Polymorphe"
 strings.Personality = "Personnalités"
- 
+
 setmetatable(strings, {__index = enStrings})
 AdvancedFilters.strings = strings

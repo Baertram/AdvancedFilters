@@ -1,4 +1,4 @@
-<GuiXml>
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Animations>
         <AnimationTimeline name="AF_SubFilterBarDropdownPulse" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
@@ -12,7 +12,7 @@
     </Animations>
     <Controls>
         <!-- Base Control -->
-        <Control name="AF_Base" virtual="true" hidden="true">
+        <Control name="AF_Base" virtual="true" hidden="true" tier="LOW" layer="CONTROLS" level="1">
             <Dimensions x="565" y="40" />
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGameSmall" hidden="false" verticalAlignment="CENTER" horizontalAlignment="RIGHT">
@@ -28,7 +28,7 @@
         </Control>
 
         <!-- Base Button -->
-        <Button name="AF_Button" font="ZoFontGameMedium" virtual="true" hidden="false">
+        <Button name="AF_Button" font="ZoFontGameMedium" virtual="true" hidden="false" tier="LOW" layer="CONTROLS" level="1">
             <Dimensions x="32" y="32" />
 
             <Controls>
@@ -44,7 +44,7 @@
             </Controls>
         </Button>
 
-        <TopLevelControl name="AF_DropdownPulse" hidden="true" tier="HIGH" keyboardEnabled="true">
+        <TopLevelControl name="AF_DropdownPulse" hidden="true" tier="HIGH" layer="CONTROLS" level="1" keyboardEnabled="true">
             <Controls>
                 <Backdrop name="$(parent)BG">
                     <Anchor point="TOPLEFT" offsetX="-8" offsetY="-8" />
