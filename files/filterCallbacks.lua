@@ -2135,7 +2135,7 @@ local subfilterCallbacks = {
             },
         },
         Armor = {
-            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET},
+            filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET, EQUIP_TYPE_OFF_HAND},
                                                     nil, true, nil, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR),
             dropdownCallbacks = {
                 {name = "Heavy", showIcon=true, filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}, true, nil, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR)},

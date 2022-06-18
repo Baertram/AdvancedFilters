@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.2.2"
+AF.version = "1.6.2.3"
 AF.savedVarsVersion = 1.511
 AF.website = "http://www.esoui.com/downloads/info245-AdvancedFilters.html"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -120,8 +120,8 @@ local questItemsOnly      = ZOsControlNames.questItemsOnly
 
 
 local quickslotKeyboard                     = QUICKSLOT_KEYBOARD
-local quickslot                             = (quickslotKeyboard ~= nil and quickslotKeyboard.control) or ZO_QuickSlot
-local quickslotFragment                     = (quickslotKeyboard ~= nil and KEYBOARD_QUICKSLOT_FRAGMENT) or QUICKSLOT_FRAGMENT
+local quickslotControl                      = quickslotKeyboard.control
+local quickslotFragment                     = KEYBOARD_QUICKSLOT_FRAGMENT
 
 --Control names for the "which panel is shown" checks
 local controlsForChecks = {
@@ -138,8 +138,10 @@ local controlsForChecks = {
     craftBag                = ZO_CraftBag,
     houseBank               = ZO_HouseBank,
     guildStoreSellBackpack  = ZO_PlayerInventory,
-    quickslot               = (quickslotKeyboard ~= nil and quickslotKeyboard) or QUICKSLOT_WINDOW,
+    quickslot               = quickslotKeyboard,
+    quickslotControl        = quickslotControl,
     quickslotFragment       = quickslotFragment,
+    quickslotWheelUnderlay  = GetControl(quickslotKeyboard.wheelControl, "Underlay"), --ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay
     mailSend                = MAIL_SEND,
     trade                   = TRADE,
     --Keyboard variables

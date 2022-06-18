@@ -539,7 +539,7 @@ local function InitializeHooks()
                 local offsetYList = layoutData.backpackOffsetY
                 local anchorVar
                 if isQuickslot == true then
-                    anchorVar = ZO_QuickSlot
+                    anchorVar = controlsForChecks.quickslotControl
                     --offsetYList = offsetYList + shiftY
                 end
                 list:SetAnchor(TOPRIGHT, anchorVar, TOPRIGHT, 0, offsetYList)
@@ -590,7 +590,7 @@ local function InitializeHooks()
             local anchorVar
             if isQuickslot == true then
                 --sortHeaderOffsetY = shiftY
-                anchorVar = ZO_QuickSlot
+                anchorVar = controlsForChecks.quickslotControl
             end
             local offsetYSortHeader = (layoutData.sortByOffsetY ~= nil and layoutData.sortByOffsetY + sortHeaderOffsetY) or sortHeaderOffsetY
             --[[
@@ -944,8 +944,9 @@ local function InitializeHooks()
                 inventoryControl = (QUICKSLOT_KEYBOARD ~= nil and quickslotVar.control) or quickslotVar.container
                 inventoryTypeUpdated = LF_QUICKSLOT
                 ThrottledUpdate("ShowSubfilterBar_Quickslots", 20, ShowSubfilterBar, quickslotVar.currentFilter, nil, nil, LF_QUICKSLOT)
-                if ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay ~= nil then
-                    ZO_QuickSlot_Keyboard_TopLevelQuickSlotCircleUnderlay:SetHidden(true)
+
+                if controlsForChecks.quickslotWheelUnderlay ~= nil then
+                    controlsForChecks.quickslotWheelUnderlay:SetHidden(true)
                 end
             end
             if doNormalChecks == true then

@@ -1022,6 +1022,7 @@ function AF_FilterBar:SetHidden(shouldHide)
     filterBarCtrl:SetHidden(shouldHide)
 
     --PerpectPixel "fix" - Increase the tier and layer and level and set to normal again afterwards
+    --[[
     if not shouldHide and PP ~= nil then
 --d("[AF]Showing filterBar - checking z tier/layer/level of child controls")
         for i=1, filterBarCtrl:GetNumChildren(), 1 do
@@ -1032,6 +1033,7 @@ function AF_FilterBar:SetHidden(shouldHide)
             end
         end
     end
+    ]]
 end
 
 function AF_FilterBar:SetInventoryType(inventoryType)

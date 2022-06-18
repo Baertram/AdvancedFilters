@@ -437,6 +437,9 @@ function util.GetInvTypeCurrentQuickslotFilter(invType, currentFilter)
         if type(currentFilter) == "table" then
             if currentFilter.extraInfo ~= nil then
                 currentFilterToUse = getAFQuickSlotCollectibleKey(currentFilter.extraInfo)
+            --MerQuickslotFilters support
+            elseif currentFilter.merQuickslotFiltersItemTypes ~= nil then
+                currentFilterToUse = ITEM_TYPE_DISPLAY_CATEGORY_ALL
             else
                 --Use the descriptor as currentFilter
                 if currentFilter.descriptor ~= ITEM_TYPE_DISPLAY_CATEGORY_ALL then
