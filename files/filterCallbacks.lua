@@ -1198,6 +1198,7 @@ local subfilterCallbacks = {
                 {name = "MuseumPiece", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_MUSEUM_PIECE})},
                 {name = "Scroll", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_SCROLL})},
                 {name = "RareFish", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_COLLECTIBLE_RARE_FISH})},
+                {name = "Treasure", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TREASURE})},
             },
         },
         Fence = {
@@ -1929,6 +1930,7 @@ local subfilterCallbacks = {
                 {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
                 {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
+                {name = "Treasure", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TREASURE})}
             },
         },
         Crown = {
