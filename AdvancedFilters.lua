@@ -154,7 +154,6 @@ local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
 
 --local universalDecon = controlsForChecks.universalDecon
-local isUniversalDeconGiven = (controlsForChecks.universalDecon ~= nil and true) or false
 local universalDeconPanel = controlsForChecks.universalDeconPanel
 local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
 local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvControl
@@ -1663,97 +1662,104 @@ local function InitializeHooks()
 
     --=== UNIVERSAL DECONSTRUCTION ==========================================================================================================
     --Attention: It does not fire "again" if the scene was hidden, and is re-shown! So manually check this via the scene
-    if isUniversalDeconGiven then
-        local detectActiveUniversalDeconstructionTab
-        --Callback function - Will fire at each change of any filter tab
-        local function onUniversalDeconstructionFilterChangedCallback(tab)
+    local detectActiveUniversalDeconstructionTab
+    --Callback function - Will fire at each change of any filter tab
+    local function onUniversalDeconstructionFilterChangedCallback(tab)
 --d("[AF]onUniversalDeconstructionFilterChangedCallback -key: " ..tos(tab.key))
-            local showError = false
-            --Get the filterType by help of the current tab
-            detectActiveUniversalDeconstructionTab = detectActiveUniversalDeconstructionTab or util.LibFilters.DetectActiveUniversalDeconstructionTab
-            local tabKey = tab.key
-            local libFiltersFilterType = detectActiveUniversalDeconstructionTab(nil, tabKey)
+        local showError = false
+        --Get the filterType by help of the current tab
+        detectActiveUniversalDeconstructionTab = detectActiveUniversalDeconstructionTab or util.LibFilters.DetectUniversalDeconstructionPanelActiveTab
+        local tabKey = tab.key
+        local libFiltersFilterType = detectActiveUniversalDeconstructionTab(nil, tabKey)
 --d(">filterType: " ..tos(libFiltersFilterType))
-            if libFiltersFilterType == nil then
-                showError = true
-            end
-            --Get the inventoryType of AF
-            local invType = universalDeconSelectedTabToAFInventoryType[tabKey]
+        if libFiltersFilterType == nil then
+            showError = true
+        end
+        --Get the inventoryType of AF
+        local invType = universalDeconSelectedTabToAFInventoryType[tabKey]
 --d(">invType: " ..tos(invType))
-            if not invType then
-                showError = true
-            end
-            AF.currentInventoryType = invType
+        if not invType then
+            showError = true
+        end
+        AF.currentInventoryType = invType
 
-            local craftingType = GetCraftingType()
-            local currentFilter = mapUniversalDeconstructionFilterType2ItemFilterType(tab)
+        local craftingType = GetCraftingType()
+        local currentFilter = mapUniversalDeconstructionFilterType2ItemFilterType(tab)
 --d(">currentFilter: " ..tos(currentFilter))
-            --[[
-            if not currentFilter then
-                showError = true
-            end
-            ]]
-            local customInventoryFilterButtonsItemType = checkForCustomInventoryFilterBarButton(invType, currentFilter)
+        --[[
+        if not currentFilter then
+            showError = true
+        end
+        ]]
+        local customInventoryFilterButtonsItemType = checkForCustomInventoryFilterBarButton(invType, currentFilter)
 
-            --[[
-            local subfilterGroup = AF.subfilterGroups[invType]
-            if not subfilterGroup then
-                showError = true
-            end
-            local currentSubfilterBar = subfilterGroup and subfilterGroup.currentSubfilterBar
-            local subFilterBarName = currentSubfilterBar and currentSubfilterBar.name
-            ]]
+        --[[
+        local subfilterGroup = AF.subfilterGroups[invType]
+        if not subfilterGroup then
+            showError = true
+        end
+        local currentSubfilterBar = subfilterGroup and subfilterGroup.currentSubfilterBar
+        local subFilterBarName = currentSubfilterBar and currentSubfilterBar.name
+        ]]
 
-            if showError then
-                showChatDebug("universalDeconOnFilterChangedCallback - BEGIN", "InventoryType: " .. tos(invType) .. ", craftingType: " ..tos(craftingType) .. ", currentFilter: " .. tos(currentFilter) .. ", libFiltersFilterType: " ..tos(libFiltersFilterType) ..", subfilterBarName: " ..tos(subFilterBarName))
-                return
-            end
+        if showError then
+            showChatDebug("universalDeconOnFilterChangedCallback - BEGIN", "InventoryType: " .. tos(invType) .. ", craftingType: " ..tos(craftingType) .. ", currentFilter: " .. tos(currentFilter) .. ", libFiltersFilterType: " ..tos(libFiltersFilterType) ..", subfilterBarName: " ..tos(subFilterBarName))
+            return
+        end
 
-            hideInventoryControls(nil, 0)
+        hideInventoryControls(nil, 0)
 
-            --Update the shown SubfilterBar now
-            ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 0,
-                    ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType, invType, true)
+        --Update the shown SubfilterBar now
+        ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 0,
+                ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType, invType, true)
 
-            local subfilterGroup = AF.subfilterGroups[invType]
-            if not subfilterGroup then
+        local subfilterGroup = AF.subfilterGroups[invType]
+        if not subfilterGroup then
 --d("<subfilter Group is missing")
-                return
-            end
-            zo_callLater(function()
-                local currentSubfilterBar = subfilterGroup.currentSubfilterBar
-                if not currentSubfilterBar then return end
-                ThrottledUpdate("RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
-                        RefreshSubfilterBar, currentSubfilterBar, false, true, tab)
-            end, 10)
+            return
         end
+        zo_callLater(function()
+            local currentSubfilterBar = subfilterGroup.currentSubfilterBar
+            if not currentSubfilterBar then return end
+            ThrottledUpdate("RefreshSubfilterBar_" .. invType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
+                    RefreshSubfilterBar, currentSubfilterBar, false, true, tab)
+        end, 10)
+    end
 
-        --Callback raise function
-        local function universalDeconOnFilterChangedCallback(tab, craftingTypes, includeBanked)
-            onUniversalDeconstructionFilterChangedCallback(tab)
-        end
-        --Add the universal deconstruction filter changed callback
-        universalDeconPanel:RegisterCallback("OnFilterChanged", universalDeconOnFilterChangedCallback)
+    --Callback raise function
+    local function universalDeconOnFilterChangedCallback(tab, craftingTypes, includeBanked)
+        onUniversalDeconstructionFilterChangedCallback(tab)
+    end
+    --Add the universal deconstruction filter changed callback
+    universalDeconPanel:RegisterCallback("OnFilterChanged", universalDeconOnFilterChangedCallback)
 
 
-        --Scene check OnShown/OnHide
-        local wasUniversalDeconSceneHidden = false
-        universalDeconScene:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWN then
-                --Was the scene hidden before?
-                if wasUniversalDeconSceneHidden == true then
-                    wasUniversalDeconSceneHidden = false
-                    --Update the shown subfilterBar now as the OnFilterChanged callback does not fire!
-                    local tabFilterData = universalDeconPanelInv:GetCurrentFilter()
-                    onUniversalDeconstructionFilterChangedCallback(tabFilterData)
+    --Scene check OnShown/OnHide
+    local wasUniversalDeconSceneHidden = false
+    universalDeconScene:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWN then
+            --Reset the dropdown filters of vanilla UniversalDecon so before applied filters do not disturb AF!
+            if not wasUniversalDeconSceneHidden then
+                local craftingTypeFiltersDropdown = universalDeconPanel.craftingTypeFiltersDropdown
+                if craftingTypeFiltersDropdown ~= nil then
+                    --Remove all selected filters at the dropdown
+                    craftingTypeFiltersDropdown:ClearAllSelections()
+                    universalDeconPanel:OnFilterChanged()
                 end
 
-            --elseif newState == SCENE_HIDING then
-            elseif newState == SCENE_HIDDEN then
-                wasUniversalDeconSceneHidden = true
+            --Was the scene hidden before?
+            else --if wasUniversalDeconSceneHidden == true then
+                wasUniversalDeconSceneHidden = false
+                --Update the shown subfilterBar now as the OnFilterChanged callback does not fire!
+                local tabFilterData = universalDeconPanelInv:GetCurrentFilter()
+                onUniversalDeconstructionFilterChangedCallback(tabFilterData)
             end
-        end)
-    end
+
+        --elseif newState == SCENE_HIDING then
+        elseif newState == SCENE_HIDDEN then
+            wasUniversalDeconSceneHidden = true
+        end
+    end)
 
     --=== RETRAIT ==========================================================================================================
     --Retrait
@@ -2114,7 +2120,6 @@ local function presetCraftingStationHookVariables()
 end
 
 local function presetUniversalDeconstructionHookVariables()
-    if not isUniversalDeconGiven then return end
     universalDeconPanelInv.AF_currentFilter = ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL
 end
 

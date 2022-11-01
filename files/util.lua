@@ -22,7 +22,7 @@ local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
 --local universaldDeconScene = controlsForChecks.universalDeconScene
 local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
 local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
-local detectActiveUniversalDeconstructionTab
+local detectUniversalDeconstructionPanelActiveTab
 local mapAFInvTypeToLibFiltersFilterType
 local filterBarParentControlsToHide
 local panelIdSupportedAtDeconNPC
@@ -158,7 +158,7 @@ function util.GetCraftingTablePanel(filterType, isUniversalDecon)
     if filterType == nil then return end
     isUniversalDeconPanelShown = isUniversalDeconPanelShown or util.LibFilters.IsUniversalDeconstructionPanelShown
     util.IsUniversalDeconPanelShown = isUniversalDeconPanelShown
-    isUniversalDecon = isUniversalDecon or isUniversalDeconPanelShown(filterType)
+    isUniversalDecon = isUniversalDecon or isUniversalDeconPanelShown()
 
     if not isCraftingPanelShown() and not isUniversalDecon then return end
     local craftingTablePanels = AF.craftingTablePanels
@@ -316,13 +316,13 @@ local getAFQuickSlotCollectibleKey = util.getAFQuickSlotCollectibleKey
 -- -v- Inventory filter functions                                                                                  -v-
 --======================================================================================================================
 local function getActiveUniversalDeconstructionPanelFilterType(invType)
-    detectActiveUniversalDeconstructionTab = detectActiveUniversalDeconstructionTab or util.LibFilters.DetectActiveUniversalDeconstructionTab
-    isUniversalDeconPanelShown = isUniversalDeconPanelShown or util.LibFilters.IsUniversalDeconstructionPanelShown
+    detectUniversalDeconstructionPanelActiveTab = detectUniversalDeconstructionPanelActiveTab or util.LibFilters.DetectUniversalDeconstructionPanelActiveTab
+    isUniversalDeconPanelShown                  = isUniversalDeconPanelShown or util.LibFilters.IsUniversalDeconstructionPanelShown
     util.IsUniversalDeconPanelShown = isUniversalDeconPanelShown
     mapAFInvTypeToLibFiltersFilterType     = mapAFInvTypeToLibFiltersFilterType or AF.mapInvTypeToLibFiltersFilterType
     local libFiltersFilterType             = mapAFInvTypeToLibFiltersFilterType[invType]
-    local isUniversalDecon = isUniversalDeconPanelShown(libFiltersFilterType)
-    if isUniversalDecon== true then
+    local isUniversalDecon = isUniversalDeconPanelShown()
+    if isUniversalDecon == true then
         return libFiltersFilterType
     end
     return nil
@@ -528,7 +528,7 @@ function util.HideInventoryControls(filterType, delay)
         filterType = filterType or getCurrentFilterTypeForInventory(AF.currentInventoryType)
         isUniversalDeconPanelShown = isUniversalDeconPanelShown or util.LibFilters.IsUniversalDeconstructionPanelShown
         util.IsUniversalDeconPanelShown = isUniversalDeconPanelShown
-        local isUniversalDecon = isUniversalDeconPanelShown(filterType)
+        local isUniversalDecon = isUniversalDeconPanelShown()
 
 --d("[AF]util.HideInventoryControls - filterType: " ..tos(filterType).. ", delay: " ..tos(delay) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
         local controlsToHide = filterBarParentControlsToHide[filterType]
