@@ -22,7 +22,14 @@ local mapMultipleGroupSubfiltersToCombinedSubfilter = util.MapMultipleGroupSubfi
 AF.AF_FilterBar = ZO_Object:Subclass()
 local AF_FilterBar = AF.AF_FilterBar
 
---SubfilterBAr dropdown pulse animation
+--Update control tier/layer/level
+local function updateControlZ(selfCtrl, tier, layer, level)
+    selfCtrl:SetDrawTier(tier)
+    selfCtrl:SetDrawLayer(layer)
+    selfCtrl:SetDrawLevel(level)
+end
+
+--SubfilterBar dropdown pulse animation
 local pulseControl = AF_DropdownPulse
 local pulseBackground = pulseControl:GetNamedChild("BG")
 local pulseTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("AF_SubFilterBarDropdownPulse", pulseBackground)
@@ -541,6 +548,9 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             --elseif settings.debugSpam then d(">>>Not adding button: " .. tos(subfilterName) .. ", at inventory: " .. tos(inventoryName) .. ", groupName: " .. tos(groupName))
         end
     end
+
+    updateControlZ(self.control,    DT_MEDIUM, DL_CONTROLS, 1)
+    updateControlZ(self.dropdown,   DT_MEDIUM, DL_CONTROLS, 1)
 end
 
 --Add a subfilter bar button
@@ -712,6 +722,8 @@ d(">>clearing menu!")
     button.down = icon.down
 
     self.activeButton = button
+
+    updateControlZ(button,   DT_MEDIUM, DL_CONTROLS, 1)
 
     table.insert(self.subfilterButtons, button)
 end
@@ -1006,7 +1018,22 @@ function AF_FilterBar:GetCurrentButton()
 end
 
 function AF_FilterBar:SetHidden(shouldHide)
-    self.control:SetHidden(shouldHide)
+    local filterBarCtrl = self.control
+    filterBarCtrl:SetHidden(shouldHide)
+
+    --PerpectPixel "fix" - Increase the tier and layer and level and set to normal again afterwards
+    --[[
+    if not shouldHide and PP ~= nil then
+--d("[AF]Showing filterBar - checking z tier/layer/level of child controls")
+        for i=1, filterBarCtrl:GetNumChildren(), 1 do
+            local childCtrlOfFilterBar = filterBarCtrl:GetChild(i)
+            if childCtrlOfFilterBar ~= nil then
+--d(">" ..tostring(childCtrlOfFilterBar:GetName()))
+                updateControlZ(childCtrlOfFilterBar,   DT_MEDIUM,   DL_CONTROLS, 1)
+            end
+        end
+    end
+    ]]
 end
 
 function AF_FilterBar:SetInventoryType(inventoryType)

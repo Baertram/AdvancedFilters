@@ -18,6 +18,7 @@ local textures = {
     Toy = "esoui/art/icons/justice_stolen_toy_001.dds",
     UpgradeFragment = "esoui/art/treeicons/collection_indexicon_upgrade_%s.dds",
     Fish = "esoui/art/icons/housing_gen_exc_fish001.dds",
+    Treasure = "/esoui/art/tradinghouse/tradinghouse_sell_tabicon_%s.dds",
 
     --WEAPONS
     OneHand = "AdvancedFilters/assets/weapons/onehanded_%s.dds",
@@ -224,6 +225,7 @@ textures.JewelryGlyph = textures.Jewelry
 
 --COLLECTIBLES
 textures.RareFish = textures.Fish
+
 
 
 --Change the size of the textures for the dropdown filter boxes?
