@@ -276,7 +276,7 @@ local getCraftingPanelUsesBagWorn = util.GetCraftingPanelUsesBagWorn
 
 --Clear the custom variables used to filter the horizontal scrolling list entries
 function util.ClearResearchPanelCustomFilters(craftingType)
-    d("!!!!! [AF]util.ClearResearchPanelCustomFilters-craftingType: " ..tos(craftingType))
+    --d("!!!!! [AF]util.ClearResearchPanelCustomFilters-craftingType: " ..tos(craftingType))
     --Reset the custom data for the loop now
     --[[
     if controlsForChecks.researchPanel and controlsForChecks.researchPanel.LibFilters_3ResearchLineLoopValues then
@@ -2353,7 +2353,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                     --d(">util.LibFilters:SetResearchLineLoopValues")
                     --util.LibFilters:SetResearchLineLoopValues(fromResearchLineIndex, toResearchLineIndex, skipTable)
                     if NonContiguousCount(skipTable) > 0 then
-                        libFilters:RegisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType, skipTable, fromResearchLineIndex, toResearchLineIndex)
+                        libFilters:RegisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType, skipTable, fromResearchLineIndex, toResearchLineIndex, true)
                         wasFilteredByAdvancedFilters = true
                     end
                 end
