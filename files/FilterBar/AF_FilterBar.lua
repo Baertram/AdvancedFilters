@@ -163,7 +163,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
             if not currentlySelectedDropdownItem then return end
             local originalCallback = util.LibFilters:GetFilterCallback(AF_CONST_DROPDOWN_FILTER, filterType)
             if originalCallback == nil then
-                d("[AF]Original callback function of dropdown entry was not found for filterType "..tos(filterType).."!")
+                d("[AdvancedFilters] ERROR - Original callback function of dropdown entry was not found for filterType "..tos(filterType).."!")
                 return
             end
             local filterCallback
@@ -479,7 +479,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     nameOfEntryWithIcon = nameOfEntry
                 end
                 if not nameOfEntry or nameOfEntry == "" then
-                    d("[AdvancedFilters] ERROR: FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
+                    d("[AdvancedFilters] ERROR - FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
                 end
                 local entry
                 if callbackEntry.itemType ~= nil and callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
