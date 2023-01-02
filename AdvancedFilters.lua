@@ -1533,7 +1533,7 @@ local function InitializeHooks()
             end
             --Show the subfilterbar for the research panel now as the function
             --"ChangeFilterCrafting(self, filterData)" will not be called automatically here
-            util.ClearResearchPanelCustomFilters()
+            util.ClearResearchPanelCustomFilters(craftType)
             ChangeFilterCrafting(self.researchPanel)
         end
         hideInventoryControls(nil)
