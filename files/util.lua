@@ -2140,7 +2140,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
         libFilters = libFilters or util.LibFilters
         if not libFilters:IsResearchShown() then return end
 
-d("[AF]util.FilterHorizontalScrollList - runPrefilterForAllSelection: " ..tos(runPrefilterForAllSelection))
+--d("[AF]util.FilterHorizontalScrollList - runPrefilterForAllSelection: " ..tos(runPrefilterForAllSelection))
         local craftingType = getCraftingType()
         if craftingType == CRAFTING_TYPE_INVALID then return false end
 
@@ -2243,7 +2243,7 @@ d("[AF]util.FilterHorizontalScrollList - runPrefilterForAllSelection: " ..tos(ru
         end
         --if AF.settings.debugSpam then d("[AF]filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount)) end
 
-d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount))
+--d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount))
 
         --Nothing should be filtered? Abort here and allow all entries
         if filterPanelId ~= nil then
@@ -2258,20 +2258,20 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                 local researchLineAtCraftingStationToFilterType = AF.researchLinesToFilterTypes[craftingType]
                 if researchLineAtCraftingStationToFilterType then
                     for researchLineIndex = 1, toResearchLineIndex do
-                        d(">researchLineIndex: " ..tos(researchLineIndex) .. ", name: " .. tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
+                        --d(">researchLineIndex: " ..tos(researchLineIndex) .. ", name: " .. tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
                         --Get the current filterType at the researchLineIndex
                         local researchLineIndexIsAllowed = false
                         --Check filterOrEquippmentTypes + armor types
                         if filterTypeCount > 0 then
-                            d(">check filterOrEquipType")
+                            --d(">check filterOrEquipType")
                             local filterTypeOfResearchLineIndex = researchLineAtCraftingStationToFilterType[researchLineIndex]
                             if filterTypeOfResearchLineIndex then
-                                d(">filterTypeOfResearchLineIndex: " ..tos(filterTypeOfResearchLineIndex))
+                                --d(">filterTypeOfResearchLineIndex: " ..tos(filterTypeOfResearchLineIndex))
                                 --Check each filterType
                                 if type(filterOrEquipTypes) == "table" then
                                     for _, filterType in ipairs(filterOrEquipTypes) do
                                         if filterType == filterTypeOfResearchLineIndex then
-                                            d(">found matching equipType: " ..tos(filterType))
+                                            --d(">found matching equipType: " ..tos(filterType))
                                             researchLineIndexIsAllowed = true
                                             break --exit the inner filterOrEquipTyps for .. loop of filterTypes
                                         end
@@ -2279,7 +2279,7 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                                 else
                                     if filterOrEquipTypes == filterTypeOfResearchLineIndex then
                                         researchLineIndexIsAllowed = true
-                                        d(">found matching equipType: " ..tos(filterOrEquipTypes))
+                                        --d(">found matching equipType: " ..tos(filterOrEquipTypes))
                                     end
                                 end
                             end
@@ -2287,15 +2287,15 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                         --Check armor types (if not checked within filterOrEquipType before)
                         if armorTypeCount > 0 and ((researchLineIndexIsAllowed and filterTypeCount > 0) or (not researchLineIndexIsAllowed and filterTypeCount == 0)) then
                             researchLineIndexIsAllowed = false
-                            d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check armorType")
+                            --d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check armorType")
                             if armorTypes and researchLineListArmorTypes then
                                 local researchLineListArmorType = researchLineListArmorTypes[researchLineIndex]
                                 if researchLineListArmorType then
-                                    d(">researchLineListArmorType: " ..tos(researchLineListArmorType))
+                                    --d(">researchLineListArmorType: " ..tos(researchLineListArmorType))
                                     if type(armorTypes) == "table" then
                                         for _, armorType in ipairs(armorTypes) do
                                             if armorType == researchLineListArmorType then
-                                                d(">found matching armorType: " ..tos(armorType))
+                                                --d(">found matching armorType: " ..tos(armorType))
                                                 researchLineIndexIsAllowed = true
                                                 break --exit the inner inner armorTypes for .. loop
                                             end
@@ -2303,7 +2303,7 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                                     else
                                         if armorTypes == researchLineListArmorType then
                                             researchLineIndexIsAllowed = true
-                                            d(">found matching armorType: " ..tos(armorTypes))
+                                            --d(">found matching armorType: " ..tos(armorTypes))
                                         end
                                     end
                                 end
@@ -2316,21 +2316,21 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                         --Or not allowed as filterOrEquipType and armorType were not checked
                         if traitTypeCount > 0 and ((researchLineIndexIsAllowed and (filterTypeCount > 0 or armorTypeCount > 0)) or (not researchLineIndexIsAllowed and (filterTypeCount == 0 and armorTypeCount == 0)) )then
                             researchLineIndexIsAllowed = false
-                            d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check traitType")
+                            --d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check traitType")
                             local researchLineListTraitType = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1)
-                            d(">researchLine trait: " ..tos(researchLineListTraitType))
+                            --d(">researchLine trait: " ..tos(researchLineListTraitType))
                             --Check if the traitTypes are given and mathcing as well
                             if type(traitTypes) == "table" then
                                 for _, traitType in ipairs(traitTypes) do
                                     if traitType == researchLineListTraitType then
-                                        d(">found matching trait: " ..tos(traitType))
+                                        --d(">found matching trait: " ..tos(traitType))
                                         researchLineIndexIsAllowed = true
                                         break --exit the inner inner traitTypes for .. loop
                                     end
                                 end
                             else
                                 if traitTypes == researchLineListTraitType then
-                                    d(">!!!found matching trait: " ..tos(traitTypes))
+                                    --d(">!!!found matching trait: " ..tos(traitTypes))
                                     researchLineIndexIsAllowed = true
                                 end
                             end
@@ -2338,7 +2338,7 @@ d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filte
                         --FilterType is not allowed? Add it to the skip table
                         if not researchLineIndexIsAllowed then
                             --if AF.settings.debugSpam then d("<<<<skipping researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex))) end
-                            d("<<<<skipping researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
+                            --d("<<<<skipping researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
                             skipTable[researchLineIndex] = true
                         else
                             --if AF.settings.debugSpam then d(">>>>>adding researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex))) end
@@ -2604,7 +2604,7 @@ end
 
 --Get the currently active AdvancedFilters subFilterBar and run apply it's currents horizontal scroll list filterCallbacks
 function util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions()
-d("!!! [AF]util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions")
+--d("!!! [AF]util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions")
     libFilters = libFilters or util.LibFilters
     if not libFilters:IsResearchShown() then return end
     --util.ReApplyDropdownFilter() --not working!
@@ -2613,7 +2613,7 @@ d("!!! [AF]util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions")
     if not activeSubfilterBar then return end
     local activeButton = activeSubfilterBar.activeButton
     if activeButton and activeButton.filterStartCallback then
-d(">running: activeSubfilterBar:filterStartCallback()")
+--d(">running: activeSubfilterBar:filterStartCallback()")
         activeButton:filterStartCallback()
     end
 end
