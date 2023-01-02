@@ -2607,7 +2607,15 @@ function util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions()
 d("!!! [AF]util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions")
     libFilters = libFilters or util.LibFilters
     if not libFilters:IsResearchShown() then return end
-    util.ReApplyDropdownFilter()
+    --util.ReApplyDropdownFilter() --not working!
+
+    local activeSubfilterBar = util.GetActiveSubfilterBar()
+    if not activeSubfilterBar then return end
+    local activeButton = activeSubfilterBar.activeButton
+    if activeButton and activeButton.filterStartCallback then
+d(">running: activeSubfilterBar:filterStartCallback()")
+        activeButton:filterStartCallback()
+    end
 end
 --======================================================================================================================
 -- -^- Crafting functions                                                                                           -^-
