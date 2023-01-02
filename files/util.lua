@@ -273,11 +273,14 @@ end
 local getCraftingPanelUsesBagWorn = util.GetCraftingPanelUsesBagWorn
 
 --Clear the custom variables used to filter the horizontal scrolling list entries
-function util.ClearResearchPanelCustomFilters()
+function util.ClearResearchPanelCustomFilters(craftingType)
     --Reset the custom data for the loop now
+    --[[
     if controlsForChecks.researchPanel and controlsForChecks.researchPanel.LibFilters_3ResearchLineLoopValues then
         controlsForChecks.researchPanel.LibFilters_3ResearchLineLoopValues = nil
     end
+    ]]
+    util.LibFilters:UnregisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType)
 end
 local clearResearchPanelCustomFilters = util.ClearResearchPanelCustomFilters
 
@@ -2124,8 +2127,15 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
     -- -v- SMITHING Research horizontal scrolllist?                                                                 -v-
     --==================================================================================================================
     if horizontalScrollList == controlsForChecks.researchLineList then
+
+d("[AF]util.FilterHorizontalScrollList")
         local craftingType = getCraftingType()
         if craftingType == CRAFTING_TYPE_INVALID then return false end
+
+        --Unregister the old filters for the horizontal scroll list, of this addon
+        clearResearchPanelCustomFilters(craftingType)
+
+        --Now check for teh current filters and register them
         local researchLineListArmorTypes = AF.researchLinesToArmorType[craftingType]
         local filterPanelId = getCurrentFilterTypeForInventory(AF.currentInventoryType)
         local craftingStationFilter = getCraftingTablePanelFilter(filterPanelId)
@@ -2220,6 +2230,9 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
         --if AF.settings.debugSpam then d("[AF]filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount)) end
         --Nothing should be filtered? Abort here and allow all entries
         if filterTypeCount == 0 and armorTypeCount == 0 and traitTypeCount == 0 then
+--d("<Nothing to filter!")
+            --Remove old filters if still applied? Or should other addons do that
+            --todo 2023-01-01
             return
         end
         --Check the researchLinIndices for their filterOrEquiupType, armorType and traitType at the current filterPanelId
@@ -2319,13 +2332,26 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                 --in function SMITHING.researchPanel.Refresh
                 -->Was overwritten in LibFilters-3.0 helper functions and the function LibFilters3.SetResearchLineLoopValues(from, to, skipTable) was added
                 -->to set the values for your needs
-                util.LibFilters:SetResearchLineLoopValues(fromResearchLineIndex, toResearchLineIndex, skipTable)
+--d(">util.LibFilters:SetResearchLineLoopValues")
+                --util.LibFilters:SetResearchLineLoopValues(fromResearchLineIndex, toResearchLineIndex, skipTable)
+
+                util.LibFilters:RegisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType, skipTable, fromResearchLineIndex, toResearchLineIndex)
+
+                --Is FCOCraftFilter enabled? Then update it's skipTable too and register / unregister it's filters
+                --Update of the researchPanel filters and horizontal scrollbar filters will be done by AdvancedFilters below then!
+                if FCOCF ~= nil and FCOCF.CallCurrentlyResearchedItemsFilter ~= nil then
+                    FCOCF.CallCurrentlyResearchedItemsFilter(false)
+                end
+
                 --Refresh -> rebuild and Commit the new list
-                controlsForChecks.researchPanel:Refresh() --> Will rebuild the list entries and call list:Commit()
+--d(">controlsForChecks.researchPanel:Refresh()")
+                --controlsForChecks.researchPanel:Refresh() --> Will rebuild the list entries and call list:Commit()
+                util.LibFilters:RequestUpdateForResearchFilters(0)
+
                 --TODO: Somehow the researchPanel:Refresh() function is called twice, except for the "ALL" filter button?? WHY???
                 --      Due to this we need to clear the variables delayed here and cannot do this within LibFilters3 as the 2nd call to Refresh would show
                 --      all entries in the horizontal list again then :-(
-                util.ThrottledUpdate("AF_ClearResearchPanelCustomFilters", 50, clearResearchPanelCustomFilters)
+                --util.ThrottledUpdate("AF_ClearResearchPanelCustomFilters", 50, clearResearchPanelCustomFilters, craftingType)
             end
 
             --Scroll the list to the selected weapon or armorType
