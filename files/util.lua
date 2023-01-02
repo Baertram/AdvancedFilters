@@ -276,6 +276,7 @@ local getCraftingPanelUsesBagWorn = util.GetCraftingPanelUsesBagWorn
 
 --Clear the custom variables used to filter the horizontal scrolling list entries
 function util.ClearResearchPanelCustomFilters(craftingType)
+    d("!!!!! [AF]util.ClearResearchPanelCustomFilters-craftingType: " ..tos(craftingType))
     --Reset the custom data for the loop now
     --[[
     if controlsForChecks.researchPanel and controlsForChecks.researchPanel.LibFilters_3ResearchLineLoopValues then
@@ -2139,12 +2140,14 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
         libFilters = libFilters or util.LibFilters
         if not libFilters:IsResearchShown() then return end
 
---d("[AF]util.FilterHorizontalScrollList")
+d("[AF]util.FilterHorizontalScrollList - runPrefilterForAllSelection: " ..tos(runPrefilterForAllSelection))
         local craftingType = getCraftingType()
         if craftingType == CRAFTING_TYPE_INVALID then return false end
 
         --Unregister the old filters for the horizontal scroll list, of this addon
-        clearResearchPanelCustomFilters(craftingType)
+        -->If we do this here the 2nd call to util.FilterHorizontalScrollList (why is it called twice? Once for filterButton from submenuFilterBar, and anoher one for the dropdown box?)
+        -->will delete the filtered skipTable :-(
+        --clearResearchPanelCustomFilters(craftingType)
 
         --Now check for teh current filters and register them
         local researchLineListArmorTypes = AF.researchLinesToArmorType[craftingType]
@@ -2239,8 +2242,11 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
             end
         end
         --if AF.settings.debugSpam then d("[AF]filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount)) end
+
+d("[AF]filterPanelId: " ..tos(filterPanelId) ..", filterTypeCount: " ..tos(filterTypeCount) .. ", armorTypeCount: " ..tos(armorTypeCount) .. ", traitTypeCount: " ..tos(traitTypeCount))
+
         --Nothing should be filtered? Abort here and allow all entries
-        if filterPanelId then
+        if filterPanelId ~= nil then
             local wasFilteredByAdvancedFilters = false
             if filterTypeCount ~= 0 or armorTypeCount ~= 0 or traitTypeCount ~= 0 then
             --Check the researchLinIndices for their filterOrEquiupType, armorType and traitType at the current filterPanelId
@@ -2252,19 +2258,20 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                 local researchLineAtCraftingStationToFilterType = AF.researchLinesToFilterTypes[craftingType]
                 if researchLineAtCraftingStationToFilterType then
                     for researchLineIndex = 1, toResearchLineIndex do
-                        --d(">researchLineIndex: " ..tos(researchLineIndex) .. ", name: " .. tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
+                        d(">researchLineIndex: " ..tos(researchLineIndex) .. ", name: " .. tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
                         --Get the current filterType at the researchLineIndex
                         local researchLineIndexIsAllowed = false
                         --Check filterOrEquippmentTypes + armor types
                         if filterTypeCount > 0 then
-                            --d(">check filterOrEquipType")
+                            d(">check filterOrEquipType")
                             local filterTypeOfResearchLineIndex = researchLineAtCraftingStationToFilterType[researchLineIndex]
                             if filterTypeOfResearchLineIndex then
-                                --d(">filterTypeOfResearchLineIndex: " ..tos(filterTypeOfResearchLineIndex))
+                                d(">filterTypeOfResearchLineIndex: " ..tos(filterTypeOfResearchLineIndex))
                                 --Check each filterType
                                 if type(filterOrEquipTypes) == "table" then
                                     for _, filterType in ipairs(filterOrEquipTypes) do
                                         if filterType == filterTypeOfResearchLineIndex then
+                                            d(">found matching equipType: " ..tos(filterType))
                                             researchLineIndexIsAllowed = true
                                             break --exit the inner filterOrEquipTyps for .. loop of filterTypes
                                         end
@@ -2272,6 +2279,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                                 else
                                     if filterOrEquipTypes == filterTypeOfResearchLineIndex then
                                         researchLineIndexIsAllowed = true
+                                        d(">found matching equipType: " ..tos(filterOrEquipTypes))
                                     end
                                 end
                             end
@@ -2279,14 +2287,15 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                         --Check armor types (if not checked within filterOrEquipType before)
                         if armorTypeCount > 0 and ((researchLineIndexIsAllowed and filterTypeCount > 0) or (not researchLineIndexIsAllowed and filterTypeCount == 0)) then
                             researchLineIndexIsAllowed = false
-                            --d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check armorType")
+                            d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check armorType")
                             if armorTypes and researchLineListArmorTypes then
                                 local researchLineListArmorType = researchLineListArmorTypes[researchLineIndex]
                                 if researchLineListArmorType then
-                                    --d(">researchLineListArmorType: " ..tos(researchLineListArmorType))
+                                    d(">researchLineListArmorType: " ..tos(researchLineListArmorType))
                                     if type(armorTypes) == "table" then
                                         for _, armorType in ipairs(armorTypes) do
                                             if armorType == researchLineListArmorType then
+                                                d(">found matching armorType: " ..tos(armorType))
                                                 researchLineIndexIsAllowed = true
                                                 break --exit the inner inner armorTypes for .. loop
                                             end
@@ -2294,6 +2303,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                                     else
                                         if armorTypes == researchLineListArmorType then
                                             researchLineIndexIsAllowed = true
+                                            d(">found matching armorType: " ..tos(armorTypes))
                                         end
                                     end
                                 end
@@ -2306,21 +2316,21 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                         --Or not allowed as filterOrEquipType and armorType were not checked
                         if traitTypeCount > 0 and ((researchLineIndexIsAllowed and (filterTypeCount > 0 or armorTypeCount > 0)) or (not researchLineIndexIsAllowed and (filterTypeCount == 0 and armorTypeCount == 0)) )then
                             researchLineIndexIsAllowed = false
-                            --d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check traitType")
+                            d(">researchLineIndexIsAllowed: " .. tos(researchLineIndexIsAllowed) .." -> check traitType")
                             local researchLineListTraitType = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1)
-                            --d(">researchLine trait: " ..tos(researchLineListTraitType))
+                            d(">researchLine trait: " ..tos(researchLineListTraitType))
                             --Check if the traitTypes are given and mathcing as well
                             if type(traitTypes) == "table" then
                                 for _, traitType in ipairs(traitTypes) do
                                     if traitType == researchLineListTraitType then
-                                        --d(">found matching trait: " ..tos(traitType))
+                                        d(">found matching trait: " ..tos(traitType))
                                         researchLineIndexIsAllowed = true
                                         break --exit the inner inner traitTypes for .. loop
                                     end
                                 end
                             else
                                 if traitTypes == researchLineListTraitType then
-                                    --d(">!!!found matching trait: " ..tos(traitTypes))
+                                    d(">!!!found matching trait: " ..tos(traitTypes))
                                     researchLineIndexIsAllowed = true
                                 end
                             end
@@ -2328,6 +2338,7 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                         --FilterType is not allowed? Add it to the skip table
                         if not researchLineIndexIsAllowed then
                             --if AF.settings.debugSpam then d("<<<<skipping researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex))) end
+                            d("<<<<skipping researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex)))
                             skipTable[researchLineIndex] = true
                         else
                             --if AF.settings.debugSpam then d(">>>>>adding researchLineIndex: " .. tos(researchLineIndex) .. ", name: " ..tos(GetSmithingResearchLineInfo(craftingType, researchLineIndex))) end
@@ -2341,9 +2352,10 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
                     -->to set the values for your needs
                     --d(">util.LibFilters:SetResearchLineLoopValues")
                     --util.LibFilters:SetResearchLineLoopValues(fromResearchLineIndex, toResearchLineIndex, skipTable)
-
-                    libFilters:RegisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType, skipTable, fromResearchLineIndex, toResearchLineIndex)
-                    wasFilteredByAdvancedFilters = true
+                    if NonContiguousCount(skipTable) > 0 then
+                        libFilters:RegisterResearchHorizontalScrollbarFilter("AF_ResearchHorizontalScrollBarFilter", craftingType, skipTable, fromResearchLineIndex, toResearchLineIndex)
+                        wasFilteredByAdvancedFilters = true
+                    end
                 end
 
 --            else
@@ -2363,16 +2375,16 @@ function util.FilterHorizontalScrollList(runPrefilterForAllSelection, horizontal
             --controlsForChecks.researchPanel:Refresh() --> Will rebuild the list entries and call list:Commit()
             if wasFilteredByAdvancedFilters == true or FCOCraftFilterisActive == true then
                 libFilters:RequestUpdateForResearchFilters(0)
+
+                --TODO: Somehow the researchPanel:Refresh() function is called twice, except for the "ALL" filter button?? WHY???
+                --      Due to this we need to clear the variables delayed here and cannot do this within LibFilters3 as the 2nd call to Refresh would show
+                --      all entries in the horizontal list again then :-(
+                util.ThrottledUpdate("AF_ClearResearchPanelCustomFilters", 50, clearResearchPanelCustomFilters, craftingType)
             end
 
 
             --AdvancedFilters itsself filtered some entries at teh horizontal list?
             if wasFilteredByAdvancedFilters == true then
-                --TODO: Somehow the researchPanel:Refresh() function is called twice, except for the "ALL" filter button?? WHY???
-                --      Due to this we need to clear the variables delayed here and cannot do this within LibFilters3 as the 2nd call to Refresh would show
-                --      all entries in the horizontal list again then :-(
-                --util.ThrottledUpdate("AF_ClearResearchPanelCustomFilters", 50, clearResearchPanelCustomFilters, craftingType)
-
                 --Scroll the list to the selected weapon or armorType
                 if not researchLineListIndexOfWeaponOrArmorOrJewelryType then researchLineListIndexOfWeaponOrArmorOrJewelryType = 0 end
                 zo_callLater(function()
@@ -2588,6 +2600,14 @@ function util.CheckForResearchPanelAndRunFilterFunction(runPrefilterForAllSelect
         --Hide entries on the horizontal scroll list of the research panel
         filterHorizontalScrollList(runPrefilterForAllSelection, researchHorizontalScrollList, filterOrEquipTypes, armorTypes, traitTypes)
     end
+end
+
+--Get the currently active AdvancedFilters subFilterBar and run apply it's currents horizontal scroll list filterCallbacks
+function util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions()
+d("!!! [AF]util.CheckForResearchPanelAndRunCurrentSubfilterBarsFilterFunctions")
+    libFilters = libFilters or util.LibFilters
+    if not libFilters:IsResearchShown() then return end
+    util.ReApplyDropdownFilter()
 end
 --======================================================================================================================
 -- -^- Crafting functions                                                                                           -^-
