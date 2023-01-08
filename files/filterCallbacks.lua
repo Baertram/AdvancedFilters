@@ -1682,6 +1682,7 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {},
         },
+        --[[
         FoodIngredient = {
             filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT),
             dropdownCallbacks = {},
@@ -1692,6 +1693,20 @@ local subfilterCallbacks = {
         },
         RareIngredient = {
             filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT),
+            dropdownCallbacks = {},
+        },
+        ]]
+        --GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sSpecializedItemTypes, checkOnlyJunk, needsItemTypeAndSpecializedItemType, itemTypeDisplayCategory)
+        FoodIngredient = {
+            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE}, false, true, nil),
+            dropdownCallbacks = {},
+        },
+        DrinkIngredient = {
+            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE}, false, true, nil),
+            dropdownCallbacks = {},
+        },
+        RareIngredient = {
+            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_RARE}, false, true, nil),
             dropdownCallbacks = {},
         },
         FurnishingMat = {
