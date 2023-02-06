@@ -4,6 +4,7 @@ local AF = AdvancedFilters
 local util = AF.util
 
 local debugSpam = AF.debugSpam
+local pluginNameUnknown = "_pluginNameUnknown"
 
 ------------------------------------------------------------------------------------------------------------------------
 --Local variables from global addon namespace
@@ -20,7 +21,9 @@ local subfilterCallbacks = AF.subfilterCallbacks
 ------------------------------------------------------------------------------------------------------------------------
 local function BuildAddonInformation(filterInformation, pluginName)
     if filterInformation == nil then return nil end
-    pluginName = pluginName or filterInformation.submenuName or "n/a"
+    --pluginName = pluginName or filterInformation.submenuName or "n/a"
+    pluginName = pluginName or (filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name))
+
     local addonInformation = {
         submenuName         = filterInformation.submenuName,
         callbackTable       = filterInformation.callbackTable,
@@ -77,6 +80,14 @@ local function BuildAddonInformation(filterInformation, pluginName)
             end
         end
     end
+    --For debugging
+    AF.addonInformation = AF.addonInformation or {}
+    if pluginName ~= nil then
+        AF.addonInformation[pluginName] = addonInformation
+    else
+        AF.addonInformation[pluginNameUnknown] = AF.addonInformation[pluginNameUnknown] or {}
+        table.insert(AF.addonInformation[pluginNameUnknown], addonInformation)
+    end
     return addonInformation
 end
 
@@ -94,9 +105,9 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
     if not filterTypeWasMappedToNewFilterTypeCategory then
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         --Added with ESO PTS API100033 Markarth
-        --TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
-        --TODO: filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
-        --TODO: properly and the dropdown filters won't be registered to the correct bars!
+        --Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+        -->filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
+        -->properly and the dropdown filters won't be registered to the correct bars!
         local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory
 --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -117,10 +128,21 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
         for index, subfilterCallbacksInfo in pairs(existingAFSubfilterCallbacksInfo) do
             --FilterInformation got a submenu? Compare the submenu names and remove exisitng before re-adding this
             if addonInformation.submenuName ~= nil then
-                if subfilterCallbacksInfo.submenuName ~= nil and subfilterCallbacksInfo.submenuName == addonInformation.submenuName then
+                if subfilterCallbacksInfo ~= nil and type(subfilterCallbacksInfo) == "table"
+                    and subfilterCallbacksInfo.submenuName ~= nil and subfilterCallbacksInfo.submenuName == addonInformation.submenuName then
                     --Remove this entry from the subfilterCallbacks as the same submenu will be added again
+--d("[AF]RemoveDuplicatePluginEntries at group: ".. tostring(groupName) .." - SUBMENU: " ..tostring(addonInformation.submenuName))
                     table.remove(existingAFSubfilterCallbacksInfo, index)
                     removedDuplicate = true
+--[[
+                else
+                    if subfilterCallbacksInfo ~= nil and type(subfilterCallbacksInfo) == "table" then
+--d(">submenuName: " ..tostring(subfilterCallbacksInfo.submenuName))
+                    else
+d("[AdvancedFilters_RemoveDuplicateAddonPlugin]Plugin SUBMENU callback name: \'"..tostring(addonInformation.submenuName).."\', group: " ..tostring(groupName) .." - Compared existingSubfilterCallbacksTableAtGroup entry is nil or not a table!- index: " ..tostring(index) .. ", subfilterCallbacksInfo: " ..tostring(subfilterCallbacksInfo))
+d(">type subfilterCallbacksInfo: " .. tostring(type(subfilterCallbacksInfo)))
+                    end
+]]
                 end
             else
                 --No submenu name is given: Compare the callbackTable contents
@@ -129,11 +151,22 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
                 if newPluginCallbackTable.name ~= nil and existingSubfilterCallbacksTableAtGroup ~= nil then
                     --Check each entry of the exisitng addon dropdown plugin callbackTable
                     for cbTabIndex, cbTabEntry in pairs(existingSubfilterCallbacksTableAtGroup) do
-                        if cbTabEntry ~= nil and cbTabEntry.name ~= nil and cbTabEntry.name == newPluginCallbackTable.name then
+                        if cbTabEntry ~= nil and type(cbTabEntry) == "table"
+                                and cbTabEntry.name ~= nil and cbTabEntry.name == newPluginCallbackTable.name then
+--d("[AF]RemoveDuplicatePluginEntries at group: ".. tostring(groupName) .." - " ..tostring(newPluginCallbackTable.name))
                             --Same name of the callback plugin table was found: Remove the old plugin callbackTable completely
                             --Remove this entry from the subfiltercallbacks as the same submenu will be added again
                             table.remove(existingAFSubfilterCallbacksInfo, index)
                             removedDuplicate = true
+--[[
+                        else
+                            if cbTabEntry ~= nil and type(cbTabEntry) == "table" then
+                                --d(">cbTabEntry.name: " ..tostring(cbTabEntry.name))
+                            else
+d("[AdvancedFilters_RemoveDuplicateAddonPlugin]ERROR - Plugin callback name: \'"..tostring(newPluginCallbackTable.name).."\', group: " ..tostring(groupName) .." - cbTabIndex: " ..tostring(cbTabIndex) .. ", cbTabEntry: " ..tostring(cbTabEntry))
+d(">type cbTabEntry: " .. tostring(type(cbTabEntry)))
+                            end
+]]
                         end
                     end
                 end
@@ -176,10 +209,10 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         local addonInformation = BuildAddonInformation(filterInformation, pluginName)
 --        local filterTypeToGroupName = AF.filterTypeNames
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
---Added with ESO PTS API100033 Markarth
---TOOD: Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
---TODO: filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
---TODO: properly and the dropdown filters won't be registered to the correct bars!
+        --Added with ESO PTS API100033 Markarth
+        --Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
+        -->filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
+        -->properly and the dropdown filters won't be registered to the correct bars!
         local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory
 --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
