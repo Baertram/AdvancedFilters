@@ -1846,7 +1846,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
 
                     --[Companion inventory]
                     elseif isCompanionInvPanel then
-d(">isCompanionInvPanel - FCOCompanionJunkEnabled: " ..tos(FCOCompanionJunkEnabled))
+--d(">isCompanionInvPanel - FCOCompanionJunkEnabled: " ..tos(FCOCompanionJunkEnabled))
                         --FCOCompanion Junk is enabled?
                         if FCOCompanionJunkEnabled == true then
                             --Item is:

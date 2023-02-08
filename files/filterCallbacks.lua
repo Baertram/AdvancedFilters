@@ -19,7 +19,10 @@ local gilii     = GetItemLinkInfo
 local gilfti    = GetItemLinkFilterTypeInfo
 local gilti     = GetItemLinkTraitInfo
 local giliid    = GetItemLinkItemId
-local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
+--local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
+local IFUgsitbitdc = ZO_ItemFilterUtils.GetSpecializedItemTypesByItemTypeDisplayCategory
+local IFUisfdiitdc = ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory
+
 local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndRunFilterFunction
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -124,21 +127,25 @@ local function checkExcludedTypes(itemLink, excludeThisTypes)
     return true
 end
 
-local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory)
+
+local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, isCompanionItem)
+    isCompanionItem = isCompanionItem or false
     if slot ~= nil and itemLink ~= nil and itemTypeDisplayCategory ~= nil then
---AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
-        --Prevent only comparison against junk itemTypeDisplayCategory
-        local oldSlotJunk = slot.isJunk
-        if oldSlotJunk ~= nil and oldSlotJunk == true then slot.isJunk = nil end
-        if not slot.filterData then
-            slot.filterData = { gilfti(itemLink) }
+        local slotCopy = ZO_ShallowTableCopy(slot)
+        --Prevent only comparison against junk itemTypeDisplayCategory within ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory
+        -->by removing the isJunk identifier and adding it, if neccessary, after the comparison
+        if slotCopy.isJunk ~= nil and slotCopy.isJunk == true then
+            slotCopy.isJunk = nil
         end
-        local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
-        --Reset the slot's junk flag
-        if oldSlotJunk ~= nil then
-            slot.isJunk = oldSlotJunk
+        if slotCopy.filterData == nil then
+            local filterData =  { gilfti(itemLink) }
+            slotCopy.filterData = filterData
+            --Update the filterData to the slot too
+            slot.filterData = filterData
         end
---AF._lastSlotAfter = slot
+        --local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
+        local isSlotFilterDataInItemTypeDisplayCategory = IFUisfdiitdc(slotCopy, itemTypeDisplayCategory, isCompanionItem)
+
         if not isSlotFilterDataInItemTypeDisplayCategory then return false end
     end
     return true
@@ -660,19 +667,28 @@ end
 AF.GetFilterCallbackForCollectibles = GetFilterCallbackForCollectibles
 
 
+-- GetFilterCallback({ITEMTYPE_WEAPON}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS),
 local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
     return function(slot, slotIndex)
         checkOnlyJunk = checkOnlyJunk or false
         slot = checkCraftingStationSlot(slot, slotIndex)
-        if not filterTypes and not itemTypeDisplayCategory then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
+        if not filterTypes and not itemTypeDisplayCategory then
+            return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk)
+        end
+        if checkOnlyJunk == true then
+            if not checkNoFilterTypesOrIsJunk(slot, true) then
+                return false
+            end
+        end
         local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then
+        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, isCompanionItem) then
             return false
         else
-            if not filterTypes then return true end
+            if not filterTypes then
+                return true
+            end
         end
 
         local itemId = giliid(itemLink)
@@ -693,10 +709,14 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeTheseItemIds
                 if excludeTheseItemIds then
                     if type(excludeTheseItemIds) == "table" then
                         for _, itemIdToExclude in ipairs(excludeTheseItemIds) do
-                            if itemId == itemIdToExclude then return false end
+                            if itemId == itemIdToExclude then
+                                return false
+                            end
                         end
                     else
-                        if itemId == excludeTheseItemIds then return false end
+                        if itemId == excludeTheseItemIds then
+                            return false
+                        end
                     end
                 end
                 return checkExcludedTypes(itemLink, excludeThisTypes)
