@@ -38,6 +38,16 @@ local nonFencableItemTypes = {
 }
 
 
+
+------------------------------------------------------------------------------------------------------------------------
+-- Other addons helper
+---------------------------------------------------------------------------------------------------------------------------
+--FCOCompanion
+local FCOCompanionJunkEnabled = false
+local junkFunctionsUpdateDone = false
+local checkForOtherAddonFlags = AF.util.CheckForOtherAddonFlags
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Helper functions
 ---------------------------------------------------------------------------------------------------------------------------
@@ -45,6 +55,15 @@ local nonFencableItemTypes = {
 local function checkNoFilterTypesOrIsJunk(slot, junkCheck)
     --Shall we check only junk items?
     if junkCheck and slot.bagId and slot.slotIndex then
+        --Check if the junk API functions need a new reassign, if maybe other addons ave hooked into them later
+        if not junkFunctionsUpdateDone then
+            FCOCompanionJunkEnabled = checkForOtherAddonFlags()
+            if FCOCompanionJunkEnabled == true then
+                isij = IsItemJunk
+                junkFunctionsUpdateDone = true
+            end
+            junkFunctionsUpdateDone = true
+        end
         return isij(slot.bagId, slot.slotIndex)
     end
     --No junk but must be junk, and no slot data to check: Disallow/Filter out
@@ -52,6 +71,7 @@ local function checkNoFilterTypesOrIsJunk(slot, junkCheck)
     --No filtertypes, no junk or no slot data: Allow/Show
     return true
 end
+
 
 local function increaseCounterIfFoundInNummericallyIndexedTable(tableName, searchValues, counter)
     for _, searchValue in ipairs(searchValues) do
