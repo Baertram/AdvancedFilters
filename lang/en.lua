@@ -199,6 +199,9 @@ local strings = {
     --Recall stones
     RecallStone = util.Localize(SI_ITEMTYPE69),
 
+    --Crafted
+    Crafted = util.Localize(SI_ITEM_FORMAT_STR_CRAFTED),
+
     --LAM settings menu
     lamDescription = "Show additional filter buttons in the inventories to seperate item types",
     lamHideItemCount = "Hide item count",
