@@ -683,7 +683,7 @@ local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeTheseItemIds
         local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, isCompanionItem) then
+        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, nil) then
             return false
         else
             if not filterTypes then
@@ -1009,7 +1009,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {},
         },
         Crown = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}),
             dropdownCallbacks = {},
         },
         Food = {
@@ -1989,7 +1989,7 @@ local subfilterCallbacks = {
             },
         },
         Crown = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}),
             dropdownCallbacks = {},
         },
 
@@ -2213,7 +2213,7 @@ local subfilterCallbacks = {
         },
         --[[
         Consumable = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
                                                 ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_TROPHY,
                                                 ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_GROUP_REPAIR}, true, itemIds.lockpick),
             dropdownCallbacks = {
@@ -2234,7 +2234,7 @@ local subfilterCallbacks = {
         Consumable = {
             filterCallback = GetFilterCallback(nil, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE),
             dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
+                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Food", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_FOOD}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Drink", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DRINK}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Recipe", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
