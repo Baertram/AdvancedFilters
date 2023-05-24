@@ -19,7 +19,11 @@ local gilii     = GetItemLinkInfo
 local gilfti    = GetItemLinkFilterTypeInfo
 local gilti     = GetItemLinkTraitInfo
 local giliid    = GetItemLinkItemId
-local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
+local iils      = IsItemLinkStolen
+--local IFUgsitbitdc = ITEM_FILTER_UTILS.GetSpecializedItemTypesByItemTypeDisplayCategory
+local IFUgsitbitdc = ZO_ItemFilterUtils.GetSpecializedItemTypesByItemTypeDisplayCategory
+local IFUisfdiitdc = ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory
+
 local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndRunFilterFunction
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -38,6 +42,16 @@ local nonFencableItemTypes = {
 }
 
 
+
+------------------------------------------------------------------------------------------------------------------------
+-- Other addons helper
+---------------------------------------------------------------------------------------------------------------------------
+--FCOCompanion
+local FCOCompanionJunkEnabled = false
+local junkFunctionsUpdateDone = false
+local checkForOtherAddonFlags = AF.util.CheckForOtherAddonFlags
+
+
 ------------------------------------------------------------------------------------------------------------------------
 -- Helper functions
 ---------------------------------------------------------------------------------------------------------------------------
@@ -45,6 +59,15 @@ local nonFencableItemTypes = {
 local function checkNoFilterTypesOrIsJunk(slot, junkCheck)
     --Shall we check only junk items?
     if junkCheck and slot.bagId and slot.slotIndex then
+        --Check if the junk API functions need a new reassign, if maybe other addons ave hooked into them later
+        if not junkFunctionsUpdateDone then
+            FCOCompanionJunkEnabled = checkForOtherAddonFlags()
+            if FCOCompanionJunkEnabled == true then
+                isij = IsItemJunk
+                junkFunctionsUpdateDone = true
+            end
+            junkFunctionsUpdateDone = true
+        end
         return isij(slot.bagId, slot.slotIndex)
     end
     --No junk but must be junk, and no slot data to check: Disallow/Filter out
@@ -52,6 +75,7 @@ local function checkNoFilterTypesOrIsJunk(slot, junkCheck)
     --No filtertypes, no junk or no slot data: Allow/Show
     return true
 end
+
 
 local function increaseCounterIfFoundInNummericallyIndexedTable(tableName, searchValues, counter)
     for _, searchValue in ipairs(searchValues) do
@@ -104,21 +128,25 @@ local function checkExcludedTypes(itemLink, excludeThisTypes)
     return true
 end
 
-local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory)
+
+local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, isCompanionItem)
+    isCompanionItem = isCompanionItem or false
     if slot ~= nil and itemLink ~= nil and itemTypeDisplayCategory ~= nil then
---AF._lastSlotBefore = ZO_ShallowTableCopy(slot)
-        --Prevent only comparison against junk itemTypeDisplayCategory
-        local oldSlotJunk = slot.isJunk
-        if oldSlotJunk ~= nil and oldSlotJunk == true then slot.isJunk = nil end
-        if not slot.filterData then
-            slot.filterData = { gilfti(itemLink) }
+        local slotCopy = ZO_ShallowTableCopy(slot)
+        --Prevent only comparison against junk itemTypeDisplayCategory within ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory
+        -->by removing the isJunk identifier and adding it, if neccessary, after the comparison
+        if slotCopy.isJunk ~= nil and slotCopy.isJunk == true then
+            slotCopy.isJunk = nil
         end
-        local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
-        --Reset the slot's junk flag
-        if oldSlotJunk ~= nil then
-            slot.isJunk = oldSlotJunk
+        if slotCopy.filterData == nil then
+            local filterData =  { gilfti(itemLink) }
+            slotCopy.filterData = filterData
+            --Update the filterData to the slot too
+            slot.filterData = filterData
         end
---AF._lastSlotAfter = slot
+        --local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
+        local isSlotFilterDataInItemTypeDisplayCategory = IFUisfdiitdc(slotCopy, itemTypeDisplayCategory, isCompanionItem)
+
         if not isSlotFilterDataInItemTypeDisplayCategory then return false end
     end
     return true
@@ -152,6 +180,62 @@ local function AF_QS_FilterFunctionForQS_ShouldAddItemToSlot(itemData)
     return true
 end
 ]]
+
+local function filterCallbackChecks(slot, slotIndex, filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
+    checkOnlyJunk = checkOnlyJunk or false
+    slot = checkCraftingStationSlot(slot, slotIndex)
+    if not filterTypes and not itemTypeDisplayCategory then
+        return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk)
+    end
+    if checkOnlyJunk == true then
+        if not checkNoFilterTypesOrIsJunk(slot, true) then
+            return false
+        end
+    end
+    local itemLink = ugil(slot)
+    if not itemLink then return false end
+
+    if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory, nil) then
+        return false
+    else
+        if not filterTypes then
+            return true
+        end
+    end
+
+    local itemId = giliid(itemLink)
+    local itemType = gilit(itemLink)
+
+    if addFilterTypesToMatch ~= nil then
+        local itemFilterTypes = {gilfti(itemLink)}
+        local matchesFound = 0
+        matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
+        if matchesFound ~= #addFilterTypesToMatch then
+            return false
+        end
+    end
+
+    local numFilterTypes = #filterTypes
+    for i=1, numFilterTypes do
+        if filterTypes[i] == itemType then
+            if excludeTheseItemIds then
+                if type(excludeTheseItemIds) == "table" then
+                    for _, itemIdToExclude in ipairs(excludeTheseItemIds) do
+                        if itemId == itemIdToExclude then
+                            return false
+                        end
+                    end
+                else
+                    if itemId == excludeTheseItemIds then
+                        return false
+                    end
+                end
+            end
+            return checkExcludedTypes(itemLink, excludeThisTypes)
+        end
+    end
+    return false
+end
 
 local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk, addFilterTypesToMatch, itemTypeDisplayCategory)
     checkOnlyJunk = checkOnlyJunk or false
@@ -332,7 +416,7 @@ local function GetFilterCallbackForTrophy(checkOnlyJunk, itemTypeDisplayCategory
         if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
 
         local itemType = gilit(itemLink)
-        --if not IsItemLinkStolen(itemLink) and (itemType == ITEMTYPE_TROPHY
+        --if not iils(itemLink) and (itemType == ITEMTYPE_TROPHY
         if allItemTypesTrophies[itemType] == true then
             return true
         end
@@ -349,7 +433,7 @@ local function GetFilterCallbackForFence(checkOnlyJunk, itemTypeDisplayCategory)
         if not itemLink then return false end
 
         local itemType = gilit(itemLink)
-        if IsItemLinkStolen(itemLink) and (not nonFencableItemTypes[itemType]) then
+        if iils(itemLink) and (not nonFencableItemTypes[itemType]) then
             if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
             return true
         end
@@ -364,7 +448,7 @@ local function GetFilterCallbackForStolen(checkOnlyJunk, itemTypeDisplayCategory
         if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
         local itemLink = ugil(slot)
         if not itemLink then return false end
-        if IsItemLinkStolen(itemLink) then
+        if iils(itemLink) then
             if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
 --d("[AF]GetFilterCallbackForStolen: " ..itemLink)
             return true
@@ -640,52 +724,36 @@ end
 AF.GetFilterCallbackForCollectibles = GetFilterCallbackForCollectibles
 
 
+-- GetFilterCallback({ITEMTYPE_WEAPON}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS),
 local function GetFilterCallback(filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
     return function(slot, slotIndex)
-        checkOnlyJunk = checkOnlyJunk or false
-        slot = checkCraftingStationSlot(slot, slotIndex)
-        if not filterTypes and not itemTypeDisplayCategory then return checkNoFilterTypesOrIsJunk(slot, checkOnlyJunk) end
-        if checkOnlyJunk == true then if not checkNoFilterTypesOrIsJunk(slot, true) then return false end end
-        local itemLink = ugil(slot)
-        if not itemLink then return false end
-
-        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then
-            return false
-        else
-            if not filterTypes then return true end
-        end
-
-        local itemId = giliid(itemLink)
-        local itemType = gilit(itemLink)
-
-        if addFilterTypesToMatch ~= nil then
-            local itemFilterTypes = {gilfti(itemLink)}
-            local matchesFound = 0
-            matchesFound = increaseCounterIfFoundInNummericallyIndexedTable(addFilterTypesToMatch, itemFilterTypes, matchesFound)
-            if matchesFound ~= #addFilterTypesToMatch then
-                return false
-            end
-        end
-
-        local numFilterTypes = #filterTypes
-        for i=1, numFilterTypes do
-            if filterTypes[i] == itemType then
-                if excludeTheseItemIds then
-                    if type(excludeTheseItemIds) == "table" then
-                        for _, itemIdToExclude in ipairs(excludeTheseItemIds) do
-                            if itemId == itemIdToExclude then return false end
-                        end
-                    else
-                        if itemId == excludeTheseItemIds then return false end
-                    end
-                end
-                return checkExcludedTypes(itemLink, excludeThisTypes)
-            end
-        end
-        return false
+        return filterCallbackChecks(slot, slotIndex, filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
     end
 end
 
+local function GetFilterCallbackWithItemLinkFunction(itemLinkFilterFunctionName, filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
+   return function(slot, slotIndex)
+       if itemLinkFilterFunctionName == nil or itemLinkFilterFunctionName == "" then return false end
+       local filterFunc = _G[itemLinkFilterFunctionName]
+       if filterFunc == nil then return false end
+
+       slot = checkCraftingStationSlot(slot, slotIndex)
+       local itemLink = ugil(slot)
+       if not itemLink then return false end
+
+       local filterFuncResult = filterFunc(itemLink)
+       filterFuncResult = filterFuncResult or false
+--d("[AF]GetFilterCallbackWithItemLinkFunction-["..tostring(itemLinkFilterFunctionName) .."]" .. itemLink .. ": " ..tostring(filterFuncResult))
+       if filterFuncResult == false then return false end
+
+       if filterTypes ~= nil or checkOnlyJunk ~= nil or excludeTheseItemIds ~= nil or addFilterTypesToMatch ~= nil or excludeThisTypes ~= nil or itemTypeDisplayCategory ~= nil then
+--d(">calling filterCallbackChecks")
+           local retVar = filterCallbackChecks(slot, slotIndex, filterTypes, checkOnlyJunk, excludeTheseItemIds, addFilterTypesToMatch, excludeThisTypes, itemTypeDisplayCategory)
+           return retVar
+       end
+       return true
+   end
+end
 
 --OTHER ADDONS CALLBACK functions
 --[[
@@ -729,12 +797,14 @@ local armorTypeDropdownCallbacks = {
     {name = "Waist",        showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
     {name = "Legs",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
     {name = "Feet",         showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
+    {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
 }
 
 local glyphTypesDropdownCallbacks = {
     {name = "ArmorGlyph",   showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR})},
     {name = "JewelryGlyph", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_JEWELRY})},
     {name = "WeaponGlyph",  showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_WEAPON})},
+    {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
 }
 
 
@@ -770,7 +840,9 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         OneHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}),
@@ -791,7 +863,8 @@ local subfilterCallbacks = {
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -803,7 +876,8 @@ local subfilterCallbacks = {
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
     },
 --=============================================================================================================================================================================================
@@ -812,19 +886,24 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         --[[
         --Moved to Miscelaneous
@@ -856,7 +935,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Neck = {
             filterForAll = {
@@ -966,19 +1047,23 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Crown = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}),
             dropdownCallbacks = {},
         },
         Food = {
             filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Drink = {
             filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Recipe = {
             filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}),
@@ -986,11 +1071,13 @@ local subfilterCallbacks = {
         },
         Potion = {
             filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Poison = {
             filterCallback = GetFilterCallback({ITEMTYPE_POISON}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Motif = {
             filterCallback = GetFilterCallback({ITEMTYPE_RACIAL_STYLE_MOTIF}),
@@ -1258,7 +1345,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         OneHand = {
             filterForAll = {
@@ -1292,7 +1381,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Bow = {
             filterForAll = {
@@ -1339,7 +1430,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Heavy = {
             filterForAll = {
@@ -1377,7 +1470,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         LightArmor = {
             filterForAll = {
@@ -1431,7 +1526,9 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(true, nil) end,
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Shield = {
             filterForAll = {
@@ -1659,19 +1756,24 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         WeaponGlyph = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_WEAPON}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         ArmorGlyph = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         JewelryGlyph = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_JEWELRY}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
     },
 --=============================================================================================================================================================================================
@@ -1783,7 +1885,9 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         OneHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_AXE, WEAPONTYPE_HAMMER, WEAPONTYPE_SWORD, WEAPONTYPE_DAGGER}),
@@ -1804,7 +1908,8 @@ local subfilterCallbacks = {
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -1816,7 +1921,8 @@ local subfilterCallbacks = {
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
     },
 --=============================================================================================================================================================================================
@@ -1829,15 +1935,18 @@ local subfilterCallbacks = {
         },
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
@@ -1903,7 +2012,9 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Drink = {
             filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
@@ -1915,7 +2026,8 @@ local subfilterCallbacks = {
         },
         Potion = {
             filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+            },
         },
         Siege = {
             filterCallback = GetFilterCallback({ITEMTYPE_SIEGE}),
@@ -1949,7 +2061,7 @@ local subfilterCallbacks = {
             },
         },
         Crown = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}),
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}),
             dropdownCallbacks = {},
         },
 
@@ -2139,7 +2251,9 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil, true),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Weapon = {
             filterCallback = GetFilterCallback({ITEMTYPE_WEAPON}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS),
@@ -2173,7 +2287,7 @@ local subfilterCallbacks = {
         },
         --[[
         Consumable = {
-            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
+            filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP, ITEMTYPE_FOOD, ITEMTYPE_DRINK, ITEMTYPE_RECIPE, ITEMTYPE_POTION, ITEMTYPE_POISON, ITEMTYPE_RACIAL_STYLE_MOTIF,
                                                 ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_TROPHY,
                                                 ITEMTYPE_COLLECTIBLE, ITEMTYPE_FISH, ITEMTYPE_GROUP_REPAIR}, true, itemIds.lockpick),
             dropdownCallbacks = {
@@ -2194,7 +2308,7 @@ local subfilterCallbacks = {
         Consumable = {
             filterCallback = GetFilterCallback(nil, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE),
             dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
+                {name = "Crown", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Food", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_FOOD}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Drink", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DRINK}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Recipe", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},

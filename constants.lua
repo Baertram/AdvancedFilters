@@ -3,8 +3,8 @@ local AF = AdvancedFilters
 
 --Addon base variables
 AF.name = "AdvancedFilters"
-AF.author = "ingeniousclown, Randactyl, Baertram (current)"
-AF.version = "1.6.2.8"
+AF.author = "ingeniousclown, Randactyl, Baertram"
+AF.version = "1.6.3.0"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -888,7 +888,6 @@ local subfilterGroups = {
     },
 }
 --Universal Deconstruction
---Universal deconstruction
 subfilterGroups[INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] = {
     [CRAFTING_TYPE_INVALID] = {
         [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL] = {},

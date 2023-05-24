@@ -1316,13 +1316,16 @@ local function InitializeHooks()
     local function ChangeFilterCompanionInventory(self, filterData)
         local debugSpam = AF.settings.debugSpam
 
-        --self: playerInvVar, filterTab: playerInvVar.filterTab
+       --self: playerInvVar, filterTab: playerInvVar.filterTab
         local tabInvType = LF_INVENTORY_COMPANION
         local currentInvType = tabInvType
         AF.currentInventoryType = currentInvType
         --Is the bank opened but the current filterType is 0 then check if another currentFilter was set as the bank was closed last time
         --and reset the subfilter bar to the last chosen one now. Therefor the currentFilter needs to be changed to the correct "last" one again:
         local currentFilter = self.currentFilter.descriptor
+
+--d("[AF]Companion_Inventory:ChangeFilter-currentFilter: " ..tos(currentFilter))
+
         if debugSpam then
             d("===========================================================================================================>")
             d("[AF]companionInvVar:ChangeFilter, tabInvType: " ..tos(tabInvType) .. ", curInvType: " .. tos(currentInvType) .. ", currentFilter: " .. tos(currentFilter))
@@ -1339,6 +1342,7 @@ local function InitializeHooks()
         if debugSpam then
             d(">>[ChangeFilterCompanionInventory]ThrottledUpdate - ShowSubfilterBar, currentInvType: " ..tos(currentInvType))
         end
+--d(">calling ShowSubfilterBar")
         ThrottledUpdate("ShowSubfilterBar_" .. currentInvType, 20, ShowSubfilterBar, currentFilter, nil, nil, currentInvType)
         --Update the total count for items as there are no epxlicit filterBars available until today at the panels, e.g. custom added
         --inventory filters like HarvensStolenFilter or NTakLootAndSteal addons
@@ -1356,6 +1360,7 @@ local function InitializeHooks()
             local craftingType = GetCraftingType()
             local currentSubfilterBar = subfilterGroup.currentSubfilterBar
             if not currentSubfilterBar then return end
+--d(">calling RefreshSubfilterBar: " ..tos(currentSubfilterBar.name))
             ThrottledUpdate("RefreshSubfilterBar_" .. currentInvType .. "_" .. craftingType .. currentSubfilterBar.name, 10,
                     RefreshSubfilterBar, currentSubfilterBar)
         end, 50)
@@ -2283,6 +2288,34 @@ local function createAdditionalSubFilterGroups()
             end
         end
     end
+
+    --------------------------------------------------------------------------------------------------------------------
+    -- Other addons
+    --------------------------------------------------------------------------------------------------------------------
+    --FCOCompanion
+    if FCOCO ~= nil and FCOCO.IsCompanionJunkEnabled ~= nil then
+        local isCompanionJunkEnabled, companionJunkedItemsOfChar = FCOCO.IsCompanionJunkEnabled()
+        if isCompanionJunkEnabled == true then
+d("[AF]FCOCompanion Junk is enabled!")
+            --Add "Junk" tab to the Companion inventory subfilterGroup
+            AF.subfilterGroups[LF_INVENTORY_COMPANION][CRAFTING_TYPE_INVALID][ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {}
+            --Update "Junk" subfilterButtonNames -> Not needed as it already got all types of junk we need for the companion items
+            --[[
+            AF.subfilterButtonNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {
+                "Miscellaneous", "Furnishings", "Materials", "Consumable", "Jewelry", "Armor", "Weapon",
+                AF_CONST_ALL,
+            }
+            ]]
+            --"Junk" filterTypeName already exists
+            --AF.filterTypeNames[] =
+            --SubfilterCallbacks for Junk also exist already
+            --[[
+            AF.subfilterCallbacks.Junk = {
+            ...
+            }
+            ]]
+        end
+    end
 end
 
 --Build the keys for the dropdown callback tables used in AF.util.BuildDropdownCallbacks()
@@ -2349,7 +2382,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
 
     EVENT_MANAGER:UnregisterForEvent(AF.name .. "_Loaded", EVENT_ADD_ON_LOADED)
 
-    --Create additional subfilterButtonBars for dynamic content like the quickslot collectible filters
+    --Create additional subfilterButtonBars for dynamic content like the quickslot collectible filters, or other addons
     createAdditionalSubFilterGroups()
     --Create the dropdownBox entry keys for entries like "Body" which combine multiple others like "light", "heavy", "medium"
     createDropdownBoxCallbackFunctionKeys()

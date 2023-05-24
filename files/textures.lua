@@ -191,7 +191,6 @@ local textures = {
     --Recall stones
     RecallStone = "/esoui/art/icons/rune_a.dds",
 
-    --TODO
     Costume         = "AdvancedFilters/assets/apparel/clothing_%s.dds",
     BodyMarking     = "AdvancedFilters/assets/collectibles/body_%s.dds",
     JewelryPiercing = "AdvancedFilters/assets/apparel/jewelry_%s.dds",
@@ -202,6 +201,8 @@ local textures = {
     Skin            = "/esoui/art/icons/skin_infernaceepidermis.dds", --TODO
     Polymorph       = "/esoui/art/icons/container_sealed_polymorph_001.dds", --TODO
     Personality     = "/esoui/art/emotes/emotes_indexicon_personality_%s.dds",
+
+    Crafted         = "/EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_up.dds"
 }
 
 --ALCHEMY
@@ -225,7 +226,6 @@ textures.JewelryGlyph = textures.Jewelry
 
 --COLLECTIBLES
 textures.RareFish = textures.Fish
-
 
 
 --Change the size of the textures for the dropdown filter boxes?

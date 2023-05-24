@@ -29,6 +29,25 @@ local filterBarParentControlsToHide
 local panelIdSupportedAtDeconNPC
 local isUniversalDeconPanelShown
 
+--======================================================================================================================
+--Other addons
+--======================================================================================================================
+--FCOCompanion
+local junkFunctionsUpdateDone = false
+local FCOCompanionJunkEnabled = false
+
+local function checkForOtherAddonFlags()
+    --Check if other addons are enabled, like FCO Companion, and if the companion junk is enabled there
+    if not junkFunctionsUpdateDone then
+        if FCOCO ~= nil and FCOCO.IsCompanionJunkEnabled ~= nil then
+            FCOCompanionJunkEnabled = FCOCO.IsCompanionJunkEnabled()
+        end
+        junkFunctionsUpdateDone = true
+    end
+    return FCOCompanionJunkEnabled
+end
+AF.util.CheckForOtherAddonFlags = checkForOtherAddonFlags
+
 
 --======================================================================================================================
 -- -v- Filter plugin functions                                                                                    -v-
@@ -1306,6 +1325,15 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isRetraitStation              = isRetraitPanelShown()
     local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNamePlayerInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isJunkButtonActive            = subFilterBar.name == (AFsubFilterNameActiveInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
+
+    checkForOtherAddonFlags()
+    --FCO Companion support
+    if isJunkButtonActive == false and FCOCompanionJunkEnabled == true then
+        local isJunkCompanionInvButtonActive = subFilterBar.name == ("AF_FilterBarCompanionInventory_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
+        if isJunkCompanionInvButtonActive == true then
+            isJunkButtonActive = isJunkCompanionInvButtonActive
+        end
+    end
     local isTrade                       = isFilterPanelShown(LF_TRADE) or false
     local libFiltersPanelId             = getCurrentFilterTypeForInventory(inventoryType, true)
     local isCompanionInv                = isCompanionInventoryShown()
@@ -1409,6 +1437,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     checkIfOtherAddonsProvideSubfilterBarRefreshFilters = checkIfOtherAddonsProvideSubfilterBarRefreshFilters or util.CheckIfOtherAddonsProvideSubfilterBarRefreshFilters
     isItemFilterTypeInItemFilterData = isItemFilterTypeInItemFilterData or util.IsItemFilterTypeInItemFilterData
 
+    --Check if any other addon flag or table or function update is needed
+    checkForOtherAddonFlags()
+
     calledFromExternalAddonName = calledFromExternalAddonName or ""
     local settings = AF.settings
     local debugSpam = settings.debugSpam
@@ -1438,11 +1469,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
 
     if debugSpam then
         d(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
+        d("[AF]SubFilter refresh, abortSubfilterBarRefresh: " .. tos(abortSubfilterBarRefresh) .. ", calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isCompanionInv: " .. tos(isCompanionInv) ..", isUniversalDecon: " ..tos(isUniversalDecon))
         AF._currentSubfilterBarAtRefreshCheck = subfilterBar
     end
-
---d("[AF]SubFilter refresh, calledFromExternalAddonName: " .. tos(calledFromExternalAddonName) .. ", invType: " .. tos(inventoryType) .. ", subfilterBar: " ..tos(subfilterBar.name) .. ", craftingType: " .. tos(craftingType) .. ", isNoCrafting: " .. tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon))
 
     local hideCharBound = settings.hideCharBoundAtBankDeposit
 
@@ -1473,6 +1502,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
         realInvTypes = {}
         table.insert(realInvTypes, inventoryType)
     end
+
 --AF._realInvTypes = realInvTypes
 
     if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tos(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tos((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tos((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tos(subfilterBar) .. ", bagWornToo?: " ..tos(bagWornItemCache ~= nil)) end
@@ -1496,7 +1526,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     local isCompanionInvButtonActive    = subFilterBarFilterInfo.isCompanionInvButtonActive
     local isUniversalDeconstructionActive = subFilterBarFilterInfo.isUniversalDeconstruction
 
-    if debugSpam then d(">isMailSend: " ..tos(isMailSendPanel) .. ", isVendorBuy: " ..tos(isVendorBuy) ..", isFencePanel: " .. tos(isFencePanel) .. ", isLaunderPanel: " .. tos(isLaunderPanel) .. ", isVendorPanel: " .. tos(isVendorPanel) .. ", isBankDepositPanel: " .. tos(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tos(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tos(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tos(isRetraitStation) .. ", isJunkInvButtonActive: " .. tos(isJunkInvButtonActive) .. ", isCompanionInv: " ..tos(isCompanionInvPanel) .. ", isUniversalDecon: " ..tos(isUniversalDeconstructionActive) ..", libFiltersPanelId: " .. tos(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tos(grayOutSubFiltersWithNoItems)) end
+    --For FCOCompanion "Junk" tab
+    local isFCOCompanionJunkTabAtCompanionInv = (FCOCompanionJunkEnabled == true and isCompanionInv and isJunkButtonActive and true) or false
+
+    if debugSpam then d(">isMailSend: " ..tos(isMailSendPanel) .. ", isVendorBuy: " ..tos(isVendorBuy) ..", isFencePanel: " .. tos(isFencePanel) .. ", isLaunderPanel: " .. tos(isLaunderPanel) .. ", isVendorPanel: " .. tos(isVendorPanel) .. ", isBankDepositPanel: " .. tos(isBankDepositPanel) .. ", isGuildBankDepositPanel: " .. tos(isGuildBankDepositPanel) .. ", isHouseBankDepositPanel: " .. tos(isHouseBankDepositPanel) .. ", isRetraitStation: " .. tos(isRetraitStation) .. ", isJunkInvButtonActive: " .. tos(isJunkInvButtonActive) .. ", isJunkButtonActive: " .. tos(isJunkButtonActive) .. ", isCompanionInv: " ..tos(isCompanionInvPanel) .. ", isUniversalDecon: " ..tos(isUniversalDeconstructionActive) ..", libFiltersPanelId: " .. tos(libFiltersPanelId) .. ", grayOutSubfiltersWithNoItems: " ..tos(grayOutSubFiltersWithNoItems)) end
     local doEnableSubFilterButtonAgain = false
     local breakInventorySlotsLoopNow = false
 
@@ -1527,12 +1560,14 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------
+
     --Check subfilterbutton for items, using the filter function and junk checks (only for non-crafting stations)
     local function checkBagContentsNow(bag, bagData, realInvType, button)
 --d(">checkBagContentsNow - isNoCrafting: " ..tos(isNoCrafting) .. ", isUniversalDecon: " ..tos(isUniversalDecon) ..", libFiltersPanelId: " ..tos(libFiltersPanelId))
         if debugSpam and not debugSpamExcludeRefreshSubfilterBar then d(">checkBagContentsNow: " ..tos(button.name)) end
         doEnableSubFilterButtonAgain = false
         breakInventorySlotsLoopNow = false
+
 
         local hasAnyJunkInBag = false
         local useBagWorn = (bag and bag == BAG_WORN) or false
@@ -1571,25 +1606,33 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
             local otherAddonUsesFilters = checkIfOtherAddonsProvideSubfilterBarRefreshFilters(itemData, realInvType, craftingType, libFiltersPanelId)
             if isNoCrafting then
                 passesCallback = button.filterCallback(itemData)
-                --Like crafting tables the junk inventory got different itemTypes in one section (ITEM_TYPE_DISPLAY_CATEGORY_JUNK = 9). So the filter comparison does not work and the callback should be enough to check.
-                passesFilter = passesCallback and (
-                        (not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
-                                --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
-                                --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
-                                or (isItemFilterTypeInItemFilterData(itemData, currentFilter, ((isUniversalDecon and activeUniversalTab) or nil)))
-                ) and otherAddonUsesFilters
-                --[[
-                if debugSpam and not debugSpamExcludeRefreshSubfilterBar then
-                    local itemlink
-                    if isVendorBuy then
-                        itemlink = GetStoreItemLink(slotIndex)
-                    else
-                        itemlink = GetItemLink(bagId, slotIndex)
-                    end
-                    d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
-                end
-                ]]
 
+                --Other addons are active which need special handling?
+                --FCOCompanion - "Junk" tab at companion inventory
+                if isFCOCompanionJunkTabAtCompanionInv and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK then
+                    passesFilter = (passesCallback and isItemFilterTypeInItemFilterData(itemData, currentFilter, nil)
+                    ) and otherAddonUsesFilters
+                else
+                    --Like crafting tables the junk inventory got different itemTypes in one section (ITEM_TYPE_DISPLAY_CATEGORY_JUNK = 9). So the filter comparison does not work and the callback should be enough to check.
+                    passesFilter = passesCallback and (
+                            (not isVendorBuy and (isJunkInvButtonActive and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK))
+                                    --Seems "itemData.filterData" contains the new ITEM_TYPE_DISPLAY_CATEGORY_* values now as well!
+                                    --use this function to map it: ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
+                                    or (isItemFilterTypeInItemFilterData(itemData, currentFilter, ((isUniversalDecon and activeUniversalTab) or nil)))
+                    ) and otherAddonUsesFilters
+                end
+
+                if isFCOCompanionJunkTabAtCompanionInv and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_JUNK then
+                    if debugSpam and not debugSpamExcludeRefreshSubfilterBar then
+                        local itemlink
+                        if isVendorBuy then
+                            itemlink = GetStoreItemLink(slotIndex)
+                        else
+                            itemlink = GetItemLink(bagId, slotIndex)
+                        end
+                        d(">> " .. itemlink .. " - passesCallback: " ..tos(passesCallback) .. ", passesFilter: " ..tos(passesFilter))
+                    end
+                end
             else
                 passesCallback = button.filterCallback(itemData)
 
@@ -1662,8 +1705,8 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     --d(">>>>FCOCF: passesFilter:  " .. tos(passesFilter))
                 end
                 --if craftingType == CRAFTING_TYPE_ENCHANTING and passesCallback == true then
-                    --local itemLink = GetItemLink(bagId, slotIndex)
-                    --d(">" .. itemLink .. " passesFilter: " ..tos(passesFilter) ..", passesCallback: " ..tos(passesCallback) .. ", otherAddonUsesFilters: " ..tos(otherAddonUsesFilters) .. ", craftingType: " ..tos(craftingType) .. ",libFiltersPanelId: " ..tos(libFiltersPanelId))
+                --local itemLink = GetItemLink(bagId, slotIndex)
+                --d(">" .. itemLink .. " passesFilter: " ..tos(passesFilter) ..", passesCallback: " ..tos(passesCallback) .. ", otherAddonUsesFilters: " ..tos(otherAddonUsesFilters) .. ", craftingType: " ..tos(craftingType) .. ",libFiltersPanelId: " ..tos(libFiltersPanelId))
                 --end
                 -- TODO: Check retrait station subfilter buttons greying out properly
                 -- TODO: Check jewelry refine subfilter buttons greying out properly
@@ -1801,21 +1844,52 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     elseif isMailSendPanel then
                         doEnableSubFilterButtonAgain = not isItemStolen and not isBound
 
-                        --[Companion inventory]
-                        --Item is:
-                        --owned by companion
-                        -->not junk
+                    --[Companion inventory]
                     elseif isCompanionInvPanel then
-                        doEnableSubFilterButtonAgain = (itemIsOwnedByCompanion and not isItemJunk)
+--d(">isCompanionInvPanel - FCOCompanionJunkEnabled: " ..tos(FCOCompanionJunkEnabled))
+                        --FCOCompanion Junk is enabled?
+                        if FCOCompanionJunkEnabled == true then
+                            --Item is:
+                            --Item is:
+                            --owned by companion
+                            -->not junk
+                            -->or junk and companionInvJunkTab is active
+                            doEnableSubFilterButtonAgain = (itemIsOwnedByCompanion and (not isItemJunk or (isItemJunk and isJunkButtonActive))) --isJunkButtonActive will be set to true if the companionInvJunk subfilterBar is currently active
 
-                        --[Normal inventory, mail, trade, craftbag]
-                        --Item is:
-                        -->not itemIsOwnedByCompanion if not companionFilterButton active
-                        -->not junk
-                        -->Or junk, and junk inventory filter or bank withdraw junk filter button is active
+                        else
+                            --Normal Companion inventory
+                            --Item is:
+                            --owned by companion
+                            -->not junk
+                            doEnableSubFilterButtonAgain = (itemIsOwnedByCompanion and not isItemJunk)
+                        end
+
+
+                        --Others & other addons
                     else
-                        doEnableSubFilterButtonAgain = (not isItemJunk or ((isJunkInvButtonActive or isJunkButtonActive) and isItemJunk))
-                                and ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
+                        --FCOCompanion Junk is enabled?
+                        if FCOCompanionJunkEnabled == true then
+                            --Item is:
+                            -->ownedByCompanion as companionFilterButton is active
+                            -->not junk
+                            -->Or junk, and junk inventory filter or bank withdraw junk filter button is active
+                            -->Or junk, and junk inventory filter or bank withdraw junk filter button is active, and ownedByCompanion
+                            doEnableSubFilterButtonAgain = (not isItemJunk or ((isJunkInvButtonActive or isJunkButtonActive) and isItemJunk))
+                                    and (
+                                    ((isJunkInvButtonActive or isJunkInvButtonActive) and itemIsOwnedByCompanion) or
+                                            (not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or
+                                            (isCompanionInvButtonActive and itemIsOwnedByCompanion)
+                            )
+
+                            --[Normal inventory, mail, trade, craftbag]
+                        else
+                            --Item is:
+                            -->ownedByCompanion as companionFilterButton is active
+                            -->not junk
+                            -->Or junk, and junk inventory filter or bank withdraw junk filter button is active
+                            doEnableSubFilterButtonAgain = (not isItemJunk or ((isJunkInvButtonActive or isJunkButtonActive) and isItemJunk))
+                                    and ((not isCompanionInvButtonActive and not itemIsOwnedByCompanion) or (isCompanionInvButtonActive and itemIsOwnedByCompanion))
+                        end
                     end
 
                     ----------------------------------------------------------------------------------------
@@ -1876,9 +1950,11 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         inventory = playerInvVar.inventories[realInvType]
                         if inventory ~= nil and inventory.slots ~= nil then
                             --Get the current filter. Normally this comes from the inventory. Crafting currentFilter determination is more complex!
-                            if isNoCrafting and not isUniversalDecon then
+                            if isNoCrafting and not isUniversalDecon and not isFCOCompanionJunkTabAtCompanionInv then
                                 currentFilter = inventory.currentFilter
-                            elseif isUniversalDecon then
+                            --UniversalDeconstruction panel and FCOCompanion currentFilter should be the one of the active inventoryType
+                            -->detected automatically
+                            elseif isUniversalDecon or isFCOCompanionJunkTabAtCompanionInv then
                                 currentFilter = getCurrentFilter(inventoryType)
                                 --d(">universalDecon - invType: " ..tos(realInvType) .. ", currentFilter: " .. tos(currentFilter))
                                 --else
