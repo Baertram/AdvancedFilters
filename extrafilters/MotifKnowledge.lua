@@ -57,6 +57,7 @@ local stringsES = {
 }
 
 local filterInformation = {
+    pluginName = "AF_MotifKnowledgeFilters",
     submenuName = "MotifKnowledge",
     callbackTable = dropdownCallbacks,
     filterType = ITEMFILTERTYPE_WEAPONS,

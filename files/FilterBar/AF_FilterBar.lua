@@ -111,7 +111,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 ------------------------------------------------------------------------------------------------------------------------
     --Function for the mouse right click on the dropdown box (filter plugins) of the subfilterBar
     local function DropdownOnMouseUpHandler(dropdown, mouseButton, upInside)
-        local comboBox = dropdown.m_comboBox
+        local comboBox = ZO_ComboBox_ObjectFromContainer(dropdown) --dropdown.m_comboBox
         AF.currentCombobox = comboBox
         AF.currentComboboxSelectedItem = nil
 
@@ -344,7 +344,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
                     selectDropdownEntry(AF_CONST_ALL)
                 else
                     --Show menu to select an entry
-                    comboBox:ShowDropdownInternal()
+                    comboBox:ShowDropdownInternal() --> Calls comboBox:AddMenuItems() -> See below
                     if not anchorToDropdown then
                         comboBox:SetVisible(false)
                         AnchorMenu(anchorZOMenuToControl, 5)
@@ -417,7 +417,8 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     self.dropdown.dropdownOnMouseUpHandlerFunc = DropdownOnMouseUpHandler
 ------------------------------------------------------------------------------------------------------------------------
 
-    local comboBox = self.dropdown.m_comboBox
+    local comboBox = ZO_ComboBox_ObjectFromContainer(self.dropdown) --self.dropdown.m_comboBox
+    comboBox._AF_FilterBar = self
 
     local function DropdownOnMouseEnterHandler()
         local selectedItemText = comboBox.m_selectedItemText
@@ -437,93 +438,182 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
 ------------------------------------------------------------------------------------------------------------------------
 
     comboBox:SetSortsItems(false)
-    comboBox.AddMenuItems = function(p_comboBox)
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+    --Populate the dropdown's comboBox entries. If createSubmenuEntries == true and entry ~= nil then
+    --add a submenu to the entry's control.
+    --Else: Only show the main entries of the combox's scrollable list -> This function here is called by a
+    --PreHook to the comboBox's AddMenuItems function then and will just add the item.callback function
+    local function populateScrollableComboBoxEntries(selfVar, p_comboBox, createSubmenuEntries, entry)
+        createSubmenuEntries = createSubmenuEntries or false
         local button = selfVar:GetCurrentButton()
         --local self = p_comboBox
 
         --Get the current LibFilters filterPanelId
         local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
+    d("[AF]comboBox.AddMenuItems - filterPanel: " ..tos(filterPanelIdActive))
+    AF._selfVar = selfVar
+    AF._p_comboBox = p_comboBox
 
-        for i = 1, #p_comboBox.m_sortedItems do
-            -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
-            local item = p_comboBox.m_sortedItems[i]
+        --Only create the normal entries in the ZO_ComboBox scroll list -> Called from ZO_PreHook at AddMenuItems
+        if createSubmenuEntries == false then
+            --Loop over all items of the combobox
+            local items = p_comboBox:GetItems()
+            -->p_comboBox.m_sortedItems will contain entries from comboBox:AddItem() function -> See AF_FilterBar:ActivateButton(newButton), function PopulateDropdown
+            for i = 1, p_comboBox:GetNumItems() do
+                -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
+                -- and would not first run the code defined at comboBox:AddItem() function -> See AF_FilterBar:ActivateButton(newButton), function PopulateDropdown
+                local origItem = items[i] ---Filled with comboBox:AddItem() function -> See AF_FilterBar:ActivateButton(newButton), function PopulateDropdown
 
-            local function OnSelect()
-                AF.currentCombobox = p_comboBox
-                AF.currentComboboxSelectedItem = item
+                --Is the item is not a submenu main entry and should show a submenu once mouse is moved above it
+                --then change the callback function
+                if not origItem.isSubmenu then
+                    local function OnSelect(selfComboBox, itemName, item, selectionChanged, oldItem)
+d("[AF]OnSelect - itemName: " ..tos(itemName))
+                        AF.currentCombobox = p_comboBox
+                        AF.currentComboboxSelectedItem = origItem
 
-                ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, item)
-                button.previousDropdownSelection = button.previousDropdownSelection or {}
-                button.previousDropdownSelection[filterPanelIdActive] = item
+                        ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, origItem) -- Will call the original item's callback function
+                        button.previousDropdownSelection = button.previousDropdownSelection or {}
+                        button.previousDropdownSelection[filterPanelIdActive] = origItem
 
-                PlaySound(SOUNDS.MENU_BAR_CLICK)
+                        PlaySound(SOUNDS.MENU_BAR_CLICK)
+                    end
+                    --Old ZO_Menu code -> For LibCustomMenu -> Not working anymore as ZO_Menu is not used within ZO_ComboBox anymore
+                    --AddCustomMenuItem(item.name, itemCallbackFunc, itemType, p_comboBox.m_font, p_comboBox.m_normalColor, p_comboBox.m_highlightColor)
+
+                    --Set the item's callback function to run the originalcallback function via upvalue of item (item.callback will be called from ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, item)) plus the above code in OnSelect
+                    origItem.callback = OnSelect
+                end
             end
-            local itemCallbackFunc
-            local itemType = item.itemType
-            if itemType ~= MENU_ADD_OPTION_HEADER then
-                itemCallbackFunc = OnSelect
-            end
-            AddCustomMenuItem(item.name, itemCallbackFunc, itemType, p_comboBox.m_font, p_comboBox.m_normalColor, p_comboBox.m_highlightColor)
         end
 
-        --Add the dropdown filter box context menu entries
-        -->Normal filters via AF and plugins
-        local submenuCandidates = p_comboBox.submenuCandidates
-        for _, submenuCandidate in ipairs(submenuCandidates) do
-            local entries = {}
-            for _, callbackEntry in ipairs(submenuCandidate.callbackTable) do
-                local nameOfEntry = AF.strings[callbackEntry.name]
-                local nameOfEntryWithIcon = callbackEntry.nameWithIcon
-                local nameOfEntryWithoutIcon = callbackEntry.nameWithoutIcon
-                if not nameOfEntryWithIcon or nameOfEntryWithIcon == "" then
-                    nameOfEntryWithIcon = nameOfEntry
-                end
-                if not nameOfEntry or nameOfEntry == "" then
-                    d("[AdvancedFilters] ERROR - FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
-                end
-                local entry
-                if callbackEntry.itemType ~= nil and callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
-                    entry = {
-                        itemType = MENU_ADD_OPTION_HEADER,
-                        label = nameOfEntryWithIcon or nameOfEntryWithoutIcon or nameOfEntry,
-                        --disabled = true,
-                    }
-                else
-                    entry = {
-                        label = nameOfEntryWithIcon,
-                        callback = function()
-                            applyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
-                            selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tos(nameOfEntry))
-                            button.forceNextDropdownRefresh = true
-                            p_comboBox.m_selectedItemText:SetText(nameOfEntryWithIcon)
-                            p_comboBox.m_selectedItemData = p_comboBox:CreateItemEntry(nameOfEntryWithIcon,
-                                    function(p_l_comboBox, itemName, item, selectionChanged)
-                                        applyFilter(callbackEntry,
-                                                AF_CONST_DROPDOWN_FILTER,
-                                                selectionChanged or button.forceNextDropdownRefresh)
-                                        selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(p_comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tos(nameOfEntry))
-                                    end)
-                            p_comboBox.m_selectedItemData.filterResetAtStartDelay = callbackEntry.filterResetAtStartDelay
-                            p_comboBox.m_selectedItemData.filterResetAtStart      = callbackEntry.filterResetAtStart
-                            p_comboBox.m_selectedItemData.filterStartCallback     = callbackEntry.filterStartCallback
-                            p_comboBox.m_selectedItemData.filterEndCallback       = callbackEntry.filterEndCallback
-                            p_comboBox.m_selectedItemData.nameWithoutIcon         = nameOfEntryWithoutIcon
-                            --Get the current LibFilters filterPanelId
-                            local filterPanelIdActiveAsContextMenuEntryCallbackFires = getCurrentFilterTypeForInventory(AF.currentInventoryType)
-                            button.previousDropdownSelection = button.previousDropdownSelection or {}
-                            button.previousDropdownSelection[filterPanelIdActiveAsContextMenuEntryCallbackFires] = p_comboBox.m_selectedItemData
+        --Create the submenu entries? As ZO_Menu is not used directly anymore at teh ZO_ComboBox we can just add the callback functions
+        --to each entry via ZO_ComboBox:SetEntryMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback)
+        --and this function here will be called from ZO_ComboBox_Entry_OnMouseEnter(entry) then
+        if createSubmenuEntries == true and entry ~= nil then
+            local data = entry.dataEntry.data
+            if not data.isSubMenu then return end
 
-                            PlaySound(SOUNDS.MENU_BAR_CLICK)
 
-                            ClearMenu()
-                        end,
-                    }
+            --Add the dropdown filter box context menu entries
+            -->Normal filters via AF and plugins
+            local submenuCandidates = p_comboBox.submenuCandidates
+            if submenuCandidates ~= nil and #submenuCandidates > 0 then
+                 --Get the entrie's control so we can anchor to it
+                local ownerControl = p_comboBox:GetControl()
+                ClearMenu()
+
+                --Get all submenu main lines and add the submeny entries to them
+                for _, submenuCandidate in ipairs(submenuCandidates) do
+                    local entries = {}
+                    for _, callbackEntry in ipairs(submenuCandidate.callbackTable) do
+                        local nameOfEntry = AF.strings[callbackEntry.name]
+                        local nameOfEntryWithIcon = callbackEntry.nameWithIcon
+                        local nameOfEntryWithoutIcon = callbackEntry.nameWithoutIcon
+                        if not nameOfEntryWithIcon or nameOfEntryWithIcon == "" then
+                            nameOfEntryWithIcon = nameOfEntry
+                        end
+                        if not nameOfEntry or nameOfEntry == "" then
+                            d("[AdvancedFilters] ERROR - FilterBar init - SubmenuCandidates -  Name is missing! InventoryName: " .. tos(inventoryName) .. ", tradeSkillname: " .. tos(tradeSkillname) .. ", groupName: " ..tos(groupName) .. ", subfilterNames: " .. tos(subfilterNames))
+                        end
+                        local subMenuEntry
+                        if callbackEntry.itemType ~= nil and callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
+                            subMenuEntry = {
+                                itemType = MENU_ADD_OPTION_HEADER,
+                                label = nameOfEntryWithIcon or nameOfEntryWithoutIcon or nameOfEntry,
+                                --disabled = true,
+                            }
+                        else
+                            subMenuEntry = {
+                                label = nameOfEntryWithIcon,
+                                callback = function()
+                                    applyFilter(callbackEntry, AF_CONST_DROPDOWN_FILTER, true)
+                                    selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(AF_FilterBarName).."', SubMenu-NameOfEntry: " ..tos(nameOfEntry))
+                                    button.forceNextDropdownRefresh = true
+                                    p_comboBox.m_selectedItemText:SetText(nameOfEntryWithIcon)
+                                    p_comboBox.m_selectedItemData = p_comboBox:CreateItemEntry(nameOfEntryWithIcon,
+                                            function(p_l_comboBox, itemName, item, selectionChanged)
+                                                applyFilter(callbackEntry,
+                                                        AF_CONST_DROPDOWN_FILTER,
+                                                        selectionChanged or button.forceNextDropdownRefresh)
+                                                selfVar:UpdateLastSelectedDropdownEntries(button, "AF_FilterBar '"..tos(p_comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tos(nameOfEntry))
+                                            end)
+                                    p_comboBox.m_selectedItemData.filterResetAtStartDelay = callbackEntry.filterResetAtStartDelay
+                                    p_comboBox.m_selectedItemData.filterResetAtStart      = callbackEntry.filterResetAtStart
+                                    p_comboBox.m_selectedItemData.filterStartCallback     = callbackEntry.filterStartCallback
+                                    p_comboBox.m_selectedItemData.filterEndCallback       = callbackEntry.filterEndCallback
+                                    p_comboBox.m_selectedItemData.nameWithoutIcon         = nameOfEntryWithoutIcon
+                                    --Get the current LibFilters filterPanelId
+                                    local filterPanelIdActiveAsContextMenuEntryCallbackFires = getCurrentFilterTypeForInventory(AF.currentInventoryType)
+                                    button.previousDropdownSelection = button.previousDropdownSelection or {}
+                                    button.previousDropdownSelection[filterPanelIdActiveAsContextMenuEntryCallbackFires] = p_comboBox.m_selectedItemData
+
+                                    PlaySound(SOUNDS.MENU_BAR_CLICK)
+
+                                    ClearMenu()
+                                end,
+                            }
+                        end
+                        table.insert(entries, subMenuEntry)
+                        --Add each submenu entry as normal menu entry now as the subMenu entries should show directly as ZO_Menu and not as a submenu of a submenu
+                        -->This will miss the > icon at the current comboBox list's entry though
+                        AddCustomMenuItem(subMenuEntry.label, subMenuEntry.callback, subMenuEntry.itemType)
+                    end
+                    --Do ot use AddCustomSubMenuitem anymore here as this would not work with ZO_Menu.
+                    --Just add normal menu items here to show the ZO_Menu as "submenu" at the current comboBox's entry
+                    --AddCustomSubmenuMenuItem(AF.strings[submenuCandidate.submenuName], entries, "ZoFontGameSmall")
                 end
-                table.insert(entries, entry)
+                ShowMenu(ownerControl) -- Show the submenu at the current comboBox's entry
             end
-            AddCustomSubMenuItem(AF.strings[submenuCandidate.submenuName], entries, "ZoFontGameSmall")
         end
     end
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+    --Update 40: ZO_ComboBox is a multi select scrollable combobox now
+    if comboBox.DisableMultiSelect ~= nil then
+        comboBox:DisableMultiSelect()
+    end
+
+    --Called from comboBox:ShowDropdownInternal()
+    --PreHook the AddMenuItems of th scrollable comboBox list and add the main entries + submenu main entries item.callback functions (for each m_sortedItems entry)
+    --[[
+    ZO_PreHook(comboBox, "AddMenuItems", function(p_comboBox)
+        populateScrollableComboBoxEntries(selfVar, p_comboBox, false) --ZO_ComboBox does not use ZO_Menu then anymore, so change to new ZO_ScrollableComboBox and do not add submenu entries here anymore!
+    end)
+    ]]
+
+    --PreHook teh entry select function to suppress it updating the comboBox selected entry if a submenu entry was clicked!
+    ZO_PreHook("ZO_ComboBox_Entry_OnSelected", function(entry)
+        if entry and entry.m_owner == comboBox then
+d("[AF]ZO_ComboBox_Entry_OnSelected")
+            AF._entryZO_ComboBox_Entry_OnSelected = entry
+            if entry.dataEntry and entry.dataEntry.data and entry.dataEntry.data.isSubMenu == true then return true end --suppress the comboBox:SetSelected() function + callback of entry
+        end
+        return false --call original code
+    end)
+
+    --With Update U40 2023-09-19 the ZO_ComboBox is not using ZO_Menu anymore, and thus is only a scrollable multiselection combobox!
+    --Try to use function ZO_ComboBox:SetEntryMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback) to add a callback function for OnMouseEnter and OnMouseExit
+    --and populate the submenu entries that way via using LibCustomMenu.submenu object
+    --populateDropdownEntries(selfVar, p_comboBox, true) --only create submenu entries if not at update U40 -> ZO_ComboBox does not use ZO_Menu then anymore
+    local function onMouseEnterCallback(p_comboBox, entry)
+        if entry and entry.m_owner == comboBox then
+            populateScrollableComboBoxEntries(selfVar, p_comboBox, true, entry) --ZO_ComboBox does not use ZO_Menu then anymore, so change to new ZO_ScrollableComboBox and do not add submenu entries here anymore!
+        end
+    end
+    local function onMouseExitCallback(p_comboBox, entry)
+        if entry and entry.m_owner == comboBox then
+            ClearMenu()
+        end
+    end
+    comboBox:SetEntryMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback)
+
+    ------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
     --Add the buttons to the subfilterBar now
@@ -738,12 +828,16 @@ function AF_FilterBar:ActivateButton(newButton)
         d("[AF]ActivateButton: " ..tos(newButton.name))
     end
     --------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------
     local function PopulateDropdown(p_newButton)
+d("[AF]Popuate dropdown")
+AF._p_newButton = p_newButton
         local comboBox = self.dropdown.m_comboBox
         p_newButton.dropdownCallbacks = BuildDropdownCallbacks(p_newButton.groupName, p_newButton.name)
         local showIconsInFilterDropdowns = AF.settings.showIconsInFilterDropdowns
         local textures = AF.textures
         local texturesReSize = AF.texturesReSize
+
 
         --Update the entry's text and texture
         local function updateDropdownEntry(v, isSubmenu)
@@ -798,6 +892,7 @@ function AF_FilterBar:ActivateButton(newButton)
         end
 
         comboBox.submenuCandidates = {}
+        --Add the normal entries for the filters, and prepare the submenu entries
         for _, v in ipairs(p_newButton.dropdownCallbacks) do
             if v.submenuName then
                 --Check each of the callbackTable entries if an icon should be shown or a pre/suffix text needs to be added
@@ -812,28 +907,63 @@ function AF_FilterBar:ActivateButton(newButton)
                         end
                     end
                 end
+                --Add submenu candidates to the comboBox data -> For later usage in comboBox:AddMenuItems()
                 table.insert(comboBox.submenuCandidates, v)
+
+                --Add 1 entry to the comboBox scrolllist now as the mainSubMenu entry and mark it as submenu in it's data
+                local subMenuData = {
+                    name = v.submenuName
+                }
+                local dropdownSubmenuMainEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownEntryWithIcon = updateDropdownEntry(subMenuData, false)
+                if dropdownSubmenuMainEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
+                    --The callback for the submenu main item must NOT change the selected entry at the comboBox to that mainSubMenu entry!
+                    --todo How to achieve this? Overriden ZO_ComboBox_Entry_OnSelected function which get's executed as an entry get's selected and check for the
+                    --dataEntry.data.isSubMenu
+                    local itemEntrySubmenuMain           = ZO_ComboBox:CreateItemEntry(totalDropdownEntryWithIcon .. "     >", nil)
+                    itemEntrySubmenuMain.isSubMenu       = true --Important, to enable the ZO_Menu submenu via comboBox:SetEntryMouseOverCallbacks(...)
+                    itemEntrySubmenuMain.nameWithoutIcon = itemEntryName
+                    comboBox:AddItem(itemEntrySubmenuMain, ZO_COMBOBOX_SUPPRESS_UPDATE) --Suppress the sorting etc. here. Will be done once below
+                end
+
             else
                 local dropdownEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownEntryWithIcon = updateDropdownEntry(v, false)
                 if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
                     local itemEntry = ZO_ComboBox:CreateItemEntry(totalDropdownEntryWithIcon,
-                            function(comboBox, itemName, item, selectionChanged)
+                            function(comboBox, itemName, item, selectionChanged, oldItem)
+                                local origItem = ZO_ShallowTableCopy(item)
+                                local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
+
+                                AF.currentCombobox = comboBox
+                                AF.currentComboboxSelectedItem = item
+
+                                PlaySound(SOUNDS.MENU_BAR_CLICK)
+
+                                --ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, origItem) -- Will call the original item's callback function
+                                --The same as below:
                                 applyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
                                 self:UpdateLastSelectedDropdownEntries(p_newButton, "PopulateDropdown-DropdownName: " ..tos(dropdownEntryName) .. ", itemName: " ..tos(itemName))
+
+                                --local button = comboBox._AF_FilterBar:GetCurrentButton()
+                                p_newButton.previousDropdownSelection = p_newButton.previousDropdownSelection or {}
+                                p_newButton.previousDropdownSelection[filterPanelIdActive] = origItem
                             end)
+                    itemEntry.isSubMenu = nil --No submenu!
                     itemEntry.filterResetAtStartDelay   = v.filterResetAtStartDelay
                     itemEntry.filterResetAtStart        = v.filterResetAtStart
                     itemEntry.filterStartCallback       = v.filterStartCallback
                     itemEntry.filterEndCallback         = v.filterEndCallback
                     itemEntry.nameWithoutIcon           = itemEntryName
-                    comboBox:AddItem(itemEntry)
+                    comboBox:AddItem(itemEntry, ZO_COMBOBOX_SUPPRESS_UPDATE) --Suppress the sorting etc. here. Will be done once below
                 end
             end
         end
         comboBox:SetSelectedItemFont("ZoFontGameSmall")
         comboBox:SetDropdownFont("ZoFontGameSmall")
+        comboBox:UpdateItems() --Update the combobox items, sort them etc.
     end
     --------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------------------------------------
+
     local inventoryTypeOfFilterBar = self:GetInventoryType()
     checkSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryTypeOfFilterBar)
 
@@ -892,7 +1022,7 @@ function AF_FilterBar:ActivateButton(newButton)
             d("===============================================")
         --end
     end
-    --add new dropdown data
+    --add new dropdown data -> with the entries added to the scrollable combobox
     PopulateDropdown(newButton)
     --re-select the previous selected/first entry of the dropdown box
     if inventoryTypeOfFilterBar and filterPanelIdActive then

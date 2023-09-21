@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram"
-AF.version = "1.6.3.0"
+AF.version = "1.6.3.4"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -13,6 +13,17 @@ AF.currentInventoryType = INVENTORY_BACKPACK
 AF.currentlySelectedDropDownEntry = nil
 
 AF.clientLang = GetCVar("language.2")
+AF.supportedLanguages = {
+    de = 1,
+    en = 2,
+    es = 3,
+    fr = 4,
+    ru = 5,
+    jp = 6,
+    zh = 7,
+}
+
+
 
 AF.otherAddonsDisallowed = {
     ["MultiCraft"] = true
@@ -94,6 +105,22 @@ local bankInvTypes = {
 }
 AF.bankInvTypes = bankInvTypes
 
+local defaultUnivesalInvTypes = {
+	INVENTORY_BACKPACK,
+	INVENTORY_BANK,
+	INVENTORY_HOUSE_BANK
+}
+AF.defaultUnivesalInvTypes = defaultUnivesalInvTypes
+
+local universalDeconSelectedTabToActualInventories = {
+    ["all"] =           defaultUnivesalInvTypes,
+    ["weapons"] =       defaultUnivesalInvTypes,
+    ["armor"] =         defaultUnivesalInvTypes,
+    ["jewelry"] =       defaultUnivesalInvTypes,
+    ["enchantments"] =  defaultUnivesalInvTypes,
+}
+AF.universalDeconSelectedTabToActualInventories = universalDeconSelectedTabToActualInventories
+
 local universalDeconStr = "UniversalDecon"
 
 --Include bank checkbox name
@@ -146,9 +173,11 @@ local controlsForChecks = {
     --Keyboard variables
     store                   = STORE_WINDOW,
     smithingBaseVar         = ZO_Smithing,
+    alchemy                 = ALCHEMY,
     smithing                = SMITHING,
     enchantingBaseVar       = ZO_Enchanting,
     enchanting              = ENCHANTING,
+    provisioner             = PROVISIONER,
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
     companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
@@ -504,10 +533,44 @@ local subFiltersBarInactive = {
 AF.subFiltersBarInactive = subFiltersBarInactive
 
 --These panels are currently not supported
+-->TODO: Remove those entries in the future where subFilter groups and bars SHOULD or COULD be possible!
+-->Remember to check if errors occur as these tabs are opened as default tab (via addons like FCOCraftFilter)!
 local notSupportedPanels = {
+    [CRAFTING_TYPE_ALCHEMY] = {
+        [ZO_ALCHEMY_MODE_NONE] = true,
+        [ZO_ALCHEMY_MODE_CREATION] = true,
+        [ZO_ALCHEMY_MODE_RECIPES] = true
+    },
+    [CRAFTING_TYPE_BLACKSMITHING] = {
+        [SMITHING_MODE_ROOT] = true,
+        [SMITHING_MODE_CREATION] = true,
+        [SMITHING_MODE_RECIPES] = true
+    },
+    [CRAFTING_TYPE_CLOTHIER] = {
+        [SMITHING_MODE_ROOT] = true,
+        [SMITHING_MODE_CREATION] = true,
+        [SMITHING_MODE_RECIPES] = true
+    },
     [CRAFTING_TYPE_ENCHANTING] = {
-        [ENCHANTING_MODE_NONE]      = true,
-        [ENCHANTING_MODE_RECIPES]   = true,
+        [ENCHANTING_MODE_NONE] = true,
+        [ENCHANTING_MODE_RECIPES] = true,
+    },
+    [CRAFTING_TYPE_JEWELRYCRAFTING] = {
+        [SMITHING_MODE_ROOT] = true,
+        [SMITHING_MODE_CREATION] = true,
+        [SMITHING_MODE_RECIPES] = true
+    },
+    [CRAFTING_TYPE_PROVISIONING] = {
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_NONE] = true,
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET] = true,
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES] = true,
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING] = true,
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING] = true,
+    },
+    [CRAFTING_TYPE_WOODWORKING] = {
+        [SMITHING_MODE_ROOT] = true,
+        [SMITHING_MODE_CREATION] = true,
+        [SMITHING_MODE_RECIPES] = true
     },
 }
 AF.notSupportedPanels = notSupportedPanels

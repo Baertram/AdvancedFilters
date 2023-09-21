@@ -114,6 +114,7 @@ stringsES = setmetatable(stringsES, {__index = strings})
         table(s).
 --]]----------------------------------------------------------------------------
 local filterInformation = {
+    pluginName = "AF_LevelFilters",
     submenuName = "LevelFilters",
     callbackTable = fullLevelDropdownCallbacks,
     filterType = {

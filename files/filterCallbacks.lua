@@ -1153,6 +1153,7 @@ local subfilterCallbacks = {
                 {name = "Potency", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_POTENCY})},
             },
         },
+        --[[
         Provisioning = {
             filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}),
             dropdownCallbacks = {
@@ -1161,6 +1162,15 @@ local subfilterCallbacks = {
                 {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT)
                 },
                 {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype(nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT)},
+            },
+        },
+        ]]
+        Provisioning = {
+            filterCallback = GetFilterCallback({ITEMTYPE_INGREDIENT}),
+            dropdownCallbacks = {
+                {name = "FoodIngredient", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ ITEMTYPE_INGREDIENT }, { SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE, SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT, SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT, SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE }, false, true, nil)},
+                {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ ITEMTYPE_INGREDIENT }, { SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE, SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL, SPECIALIZED_ITEMTYPE_INGREDIENT_TEA, SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC }, false, true, nil)},
+                {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ ITEMTYPE_INGREDIENT }, { SPECIALIZED_ITEMTYPE_INGREDIENT_RARE }, false, true, nil),},
             },
         },
         JewelryCrafting = {
@@ -1800,11 +1810,11 @@ local subfilterCallbacks = {
         ]]
         --GetFilterCallbackForItemTypeAndSpecializedItemtype(sItemTypes, sSpecializedItemTypes, checkOnlyJunk, needsItemTypeAndSpecializedItemType, itemTypeDisplayCategory)
         FoodIngredient = {
-            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE}, false, true, nil),
+            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE, SPECIALIZED_ITEMTYPE_INGREDIENT_FRUIT, SPECIALIZED_ITEMTYPE_INGREDIENT_MEAT, SPECIALIZED_ITEMTYPE_INGREDIENT_VEGETABLE}, false, true, nil),
             dropdownCallbacks = {},
         },
         DrinkIngredient = {
-            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE}, false, true, nil),
+            filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_INGREDIENT}, {SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE, SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL, SPECIALIZED_ITEMTYPE_INGREDIENT_TEA, SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC}, false, true, nil),
             dropdownCallbacks = {},
         },
         RareIngredient = {
