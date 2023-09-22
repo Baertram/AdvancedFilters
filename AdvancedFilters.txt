@@ -3,7 +3,7 @@
 ## Version: 1.6.3.4
 ## AddOnVersion: 1634
 ## APIVersion: 101039 101040
-## DependsOn: LibAddonMenu-2.0>=34 LibCustomMenu>=721 LibFilters-3.0>=340
+## DependsOn: LibAddonMenu-2.0>=34 LibCustomMenu>=722 LibFilters-3.0>=340 LibScrollableMenu>=0102
 ## OptionalDependsOn: LibMotifCategories>=2
 ## OptionalDependsOn: FCOCraftFilter>=006020 FCOCompanion>=001040
 ## SavedVariables: AdvancedFilters_Settings
