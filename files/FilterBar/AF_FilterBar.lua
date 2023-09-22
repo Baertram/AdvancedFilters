@@ -860,8 +860,8 @@ function AF_FilterBar:ActivateButton(newButton)
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     local function PopulateDropdown(p_newButton)
-d("[AF]Popuate dropdown")
-AF._p_newButton = p_newButton
+--d("[AF]Populate dropdown")
+--AF._p_newButton = p_newButton
         local comboBox = self.dropdown.m_comboBox
         p_newButton.dropdownCallbacks = BuildDropdownCallbacks(p_newButton.groupName, p_newButton.name)
         local showIconsInFilterDropdowns = AF.settings.showIconsInFilterDropdowns
@@ -927,7 +927,7 @@ AF._p_newButton = p_newButton
         --Add the normal entries for the filters, and prepare the submenu entries
         for _, v in ipairs(p_newButton.dropdownCallbacks) do
             if v.submenuName then
-d("[AF]subMenu: " ..tos(v.submenuName))
+--d("[AF]subMenu: " ..tos(v.submenuName))
                 local submenuEntries = {}
 
                 --Check each of the callbackTable entries if an icon should be shown or a pre/suffix text needs to be added
