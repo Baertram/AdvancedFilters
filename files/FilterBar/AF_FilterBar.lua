@@ -876,8 +876,20 @@ function AF_FilterBar:ActivateButton(newButton)
         local function updateDropdownEntry(v, isSubmenu)
             isSubmenu = isSubmenu or false
             local totalDropdownEntryWithIcon
+            local isHeader = v.isHeader
 
             local dropdownEntryName = v.name
+            --The header entries might consist of "<group><|><subFilter>" and must be split into the <subFilter> solo again
+            --so that AF.strings[<subFilter>] works properly.
+            -->They were added as "<group><|><subFilter>" at AF.util.BuildDropdownCallbacks -> For a unique table key in the
+            -->callbacks, so that "Armor">"All" does not prevent a 2nd entry for "Weapons">"All" e.g.
+            if isHeader == true then
+                local found, startIndex, endIndex = zo_plainstrfind(dropdownEntryName, "<|>")
+                if found == true and endIndex ~= nil then
+                    dropdownEntryName = string.sub(dropdownEntryName, endIndex)
+                end
+            end
+
             if v.addString ~= nil and v.addString ~= "" then
                 dropdownEntryName = dropdownEntryName .. "_" .. v.addString
             end

@@ -866,6 +866,7 @@ local subfilterCallbacks = {
                 {name = "Sword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
                 {name = "Dagger", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
+            dropdownCallbacksHeaders = true,
         },
         TwoHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
@@ -874,11 +875,14 @@ local subfilterCallbacks = {
                 {name = "TwoHandHammer", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
                 {name = "TwoHandSword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
             dropdownCallbacks = {
+                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
             },
+            dropdownCallbacksHeaders = true,
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -887,11 +891,14 @@ local subfilterCallbacks = {
                 {name = "Frost", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
                 {name = "Lightning", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
             dropdownCallbacks = {
+                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -908,16 +915,19 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         --[[
         --Moved to Miscelaneous
@@ -927,6 +937,7 @@ local subfilterCallbacks = {
         ]]
         Body = {
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
@@ -992,7 +1003,7 @@ local subfilterCallbacks = {
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
                     subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
+                    onlyGroups = {"Jewelry", "JewelryCraftingStation", "JewelryRetrait", "Junk"},
                     excludeFilterPanels = {
                         LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
                         LF_SMITHING_REFINE,
@@ -1042,7 +1053,7 @@ local subfilterCallbacks = {
                     },
                     filterType = {ITEMFILTERTYPE_ALL},
                     subfilters = {"All",},
-                    onlyGroups = {"Jewelry", "JewelryRetrait", "Junk"},
+                    onlyGroups = {"Jewelry", "JewelryCraftingStation", "JewelryRetrait", "Junk"},
                     excludeFilterPanels = {
                         LF_ENCHANTING_CREATION, LF_ENCHANTING_EXTRACTION,
                         LF_SMITHING_REFINE,
@@ -1062,6 +1073,8 @@ local subfilterCallbacks = {
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
             dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
         },
         Crown = {
@@ -1071,16 +1084,14 @@ local subfilterCallbacks = {
         Food = {
             filterCallback = GetFilterCallback({ITEMTYPE_FOOD}),
             dropdownCallbacks = {
-                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Drink = {
             filterCallback = GetFilterCallback({ITEMTYPE_DRINK}),
             dropdownCallbacks = {
-                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Recipe = {
             filterCallback = GetFilterCallback({ITEMTYPE_RECIPE}),
@@ -1089,21 +1100,18 @@ local subfilterCallbacks = {
         Potion = {
             filterCallback = GetFilterCallback({ITEMTYPE_POTION}),
             dropdownCallbacks = {
-                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Poison = {
             filterCallback = GetFilterCallback({ITEMTYPE_POISON}),
             dropdownCallbacks = {
-                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Motif = {
             filterCallback = GetFilterCallback({ITEMTYPE_RACIAL_STYLE_MOTIF}),
             dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
         },
         Writ = {
@@ -1118,13 +1126,11 @@ local subfilterCallbacks = {
                     {ITEMFILTERTYPE_PROVISIONING},
                     {SPECIALIZED_ITEMTYPE_CONTAINER}, false, true),
             dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
         },
         Repair = {
             filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_GROUP_REPAIR}),
             dropdownCallbacks = {
-                {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
             },
         },
         Trophy = {
@@ -1142,6 +1148,7 @@ local subfilterCallbacks = {
                 {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1171,6 +1178,7 @@ local subfilterCallbacks = {
                 {name = "Water", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POTION_BASE})},
                 {name = "Oil", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POISON_BASE})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Enchanting = {
             filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY}),
@@ -1179,6 +1187,7 @@ local subfilterCallbacks = {
                 {name = "Essence", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_ESSENCE})},
                 {name = "Potency", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_ENCHANTING_RUNE_POTENCY})},
             },
+            dropdownCallbacksHeaders = true,
         },
         --[[
         Provisioning = {
@@ -1199,6 +1208,7 @@ local subfilterCallbacks = {
                 {name = "DrinkIngredient", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ ITEMTYPE_INGREDIENT }, { SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE, SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL, SPECIALIZED_ITEMTYPE_INGREDIENT_TEA, SPECIALIZED_ITEMTYPE_INGREDIENT_TONIC }, false, true, nil)},
                 {name = "RareIngredient", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ ITEMTYPE_INGREDIENT }, { SPECIALIZED_ITEMTYPE_INGREDIENT_RARE }, false, true, nil),},
             },
+            dropdownCallbacksHeaders = true,
         },
         JewelryCrafting = {
             filterCallback = GetFilterCallback({
@@ -1213,6 +1223,7 @@ local subfilterCallbacks = {
                 {name = "RawPlating", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER})},
                 {name = "RawMaterialJewelry", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Style = {
             filterCallback = GetFilterCallback({ITEMTYPE_STYLE_MATERIAL, ITEMTYPE_RAW_MATERIAL}),
@@ -1224,6 +1235,7 @@ local subfilterCallbacks = {
                 {name = "ExoticStyle", showIcon=true, filterCallback = GetFilterCallbackForStyleMaterial(LMC_MOTIF_CATEGORY_EXOTIC)},
                 {name = "CrownStyle", showIcon=true, filterCallback = GetFilterCallbackForStyleMaterial(LMC_MOTIF_CATEGORY_CROWN)},
             },
+            dropdownCallbacksHeaders = true,
         },
         --[[
         WeaponTrait = {
@@ -1251,6 +1263,7 @@ local subfilterCallbacks = {
                 {name = "JewelryRawTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT})},
                 {name = "JewelryRefinedTrait", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_TRAIT})},
             },
+            dropdownCallbacksHeaders = true,
         },
         FurnishingMat = {
             filterCallback = GetFilterCallback({ITEMTYPE_FURNISHING_MATERIAL}),
@@ -1324,6 +1337,7 @@ local subfilterCallbacks = {
                 {name = "RareFish", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_COLLECTIBLE_RARE_FISH})},
                 {name = "Treasure", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TREASURE})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Fence = {
             filterCallback = GetFilterCallbackForFence(),
@@ -1340,6 +1354,7 @@ local subfilterCallbacks = {
                 {name = "Disguise", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_DISGUISE})},
                 {name = "Tabard", showIcon=true,   filterCallback = GetFilterCallback({ITEMTYPE_TABARD})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
     --Quest
@@ -1398,6 +1413,7 @@ local subfilterCallbacks = {
                 {name = "Sword", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
                 {name = "Dagger", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_DAGGER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
+            dropdownCallbacksHeaders = true,
         },
         TwoHand = {
             filterForAll = {
@@ -1410,6 +1426,7 @@ local subfilterCallbacks = {
                 {name = "TwoHandHammer", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_HAMMER) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
                 {name = "TwoHandSword", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_TWO_HANDED_SWORD) end, filterCallback=GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1431,6 +1448,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {
                 {name = "Bow", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_BOW) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
             },
+            dropdownCallbacksHeaders = true,
         },
         DestructionStaff = {
             filterForAll = {
@@ -1443,6 +1461,7 @@ local subfilterCallbacks = {
                 {name = "Frost", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_FROST_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
                 {name = "Lightning", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_LIGHTNING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
         HealStaff = {
             filterForAll = {
@@ -1453,6 +1472,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {
                 {name = "HealStaff", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, WEAPONTYPE_HEALING_STAFF) end, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1485,7 +1505,8 @@ local subfilterCallbacks = {
                 {name = "Waist", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
                 {name = "Legs", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
                 {name = "Feet", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
-            }
+            },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1526,6 +1547,7 @@ local subfilterCallbacks = {
                 {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
                 {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Medium = {
             filterForAll = {
@@ -1542,6 +1564,7 @@ local subfilterCallbacks = {
                 {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
                 {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1576,6 +1599,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {
                 {name = "Shield", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_OFF_HAND) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1908,6 +1932,7 @@ local subfilterCallbacks = {
                 {name = "RawMaterialJewelry", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_RAW_TRAIT})},
                 {name = "RefinedMaterialJewelry", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_JEWELRY_TRAIT})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1934,6 +1959,7 @@ local subfilterCallbacks = {
                 {name = "Sword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
                 {name = "Dagger", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
+            dropdownCallbacksHeaders = true,
         },
         TwoHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
@@ -1942,11 +1968,14 @@ local subfilterCallbacks = {
                 {name = "TwoHandHammer", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
                 {name = "TwoHandSword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
             dropdownCallbacks = {
+                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
             },
+            dropdownCallbacksHeaders = true,
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -1955,11 +1984,14 @@ local subfilterCallbacks = {
                 {name = "Frost", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
                 {name = "Lightning", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
             dropdownCallbacks = {
+                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -1974,22 +2006,26 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = {
             },
+            dropdownCallbacksHeaders = true,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
             dropdownCallbacks = {
                 {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 --=============================================================================================================================================================================================
@@ -2096,6 +2132,7 @@ local subfilterCallbacks = {
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
                 {name = "Treasure", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TREASURE})}
             },
+            dropdownCallbacksHeaders = true,
         },
         Crown = {
             filterCallback = GetFilterCallback({ITEMTYPE_CROWN_ITEM, ITEMTYPE_DYE_STAMP}),
@@ -2133,6 +2170,7 @@ local subfilterCallbacks = {
                 {name = "DestructionStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}, false, {ITEMFILTERTYPE_COMPANION})},
                 {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}, false, {ITEMFILTERTYPE_COMPANION})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Armor = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD, EQUIP_TYPE_CHEST, EQUIP_TYPE_SHOULDERS, EQUIP_TYPE_HAND, EQUIP_TYPE_WAIST, EQUIP_TYPE_LEGS, EQUIP_TYPE_FEET, EQUIP_TYPE_OFF_HAND}, nil, false, {ITEMFILTERTYPE_COMPANION}),
@@ -2145,6 +2183,7 @@ local subfilterCallbacks = {
                 --{name = "Vanity", filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_DISGUISE, EQUIP_TYPE_COSTUME}, nil, false, , {ITEMFILTERTYPE_COMPANION})},
                 --{name = "Vanity", filterCallback = GetFilterCallbackForClothing(true, {ITEMFILTERTYPE_COMPANION})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Jewelry = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING, EQUIP_TYPE_NECK}, nil, false, {ITEMFILTERTYPE_COMPANION}),
@@ -2152,6 +2191,7 @@ local subfilterCallbacks = {
                 {name = "Ring", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_RING}, nil, false, {ITEMFILTERTYPE_COMPANION})},
                 {name = "Neck", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_NECK}, nil, false, {ITEMFILTERTYPE_COMPANION})},
             },
+            dropdownCallbacksHeaders = true,
         },
     },
 
@@ -2467,6 +2507,7 @@ local subfilterCallbacks = {
                 {name = "Sword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
                 {name = "Dagger", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
+            dropdownCallbacksHeaders = true,
         },
         TwoHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
@@ -2475,10 +2516,14 @@ local subfilterCallbacks = {
                 {name = "TwoHandHammer", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
                 {name = "TwoHandSword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
+            },
+            dropdownCallbacksHeaders = true,
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -2487,33 +2532,42 @@ local subfilterCallbacks = {
                 {name = "Frost", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
                 {name = "Lightning", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
+            },
+            dropdownCallbacksHeaders = true,
         },
 
         --Armor
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Body = {
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
             dropdownCallbacks = {
                 {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
+            dropdownCallbacksHeaders = true,
         },
 
         --Jewelry
@@ -2605,6 +2659,7 @@ local subfilterCallbacks = {
         Glyphs = {
             filterCallback = GetFilterCallback({ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON}),
             dropdownCallbacks = glyphTypesDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
 
     }, --ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ALL
@@ -2623,6 +2678,7 @@ local subfilterCallbacks = {
                 {name = "Sword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_SWORD})},
                 {name = "Dagger", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_DAGGER})},
             },
+            dropdownCallbacksHeaders = true,
         },
         TwoHand = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_AXE, WEAPONTYPE_TWO_HANDED_HAMMER, WEAPONTYPE_TWO_HANDED_SWORD}),
@@ -2631,10 +2687,14 @@ local subfilterCallbacks = {
                 {name = "TwoHandHammer", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_HAMMER})},
                 {name = "TwoHandSword", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_TWO_HANDED_SWORD})},
             },
+            dropdownCallbacksHeaders = true,
         },
         Bow = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "Bow", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_BOW})},
+            },
+            dropdownCallbacksHeaders = true,
         },
         DestructionStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FIRE_STAFF, WEAPONTYPE_FROST_STAFF, WEAPONTYPE_LIGHTNING_STAFF}),
@@ -2643,10 +2703,14 @@ local subfilterCallbacks = {
                 {name = "Frost", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_FROST_STAFF})},
                 {name = "Lightning", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_LIGHTNING_STAFF})},
             },
+            dropdownCallbacksHeaders = true,
         },
         HealStaff = {
             filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF}),
-            dropdownCallbacks = {},
+            dropdownCallbacks = {
+                {name = "HealStaff", showIcon=true, filterCallback = GetFilterCallbackForWeaponType({WEAPONTYPE_HEALING_STAFF})},
+            },
+            dropdownCallbacksHeaders = true,
         },
     }, --ITEMFILTERTYPE_AF_UNIVERSAL_DECON_WEAPONS
 
@@ -2659,14 +2723,17 @@ local subfilterCallbacks = {
         Heavy = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Medium = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         LightArmor = {
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         --[[
         --Moved to Miscelaneous
@@ -2676,12 +2743,14 @@ local subfilterCallbacks = {
         ]]
         Body = {
             dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacksHeaders = true,
         },
         Shield = {
             filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND}),
             dropdownCallbacks = {
                 {name = "Shield", showIcon=true, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_OFF_HAND})},
             },
+            dropdownCallbacksHeaders = true,
         },
         --[[
         --Moved to Miscelaneous

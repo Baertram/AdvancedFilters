@@ -1064,27 +1064,50 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
 
         for _, value in ipairs(callbackTable) do
             if value == callbackEntry or (value.name and value.name == callbackEntry.name) then
-                if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Duplicate AF base filter entry: " .. tos(callbackEntry.name)) end
-                return
+                local doError = true
+                if callbackEntry.addString ~= nil then
+                    if value.name ~= nil and value.name ~= callbackEntry.name .. "_" .. callbackEntry.addString then
+                        doError = false
+                    end
+                end
+                if doError == true then
+                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Duplicate AF base filter entry: " .. tos(callbackEntry.name)) end
+                    return
+                end
             end
         end
         table.insert(callbackTable, callbackEntry)
     end
 
     --Check if the dropdownCallbacks should show a header row in the dropdown (e.g. for the Junk entries)
-    local function checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subFilterName)
+    local function checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subFilterName, isSubmenuCallback)
+        isSubmenuCallback = isSubmenuCallback or false
         local subFilterGroupDropdownCallbacks
         if groupName == nil then
             subFilterGroupDropdownCallbacks = subfilterCallbacks[subFilterName]
         else
             subFilterGroupDropdownCallbacks = subfilterCallbacks[groupName][subFilterName]
         end
-        if subFilterGroupDropdownCallbacks ~= nil and subFilterGroupDropdownCallbacks.dropdownCallbacksHeaders == true then
-            local headerCallbackEntry = {
-                isHeader    = true, --Define this entry as headerline for the dropdown ZO_ComboBox -> LibScrollableMenu
-                name        = subFilterName,
-            }
-            insertNonDuplicateToCallbackTable(callbackTable, headerCallbackEntry)
+        if subFilterGroupDropdownCallbacks ~= nil then
+            if not isSubmenuCallback then
+                if subFilterGroupDropdownCallbacks.dropdownCallbacksHeaders == true then
+                    if not ZO_IsTableEmpty(subFilterGroupDropdownCallbacks.dropdownCallbacks) then
+                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Dropdown callback header entry: " .. tos(subFilterName) .. ", group: " ..tos(groupName)) end
+                        local headerCallbackEntry = {
+                            isHeader    = true, --Define this entry as headerline for the dropdown ZO_ComboBox -> LibScrollableMenu
+                            name        = tos(groupName) .. "<|>" .. tos(subFilterName),
+                        }
+                        insertNonDuplicateToCallbackTable(callbackTable, headerCallbackEntry)
+                    end
+                end
+
+            else
+                --[[
+                if subFilterGroupDropdownCallbacks.dropdownSubmenuCallbacks.dropdownCallbacksHeaders == true then
+
+                end
+                ]]
+            end
         end
     end
 
@@ -1092,7 +1115,7 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
     ------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------
 
-    -- insert global AdvancedFilters "All" filters
+    -- insert global AdvancedFilters "All" filters (no group)
     checkAndAddPossibleDropdownCallbackHeaderLine(nil, AF_CONST_ALL)
     for _, callbackEntry in ipairs(subfilterCallbacks[AF_CONST_ALL].dropdownCallbacks) do
         callbackEntry.isStandardAFDropdownFilter = true
@@ -1111,6 +1134,7 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
         end
         --Subfilter is the ALL entry?
         if subfilterName == AF_CONST_ALL then
+            --Gte the keys of all groupnames' subFilters, e.g. "1 HD", "2 HD", "Heal staff"
             local groupNameOfKeys = keys[groupName]
             if groupNameOfKeys == nil then
                 d("[AdvancedFilters] ERROR - util.BuildDropdownCallbacks-GroupName is missing in keys: " ..tos(groupName) .. ". Please contact the author of ".. tos(AF.name) .. " at the website in the settings menu (link can be found at the top of the settings page)!")
@@ -1152,6 +1176,7 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
                     insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
                 end
             end
+
         --Subfilter is NOT the ALL entry
         else
             --insert standard AdvancedFilters filters for provided subfilter
