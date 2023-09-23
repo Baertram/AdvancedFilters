@@ -2000,23 +2000,58 @@ local subfilterCallbacks = {
         addonDropdownCallbacks = {},
         [AF_CONST_ALL] = {
             filterCallback = GetFilterCallback(nil),
-            dropdownCallbacks = armorTypeDropdownCallbacks,
+            dropdownCallbacks = {
+                {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
+            },
         },
         Heavy = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_HEAVY},
+            },
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_HEAVY) end,
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_HEAVY}),
             dropdownCallbacks = {
-            },
-            dropdownCallbacksHeaders = true,
-        },
-        Medium = {
-            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
-            dropdownCallbacks = {
+                {name = "Head", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD})},
+                {name = "Chest", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST})},
+                {name = "Shoulders", showIcon=true, filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS})},
+                {name = "Hand", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND})},
+                {name = "Waist", showIcon=true,     filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST})},
+                {name = "Legs", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS})},
+                {name = "Feet", showIcon=true,      filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_HEAVY) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET})},
             },
             dropdownCallbacksHeaders = true,
         },
         LightArmor = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_LIGHT},
+            },
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_LIGHT) end,
             filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_LIGHT}),
             dropdownCallbacks = {
+                {name = "Head", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_LIGHT})},
+                {name = "Chest", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_LIGHT})},
+                {name = "Shoulders", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_LIGHT})},
+                {name = "Hand", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_LIGHT})},
+                {name = "Waist", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_LIGHT})},
+                {name = "Legs", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_LIGHT})},
+                {name = "Feet", showIcon=true, addString="Light", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_LIGHT) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_LIGHT})},
+            },
+            dropdownCallbacksHeaders = true,
+        },
+        Medium = {
+            filterForAll = {
+                armorTypes = {ARMORTYPE_MEDIUM},
+            },
+            filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, nil, ARMORTYPE_MEDIUM) end,
+            filterCallback = GetFilterCallbackForArmorType({ARMORTYPE_MEDIUM}),
+            dropdownCallbacks = {
+                {name = "Head", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HEAD, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HEAD}, {ARMORTYPE_MEDIUM})},
+                {name = "Chest", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_CHEST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_CHEST}, {ARMORTYPE_MEDIUM})},
+                {name = "Shoulders", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_SHOULDERS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_SHOULDERS}, {ARMORTYPE_MEDIUM})},
+                {name = "Hand", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_HAND, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_HAND}, {ARMORTYPE_MEDIUM})},
+                {name = "Waist", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_WAIST, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_WAIST}, {ARMORTYPE_MEDIUM})},
+                {name = "Legs", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_LEGS, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_LEGS}, {ARMORTYPE_MEDIUM})},
+                {name = "Feet", showIcon=true, addString="Medium", filterStartCallback = function() checkForResearchPanelAndRunFilterFunction(false, EQUIP_TYPE_FEET, ARMORTYPE_MEDIUM) end, filterCallback = GetFilterCallbackForGear({EQUIP_TYPE_FEET}, {ARMORTYPE_MEDIUM})},
             },
             dropdownCallbacksHeaders = true,
         },
