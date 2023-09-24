@@ -31,6 +31,7 @@ local stringsES = {
 }
 
 local filterInformation = {
+    pluginName = "AF_NewMotifFilters",
     callbackTable = dropdownCallback,
     filterType = ITEMFILTERTYPE_WEAPONS,
     subfilters = {"All",},

@@ -44,6 +44,7 @@ local stringsFR = {
 stringsFR = setmetatable(stringsFR, {__index = strings})
 
 local filterInformation = {
+    pluginName = "AF_MotifCategoriesFilters",
     submenuName = "MotifCategories",
     callbackTable = dropdownCallbacks,
     filterType = ITEMFILTERTYPE_WEAPONS,

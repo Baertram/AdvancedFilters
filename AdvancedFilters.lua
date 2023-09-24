@@ -35,60 +35,22 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --     Should check though if the filter of the dropdown box can be applied to the current panel and subfilterGroup! -> Possible?
 --> Not doable that easily as filters which cannot be applied at a panel should not be shown in teh "last selected" list then, and so on
 
---#55: 2021-02-20: Bug, Baertram: Bank withdraw panel does not reset the disabled subfilter buttons if directly opened after
---     e.g. mail send panel, where the subfilter button was disabled due to e.g. items that cannot be send by mail (bound).
---     e.g. weapons->1hd at mail send panel -> Button is disabled. Open the bank, switch to withdraw tab: The weapons sub-filter
---     button is still disabled there! Needs to be reset on bank open e.g.
-
---#57: 2021-02-20: Bug, Baertram: Bank withdraw panel somehow applies filters from Bank deposit/mail send panel? Or at
---     least the selected subfilters do not show any items anymore? LibFilters-3.0 v20 bug? Not always reproducable. You
---     need to open the inventoy first, then mail send, then switch to bank/house bank and switch between deposit and
---     withdraw
-
 --[[
->>>======== AF ERROR - BEGIN ========>>>
-[AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
-
-1) What did you do?
-- Open a storage furnishing
-- Withdraw "Tab"
-- click Companion Items Filter Tab <- ERROR happens
-2) Where did you do it?
-At my ingame home
-3) Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)?
-yes - happens with only AdvancedFilters active
-
--> [ ShowSubfilterBar - SubFilterBar missing]
-
-InventoryType: 4, craftingType: 0/0, currentFilter: 41, subFilterGroupMissing: false, subfilterBarMissing: false
-<<<======== AF ERROR - END ========<<<
- Report comment to moderator
-]]
-
---#73 2022-02-06, bug, Beartram: Opening enchanting (extract) table with AF and FCOIS and FCOCraftFilter enabled
---[[
-user:/AddOns/AdvancedFilters/files/util.lua:2128: attempt to index a nil value
-|rstack traceback:
-user:/AddOns/AdvancedFilters/files/util.lua:2128: in function 'util.GetCraftingTablePanelIncludeBankedCheckbox'
-|caaaaaa<Locals> filterPanelId = 7, ZOsControlNames = [table:1]{tabs = "Tabs", questItemsOnly = "QuestItemsOnly", active = "Active", searchFilters = "SearchFilters", subTabs = "SubTabs", textSearch = "TextSearch", includeBankedCheckbox = "IncludeBanked", filterDivider = "FilterDivider", title = "Title", searchDivider = "SearchDivider", buttonDivider = "ButtonDivider"}, includeBankedCBoxName = "IncludeBanked" </Locals>|r
-user:/AddOns/AdvancedFilters/files/util.lua:1175: in function 'util.RefreshSubfilterBar'
-|caaaaaa<Locals> subfilterBar = [table:2]{name = "PlayerInventory_All", libFilters_filterType = 1, inventoryType = 1}, calledFromExternalAddonName = "", settings = [table:3]{}, debugSpam = F, debugSpamExcludeRefreshSubfilterBar = T, inventoryType = 1, craftingType = 3, isNoCrafting = F, realInvTypes = [table:4]{1 = 1}, grayOutSubFiltersWithNoItems = T, abortSubfilterBarRefresh = F, onlyEnableAllSubfilterBarButtons = F, isVendorBuyInv = F, isCompanionInv = F, hideCharBound = F, subFilterBarFilterInfo = [table:5]{libFiltersPanelId = 7, isTrade = F, isMailSendPanel = F, isLaunderPanel = F, isCompanionInvButtonActive = F, isGuildStoreSellPanel = F, isCompanionInv = F, isRetraitStation = F, isJunkInvButtonActive = F, isBankDepositPanel = F, isHouseBankDepositPanel = F, isJunkButtonActive = F, isVendorBuy = F, isGuildBankDepositPanel = F, isFencePanel = F, isVendorPanel = F}, libFiltersPanelId = 7, isMailSendPanel = F, isVendorBuy = F, isVendorPanel = F </Locals>|r
-user:/AddOns/AdvancedFilters/files/util.lua:72: in function 'Update'
-]]
 
 
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2022-02-06
+--TODO Last updated: 2023-06-08
 --Max todos: #73
+
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2022-01-18
+--CURRENTLY WORKING ON - Last updated: 2023-06-08
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.1.4 - Current 1.6.1.5
+--  UPDATE INFORMATION: since AF 1.6.3.0 - Current 1.6.3.1
 --______________________________________________________________________________________________________________________
 
 -- ADDED
@@ -97,14 +59,9 @@ user:/AddOns/AdvancedFilters/files/util.lua:72: in function 'Update'
 -- ADDED ON REQUEST
 
 -- CHANGED
--- Renamed files and created folders
--- Created own API file
--- Added more comments
 
 -- FIXED
--- French translations, thanks to Jakez31
---#66 Bank junk filter did not enable subfilter buttons properly
---#72 Treasure itemType was shown below Consumables at the Junk tab
+
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -113,31 +70,12 @@ user:/AddOns/AdvancedFilters/files/util.lua:72: in function 'Update'
 --                                                  NOT REPLICABLE
 --______________________________________________________________________________________________________________________
 --Not replicable 2019-08-11
---1. Error message on PTS if opening the Enchanting table:
---[[
-local subfilterBar = subfilterGroup[craftingType][currentFilter]
--subfilterBar was missing somehow-
 
-user:/AddOns/AdvancedFilters/main.lua:213: attempt to index a nil value
-stack traceback:
-user:/AddOns/AdvancedFilters/main.lua:213: in function 'ShowSubfilterBar'
-|caaaaaa<Locals> craftingType = 3, UpdateListAnchors = user:/AddOns/AdvancedFilters/main.lua:165, doDebugOutput = false, subfilterGroup = tbl </Locals>|r
-user:/AddOns/AdvancedFilters/util.lua:732: in function 'Update'
-]]
-
---Not replicable 2019-08-11
---2. Error message upon doing something at crafting station (User: Phuein)
---[[
--subfilterBar was missing somehow-
--> local subfilterBar = subfilterGroup[craftingType][currentFilter]
-
-https://imgur.com/7btGZff
-user:/AddOns/AdvancedFilters/main.lua:213 attempt o index a nil value, craftingType = 1
-]]
 
 --______________________________________________________________________________________________________________________
 --                                                  TODO - END
 --______________________________________________________________________________________________________________________
+]]
 ---==========================================================================================================================================================================
 
 --Constants in local variables
@@ -147,6 +85,8 @@ local smithingBaseVar = controlsForChecks.smithingBaseVar
 local smithingVar = controlsForChecks.smithing
 local enchantingVar = controlsForChecks.enchanting
 local enchantingBaseVar = controlsForChecks.enchantingBaseVar
+local alchemyVar = controlsForChecks.alchemy
+local provisionerVar = controlsForChecks.provisioner
 local retraitVar = controlsForChecks.retrait
 local quickslotVar = controlsForChecks.quickslot
 local quickslotFragment = controlsForChecks.quickslotFragment
@@ -436,6 +376,43 @@ local function InitializeHooks()
         end
     end
 
+
+    --Detect if the current panel (crafting e.g.) is not supporting any subFilter groupes and bars (e.g. SMITHING creation/recipes, enchanting recipes, ...)
+    local function detectNotSupportedSubfilterPanel(craftingType)
+        --Supported panel? SubfilterBar filters are provided?
+        --Check if any not supported panel is given and do not show a message in chat then
+        local notSupportedPanel = false
+        local panelModeVar
+
+        local notSupportedPanels = AF.notSupportedPanels
+        local notSupportedPanelForCrafting = notSupportedPanels[craftingType]
+
+        if notSupportedPanelForCrafting ~= nil then
+            if craftingType ~= CRAFTING_TYPE_INVALID then
+                --Check which crafting it is and get the current crafting's mode variable/state
+                if craftingType == CRAFTING_TYPE_ENCHANTING then
+                    panelModeVar = enchantingVar.enchantingMode
+                elseif craftingType == CRAFTING_TYPE_BLACKSMITHING or craftingType == CRAFTING_TYPE_CLOTHIER or craftingType == CRAFTING_TYPE_WOODWORKING or craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+                    panelModeVar = smithingVar.mode
+                elseif craftingType == CRAFTING_TYPE_ALCHEMY then
+                    panelModeVar = alchemyVar.mode
+                elseif craftingType == CRAFTING_TYPE_PROVISIONING then
+                    panelModeVar = provisionerVar.filterType
+                end
+                if panelModeVar ~= nil then
+                    if notSupportedPanelForCrafting[panelModeVar] == true then
+                        notSupportedPanel = true
+                    end
+                end
+            --else
+                --Universal Decon or Retrait: All panels are supported until now
+            end
+        end
+        return notSupportedPanel, panelModeVar
+    end
+    AF.util.detectNotSupportedSubfilterPanel = detectNotSupportedSubfilterPanel
+
+
     --Show the subfilter bar of AdvancedFilters below the parent filter (e.g. button for armor, weapons, material, ...)
     --The subfilter bars are defined via the file constants.lua in table "subfilterGroups".
     --The contents of the subfilter bars are defined in file constants.lua in table "subfilterButtonNames"
@@ -718,12 +695,16 @@ local function InitializeHooks()
                 AF.blockOnInventoryFilterChangedPreHookForCraftBag = false
             end
         ]]
+
+        --Supported panel? SubfilterBar filters are provided?
+        --Check if any not supported panel is given and do not show a message in chat then
+        local notSupportedPanel, panelModeVar = detectNotSupportedSubfilterPanel(craftingType)
+
         --Error handling: Hiding old subfilter bar
         -- e.g. for missing variables, or if other addons might have changed the currentFilter or currentInventoryType (indirectly by their stuff -> loadtime was increased -> filter change did not happen in time for AF due to this)
         local doDebugOutput = AF.settings.doDebugOutput
         local subfilterGroupMissingForInvType = false
         local subfilterBarMissing = false
-        local notSupportedPanel = false
         if doDebugOutput then
             local showErrorInChat = false
             if invType == nil then
@@ -755,33 +736,22 @@ local function InitializeHooks()
                     subFilterBarName = nextSubfilterBar.name
                 end
             end
-            --Check if any not supported panel is given and do not show a message in chat then
-            local notSupportedPanels = AF.notSupportedPanels
-            local notSupportedPanelForCrafting = notSupportedPanels[craftingType]
-            if notSupportedPanelForCrafting then
-                if craftingType ~= CRAFTING_TYPE_NONE then
-                    --Check which crafting it is and get the current crafting's mode variable/state
-                    local modeVar
-                    if craftingType == CRAFTING_TYPE_ENCHANTING then
-                        modeVar = enchantingVar.enchantingMode
-                    elseif craftingType == CRAFTING_TYPE_BLACKSMITHING or craftingType == CRAFTING_TYPE_CLOTHIER or craftingType == CRAFTING_TYPE_WOODWORKING then
-                        modeVar = smithingVar.mode
-                    end
-                    if modeVar ~= nil then
-                        if notSupportedPanelForCrafting[modeVar] == true then
-                            notSupportedPanel = true
-                            if debugSpam then
-                                d("<Not supported panel for craftingType "..tos(craftingType) .. ", panelMode: " ..tos(modeVar))
-                            end
-                        end
-                    end
+            if notSupportedPanel then
+                if debugSpam then
+                    d("<Not supported panel for craftingType "..tos(craftingType) .. ", panelMode: " ..tos(panelModeVar))
                 end
             end
+
             --Show a debug message now and abort here?
             if showErrorInChat and AF.subFiltersBarInactive[currentFilterToUse] == nil and notSupportedPanel == false then
                 showChatDebug("ShowSubfilterBar - BEGIN", "InventoryType: " ..tos(invType) .. ", craftingType: " ..tos(craftingType) .. "/" .. util.GetCraftingType() .. ", currentFilter: " .. tos(currentFilterToUse) .. ", subFilterGroupMissing: " ..tos(subfilterGroupMissingForInvType) .. ", subfilterBarMissing: " ..tos(subfilterBarMissing) .. ", subfilterBarName: " ..tos(subFilterBarName))
                 return false
             end
+        end
+
+        --Not supported panel detected, abort here as we got no subfilterGroup and thus no Bar to show!
+        if notSupportedPanel == true then
+            return false
         end
 
         --Get the old subfilterbar + the new subfilterbar group data

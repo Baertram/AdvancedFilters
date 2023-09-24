@@ -5,15 +5,22 @@ local util = AF.util
 
 local debugSpam = AF.debugSpam
 local pluginNameUnknown = "_pluginNameUnknown"
+AF.pluginNameUnknown = pluginNameUnknown
 
 ------------------------------------------------------------------------------------------------------------------------
 --Local variables from global addon namespace
 ------------------------------------------------------------------------------------------------------------------------
+local addStrings = AF.util.AddStrings
+
 local filterTypeToGroupName = AF.filterTypeNames
 local normalFilterNames = AF.normalFilterNames
 local normalFilter2CraftingFilter = AF.normalFilter2CraftingFilter
 
 local subfilterCallbacks = AF.subfilterCallbacks
+
+--Preventer table to check if any plugin strings have been changed to add the unique prefix already
+-->Will contain the table as key and a boolean true if already processed!
+local alreadyStringProcessedPluginFilterInformation = {}
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -22,9 +29,10 @@ local subfilterCallbacks = AF.subfilterCallbacks
 local function BuildAddonInformation(filterInformation, pluginName)
     if filterInformation == nil then return nil end
     --pluginName = pluginName or filterInformation.submenuName or "n/a"
-    pluginName = pluginName or (filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name))
+    pluginName = pluginName or (filterInformation.pluginName or filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name))
 
     local addonInformation = {
+        pluginName          = pluginName,
         submenuName         = filterInformation.submenuName,
         callbackTable       = filterInformation.callbackTable,
         subfilters          = filterInformation.subfilters,
@@ -178,9 +186,13 @@ end
 local removeDuplicateAddonPlugin = AdvancedFilters_RemoveDuplicateAddonPlugin
 
 
+
 --Register a filterInformation table to AdvancedFilters -> Register a plugin for the filter dropdown boxes
 function AdvancedFilters_RegisterFilter(filterInformationTable)
-    local pluginName = filterInformationTable.submenuName or (filterInformationTable.callbackTable and filterInformationTable.callbackTable[1] and filterInformationTable.callbackTable[1].name)
+    local pluginName = filterInformationTable.pluginName or filterInformationTable.submenuName or (filterInformationTable.callbackTable and filterInformationTable.callbackTable[1] and filterInformationTable.callbackTable[1].name)
+
+--d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'")
+
     --make sure all necessary information is present
     if filterInformationTable == nil then
         d("[AdvancedFilters_RegisterFilter]Plugin: \'"..tostring(pluginName).."\'-No filter information provided. Filter not registered.")
@@ -203,10 +215,11 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         return
     end
 
+    --------------------------------------------------------------------------------------------------------------------
     --Parse the filterInformation now and add the plugin data to the dropdown filters
-    local function parseFilterInformation(filterInformation)
-        --get filter information from the calling addon and insert it into our callback table
-        local addonInformation = BuildAddonInformation(filterInformation, pluginName)
+    local function parseFilterInformation(filterInformation, originalFilterInformationTable)
+        originalFilterInformationTable = originalFilterInformationTable or filterInformation
+
 --        local filterTypeToGroupName = AF.filterTypeNames
 -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         --Added with ESO PTS API100033 Markarth
@@ -228,23 +241,24 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         --and remove the old one, before adding the same/newer one again
         removeDuplicateAddonPlugin(filterInformation, groupName, true)
 
-        --insert addon information
+
+        --get filter information from the calling addon and insert it into our callback table
+        local addonInformation = BuildAddonInformation(filterInformation, pluginName)
+        --insert addon/plugin's callbacks to subFilter callbacks of group
         table.insert(subfilterCallbacks[groupName].addonDropdownCallbacks, addonInformation)
 
-        --if strings are going to be generated, end registration now
-        if filterInformation.generator then return end
 
-        --get string information from the calling addon and insert it into our string table
-        --and support setmetatable!
-        --> Overwrite exisiting strings with data from the same AF plugin strings, if re-apllied
-        local function addStrings(lang, strings, langStrings)
-            for key, string in pairs(strings) do
-                AF.strings[key] = langStrings and langStrings[key] or string
-            end
-        end
-        local lang = AF.util.GetLanguage()
-        addStrings(lang, filterInformation.enStrings, filterInformation[lang .. "Strings"])
+        --if strings are going to be generated from a function at the plugin (as dropdown menu opens), end registration now
+        if filterInformation.generator ~= nil then return end
+
+
+        --Add the texts to the AF.strings table
+        addStrings(filterInformation.enStrings, filterInformation, pluginName)
     end
+    --------------------------------------------------------------------------------------------------------------------
+
+
+
 
     --Support for filterType = table, but not if it's a "generator" run!
     local filterTypes = filterInformationTable.filterType
@@ -260,12 +274,12 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
                 --But just exchange the filterType on each call
                 filterInformationForEachFilterType.filterType = filterInformationFilterType
                 if filterInformationForEachFilterType ~= nil then
-                    parseFilterInformation(filterInformationForEachFilterType)
+                    parseFilterInformation(filterInformationForEachFilterType, filterInformationTable)
                 end
             end
         end
     else
-        parseFilterInformation(filterInformationTable)
+        parseFilterInformation(filterInformationTable, nil)
     end
 end
 

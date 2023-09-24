@@ -23,6 +23,8 @@ local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
 --local universaldDeconScene = controlsForChecks.universalDeconScene
 local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
 local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
+local universalDeconSelectedTabToActualInventories = AF.universalDeconSelectedTabToActualInventories
+
 local detectUniversalDeconstructionPanelActiveTab
 local mapAFInvTypeToLibFiltersFilterType
 local filterBarParentControlsToHide
@@ -49,6 +51,82 @@ end
 AF.util.CheckForOtherAddonFlags = checkForOtherAddonFlags
 
 
+
+--======================================================================================================================
+-- -v- String functions                                                                                           -v-
+--======================================================================================================================
+--get string information from the calling addon/plugin and insert it into our string table
+--and support setmetatable! Use english texts as fallback -> See function AF.util.GetLanguage()
+--> Overwrite exisiting strings with data from the same AF plugin strings, if re-apllied, which happens due to different languages and metatables!
+-->1st enStrings will be added, after that deStrings etc. Each use the same key
+-->A shadow table AF.stringsOfPlugins will be updated here with the keys of each plugin, and if any plugin re-used an existing key an error message will be shown!
+AF.pluginStrings = {}
+AF.pluginStringKeyToPlugin = {}
+
+local function addStrings(strings, p_filterInformation, p_pluginName)
+    if strings == nil then return end
+    local pluginName = (p_pluginName or (p_filterInformation ~= nil and (p_filterInformation.pluginName or p_filterInformation.submenuName or (p_filterInformation.callbackTable and p_filterInformation.callbackTable[1] and p_filterInformation.callbackTable[1].name)))) or AF.pluginNameUnknown
+    local langEn, lang, langStrings
+
+    if p_filterInformation ~= nil then
+        langEn = "en"
+        lang = util.GetLanguage()
+        langStrings = p_filterInformation[lang .. "Strings"]
+    else
+        langEn = "en"
+    end
+
+--d("[AF]addStrings-name: " ..tostring(pluginName) .. ", lang: " ..tostring(lang))
+
+
+    --English strings (or generated strings in client language) first
+    for key, stringEn in pairs(strings) do
+
+        AF.pluginStrings[pluginName] = AF.pluginStrings[pluginName] or {}
+        AF.pluginStrings[pluginName][langEn] = AF.pluginStrings[pluginName][langEn] or {}
+        AF.pluginStrings[pluginName][langEn][key] = stringEn
+
+        if AF.strings[key] == nil then
+            AF.strings[key] = stringEn
+
+            --Duplicate entry prevention
+            AF.pluginStringKeyToPlugin[key] = pluginName
+        --[[
+        else
+            --Check if the same key was defined within another plugin already, and if this is the case: Error!
+            local alreadyAddedPluginForKey = AF.pluginStringKeyToPlugin[key]
+            if alreadyAddedPluginForKey ~= nil and alreadyAddedPluginForKey ~= pluginName then
+                d("[AdvancedFilters]String key \'"..tostring(key) .."\' = \'"..tostring(stringEn).."\' already exist in plugin \'" .. tostring(alreadyAddedPluginForKey).."\'! Please define a unique string key within current plugin: \'" ..tostring(pluginName) .. "\'")
+            end
+            ]]
+        end
+    end
+
+    --Client language strings afterwards - If not client lang = English!
+    if langStrings ~= nil and lang ~= nil and lang ~= langEn then
+        for key, stringOfClientLang in pairs(langStrings) do
+            --if AF.strings[key] == nil then --Overwrite with client language!
+                AF.strings[key] = stringOfClientLang
+
+                AF.pluginStrings[pluginName] = AF.pluginStrings[pluginName] or {}
+                AF.pluginStrings[pluginName][lang] = AF.pluginStrings[pluginName][lang] or {}
+                AF.pluginStrings[pluginName][lang][key] = stringOfClientLang
+
+            --[[
+            else
+                --Check if the same key was defined within another plugin already, and if this is the case: Error!
+                local alreadyAddedPluginForKey = AF.pluginStringKeyToPlugin[key]
+                if alreadyAddedPluginForKey ~= nil and alreadyAddedPluginForKey ~= pluginName then
+                    d("[AdvancedFilters]Client lang \'"..tostring(lang).."\' string key \'"..tostring(key) .."\' = \'"..tostring(stringOfClientLang).."\' already exist in plugin \'" .. tostring(alreadyAddedPluginForKey).."\'! Please define a unique string key within current plugin: \'" ..tostring(pluginName) .. "\'")
+                end
+                ]]
+            --end
+        end
+    end
+end
+AF.util.AddStrings = addStrings
+
+
 --======================================================================================================================
 -- -v- Filter plugin functions                                                                                    -v-
 --======================================================================================================================
@@ -70,15 +148,7 @@ end
 --Get the language of the client
 function util.GetLanguage()
     local lang = GetCVar("language.2")
-    local supported = {
-        de = 1,
-        en = 2,
-        es = 3,
-        fr = 4,
-        ru = 5,
-        jp = 6,
-    }
-
+    local supported = AF.supportedLanguages
     --check for supported languages
     if(supported[lang] ~= nil) then return lang end
 
@@ -691,6 +761,11 @@ local mapLibFiltersInventoryTypeToRealInventoryType = util.MapLibFiltersInventor
 
 function util.MapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
     if tabKey == nil then return nil end
+    return universalDeconSelectedTabToActualInventories[tabKey]
+end
+--[[
+function util.MapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
+    if tabKey == nil then return nil end
     local mapLibFiltersInvToRealInvType1 = {
         ["all"]          = INVENTORY_BACKPACK,
         ["weapons"]      = INVENTORY_BACKPACK,
@@ -721,6 +796,7 @@ function util.MapUniversalDeconTabKeyToRealInventoryTypes(tabKey)
     if realInvType3 ~= nil then realInvTypes = realInvTypes or {} table.insert(realInvTypes, realInvType3) end
     return realInvTypes
 end
+]]
 local mapUniversalDeconTabKeyToRealInventoryTypes = util.MapUniversalDeconTabKeyToRealInventoryTypes
 --======================================================================================================================
 -- -^- Mapping functions                                                                                            -^-
@@ -778,6 +854,8 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
         local addonName = ""
         if addonTable.name ~= nil and addonTable.name ~= "" then
             addonName = addonTable.name
+        elseif addonTable.pluginName ~= nil and addonTable.pluginName ~= "" then
+            addonName = addonTable.pluginName
         elseif addonTable.submenuName ~= nil and addonTable.submenuName ~= "" then
             addonName = addonTable.submenuName
         else
@@ -788,15 +866,19 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
         end
         if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("->insertAddon addonName: '" .. tos(addonName) .."', groupNameLocal: '" .. tos(groupNameLocal) .. "', subfilterNameLocal: '" .. tos(subfilterNameLocal).. "'") end
 
-        --generate information if necessary
+        --generate information, if necessary
+        -->Coming from plugin filterInformation
         if addonTable.generator then
             local strings
-
             addonTable.callbackTable, strings = addonTable.generator()
 
+            --Add generated strings to the AF.strings table
+            --[[
             for key, string in pairs(strings) do
                 AF.strings[key] = string
             end
+            ]]
+            addStrings(strings, nil, addonName)
         end
 
         --Is the addon filter not to be shown at some libFilter panels?
