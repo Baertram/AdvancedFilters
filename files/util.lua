@@ -830,12 +830,6 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
     local settings = AF.settings
     local debugSpam = settings.debugSpam
     local debugSpamExcludeDropdownBoxFilters = settings.debugSpamExcludeDropdownBoxFilters
-
-    --todo: For debugging
-    --debugSpam = true
-    --debugSpamExcludeDropdownBoxFilters = false
-
-
     local subfilterNameOrig = subfilterName
     if groupName == "Armor" and (subfilterName == "Heavy" or subfilterName == "Medium" or subfilterName == "LightArmor" or subfilterName == "Clothing") then subfilterName = "Body" end
     if debugSpam then d("=========================\n[AF]]BuildDropdownCallbacks - groupName: " .. tos(groupName) .. ", subfilterName: " .. tos(subfilterName) .. ", subFilterNameOrig: " ..tos(subfilterNameOrig) .. ", AF.currentInventoryType: " ..tos(AF.currentInventoryType)) end
@@ -1020,7 +1014,6 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
                     end
                 end
             end
-
             --Compare names with the entries in dropdownbox now
             for _, compareName in ipairs(compareNames) do
                 --Check the whole callback table for entries with the same name or submenuName
@@ -1057,104 +1050,38 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
                 table.insert(callbackTable, callbackEntry)
             end
         end
-    end -- function "insertAddonOrBaseAdvancedFiltersSubmenu"
-
-
-    --Check if the new callbackEntry's name was not already added to the callbackTable, so that we do not have
-    --duplicate entries in the "All" subfilter button e.g.
-    local function insertNonDuplicateToCallbackTable(callbackTable, callbackEntry)
-        if callbackTable == nil or callbackEntry == nil or callbackEntry.name == nil or callbackEntry.name == "" then return end
-
-        for _, value in ipairs(callbackTable) do
-            if value == callbackEntry or (value.name and value.name == callbackEntry.name) then
-                local doError = true
-                if callbackEntry.addString ~= nil then
-                    if value.name ~= nil and value.name ~= callbackEntry.name .. "_" .. callbackEntry.addString then
-                        doError = false
-                    end
-                end
-                if doError == true then
-                    if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Duplicate AF base filter entry: " .. tos(callbackEntry.name)) end
-                    return
-                end
-            end
-        end
-        table.insert(callbackTable, callbackEntry)
-    end
-
-    --Check if the dropdownCallbacks should show a header row in the dropdown (e.g. for the Junk entries)
-    local function checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subFilterName, isSubmenuCallback)
-        if not AF.settings.showSubMenuHeaderlinesInFilterDropdowns then return end
-
-        isSubmenuCallback = isSubmenuCallback or false
-        local subFilterGroupDropdownCallbacks
-        if groupName == nil then
-            subFilterGroupDropdownCallbacks = subfilterCallbacks[subFilterName]
-        else
-            subFilterGroupDropdownCallbacks = subfilterCallbacks[groupName][subFilterName]
-        end
-        if subFilterGroupDropdownCallbacks ~= nil then
-            if not isSubmenuCallback then
-                if subFilterGroupDropdownCallbacks.dropdownCallbacksHeaders == true then
-                    if not ZO_IsTableEmpty(subFilterGroupDropdownCallbacks.dropdownCallbacks) then
-                        if debugSpam and not debugSpamExcludeDropdownBoxFilters then d(">Dropdown callback header entry: " .. tos(subFilterName) .. ", group: " ..tos(groupName)) end
-                        local headerCallbackEntry = {
-                            isHeader    = true, --Define this entry as headerline for the dropdown ZO_ComboBox -> LibScrollableMenu
-                            name        = tos(groupName) .. "<|>" .. tos(subFilterName),
-                        }
-                        insertNonDuplicateToCallbackTable(callbackTable, headerCallbackEntry)
-                    end
-                end
-
-            else
-                --[[
-                if subFilterGroupDropdownCallbacks.dropdownSubmenuCallbacks.dropdownCallbacksHeaders == true then
-
-                end
-                ]]
-            end
-        end
-    end
-
+    end -- function "insertAddon"
     ------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------
 
-    -- insert global AdvancedFilters "All" filters (no group)
-    checkAndAddPossibleDropdownCallbackHeaderLine(nil, AF_CONST_ALL)
+    -- insert global AdvancedFilters "All" filters
     for _, callbackEntry in ipairs(subfilterCallbacks[AF_CONST_ALL].dropdownCallbacks) do
         callbackEntry.isStandardAFDropdownFilter = true
-        insertNonDuplicateToCallbackTable(callbackTable, callbackEntry)
-        --table.insert(callbackTable, callbackEntry)
+        table.insert(callbackTable, callbackEntry)
     end
 
     --insert filters that apply to a group, but not the ALL entry!
     if groupName ~= AF_CONST_ALL then
-        checkAndAddPossibleDropdownCallbackHeaderLine(groupName, AF_CONST_ALL)
         --insert global "All" filters for a "group". e.g. Group "Jewelry", entry "All" -> subfilterCallbacks[Jewelry].All
-        for _, callbackEntry in ipairs(subfilterCallbacks[groupName][AF_CONST_ALL].dropdownCallbacks) do
+        for _, callbackEntry in ipairs(subfilterCallbacks[groupName].All.dropdownCallbacks) do
             callbackEntry.isStandardAFDropdownFilter = true
-            insertNonDuplicateToCallbackTable(callbackTable, callbackEntry)
-            --table.insert(callbackTable, callbackEntry)
+            table.insert(callbackTable, callbackEntry)
         end
         --Subfilter is the ALL entry?
         if subfilterName == AF_CONST_ALL then
-            --Gte the keys of all groupnames' subFilters, e.g. "1 HD", "2 HD", "Heal staff"
             local groupNameOfKeys = keys[groupName]
             if groupNameOfKeys == nil then
                 d("[AdvancedFilters] ERROR - util.BuildDropdownCallbacks-GroupName is missing in keys: " ..tos(groupName) .. ". Please contact the author of ".. tos(AF.name) .. " at the website in the settings menu (link can be found at the top of the settings page)!")
                 return
-            elseif AF.settings.debugSpam and not debugSpamExcludeDropdownBoxFilters
-                then d("[AF]util.BuildDropdownCallbacks-GroupName: " ..tos(groupName))
+                elseif AF.settings.debugSpam and not debugSpamExcludeDropdownBoxFilters then d("[AF]util.BuildDropdownCallbacks-GroupName: " ..tos(groupName))
             end
-            --insert all default AdvancedFilters filters for each subfilter (see file files/filterCallbacks.lua -> table subfilterCallbacks)
+            --insert all default AdvancedFilters filters for each subfilter (see file data.lua -> table AF.subfilterCallbacks)
             for _, subfilterNameLoop in ipairs(groupNameOfKeys) do
-                checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subfilterNameLoop)
                 local currentSubfilterTable = subfilterCallbacks[groupName][subfilterNameLoop]
                 for _, callbackEntry in ipairs(currentSubfilterTable.dropdownCallbacks) do
                     callbackEntry.isStandardAFDropdownFilter = true
-                    insertNonDuplicateToCallbackTable(callbackTable, callbackEntry)
-                    --table.insert(callbackTable, callbackEntry)
+                    table.insert(callbackTable, callbackEntry)
                 end
 
                 --Insert special AdvancedFilters dropdown entries with SubMenus for all the subfilters of the group
@@ -1181,16 +1108,13 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
                     insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
                 end
             end
-
         --Subfilter is NOT the ALL entry
         else
             --insert standard AdvancedFilters filters for provided subfilter
-            checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subfilterName)
             local currentSubfilterTable = subfilterCallbacks[groupName][subfilterName]
             for _, callbackEntry in ipairs(currentSubfilterTable.dropdownCallbacks) do
                 callbackEntry.isStandardAFDropdownFilter = true
-                insertNonDuplicateToCallbackTable(callbackTable, callbackEntry)
-                --table.insert(callbackTable, callbackEntry)
+                table.insert(callbackTable, callbackEntry)
             end
 
             --Insert special AdvancedFilters dropdown entries with SubMenus
@@ -1223,11 +1147,6 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
             insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupName, subfilterName)
         end
     end
-
-    --todo: For debugging
-    --debugSpam = false
-    --debugSpamExcludeDropdownBoxFilters = true
-
 
     return callbackTable
 end

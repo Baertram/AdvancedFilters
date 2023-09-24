@@ -25,9 +25,6 @@ function AF.loadLibraries(calledFromEventPlayerActivated)
     --LibMotifCategories
     util.LibMotifCategories = LibMotifCategories
 
-    --LibScrollableMenu
-    AF.LSM = LibScrollableMenu
-
     AF.dependenciesLoaded = true
 end
 
