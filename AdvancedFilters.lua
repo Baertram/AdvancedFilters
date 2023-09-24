@@ -2384,6 +2384,14 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
     util.LibFilters:InitializeLibFilters()
     --SavedVariables
     AF.settings = ZO_SavedVars:NewAccountWide(AF.name .. "_Settings", AF.savedVarsVersion, "Settings", AF.defaultSettings, GetWorldName())
+
+    --20230924 - Disable the right click dropdown menu at the submenu filter buttons as it does not properly
+    --work anymore with update P40, API101040 (LibCustomMenu is not used anymore, LibScrollableMenu is used and
+    --cannot "currently" show the menu at another control as the combobox -> So we disable this feature here for now and
+    --hide the settings menu point for it)
+    AF.settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton = false
+
+
     --Create the subfilter bars below the normal inventories filters
     AF.CreateSubfilterBars()
     --Initialize the prehooks etc. for inventories to react on filter changes etc.

@@ -152,7 +152,9 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     --self.dropdown.combobox = comboBoxObject:GetContainer()
     --self.dropdown.dropdown = comboBoxObject --combobox and dropdown wording is mixed AF... self.dropdown should be self.combobox instead!
     --self.dropdown.scrollHelper = LSM.ScrollableDropdownHelper:New(self.control, self.dropdown, 15) --15 visible rows
-    self.dropdown.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.control, self.dropdown, 15, 15, comboBoxObject)
+    local settings = AF.settings
+
+    self.dropdown.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.control, self.dropdown, settings.dropdownVisibleRows, settings.dropdownVisibleSubmenuRows, comboBoxObject)
 
 ------------------------------------------------------------------------------------------------------------------------
     --Function for the mouse right click on the dropdown box (filter plugins) of the subfilterBar
@@ -922,8 +924,11 @@ function AF_FilterBar:ActivateButton(newButton)
             end
             local itemEntryName = AF.strings[dropdownEntryName] or ""
 
-            if itemEntryName == "" then
-                d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tos(dropdownEntryName))
+            if itemEntryName == "" then --"Body" raises an error, but is a special case so do not error!
+
+                if dropdownEntryName ~= "Body" then
+                    d("[AdvancedFilters] ERROR - Translation missing for dropdown filter entry: " .. tos(dropdownEntryName))
+                end
                 return nil, nil, nil, nil
             else
                 if showIconsInFilterDropdowns and iconForDropdownCallbackEntry ~= "" then

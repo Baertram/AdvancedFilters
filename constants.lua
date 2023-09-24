@@ -45,12 +45,15 @@ AF.defaultSettings = {
     hideSubFilterLabel                      = false,
     grayOutSubFiltersWithNoItems            = true,
     showIconsInFilterDropdowns              = true,
+    showSubMenuHeaderlinesInFilterDropdowns = false,
     rememberFilterDropdownsLastSelection    = true,
     showDropdownSelectedReminderAnimation   = true,
     showDropdownLastSelectedEntries         = true,
     subfilterBarDropdownLastSelectedEntries = {},
     hideCharBoundAtBankDeposit              = false,
     showFilterDropdownMenuOnRightMouseAtSubFilterButton = false,
+    dropdownVisibleRows = 15,
+    dropdownVisibleSubmenuRows = 15,
 }
 
 --Libraries

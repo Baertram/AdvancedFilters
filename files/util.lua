@@ -1084,6 +1084,8 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
 
     --Check if the dropdownCallbacks should show a header row in the dropdown (e.g. for the Junk entries)
     local function checkAndAddPossibleDropdownCallbackHeaderLine(groupName, subFilterName, isSubmenuCallback)
+        if not AF.settings.showSubMenuHeaderlinesInFilterDropdowns then return end
+
         isSubmenuCallback = isSubmenuCallback or false
         local subFilterGroupDropdownCallbacks
         if groupName == nil then
