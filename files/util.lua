@@ -76,6 +76,9 @@ local function addStrings(strings, p_filterInformation, p_pluginName)
         langEn = "en"
     end
 
+--d("[AF]addStrings-name: " ..tostring(pluginName) .. ", lang: " ..tostring(lang))
+
+
     --English strings (or generated strings in client language) first
     for key, stringEn in pairs(strings) do
 
@@ -99,10 +102,10 @@ local function addStrings(strings, p_filterInformation, p_pluginName)
         end
     end
 
-    --Client language strings afterwards
-    if langStrings ~= nil then
+    --Client language strings afterwards - If not client lang = English!
+    if langStrings ~= nil and lang ~= nil and lang ~= langEn then
         for key, stringOfClientLang in pairs(langStrings) do
-            if AF.strings[key] == nil then
+            --if AF.strings[key] == nil then --Overwrite with client language!
                 AF.strings[key] = stringOfClientLang
 
                 AF.pluginStrings[pluginName] = AF.pluginStrings[pluginName] or {}
@@ -117,7 +120,7 @@ local function addStrings(strings, p_filterInformation, p_pluginName)
                     d("[AdvancedFilters]Client lang \'"..tostring(lang).."\' string key \'"..tostring(key) .."\' = \'"..tostring(stringOfClientLang).."\' already exist in plugin \'" .. tostring(alreadyAddedPluginForKey).."\'! Please define a unique string key within current plugin: \'" ..tostring(pluginName) .. "\'")
                 end
                 ]]
-            end
+            --end
         end
     end
 end

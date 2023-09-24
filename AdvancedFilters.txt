@@ -1,8 +1,8 @@
 ## Title: Advanced Filters
 ## Author: Randactyl & Baertram
-## Version: 1.6.3.4
-## AddOnVersion: 1634
-## APIVersion: 101039 101040
+## Version: 1.6.4.0
+## AddOnVersion: 1640
+## APIVersion: 101040 101041
 ## DependsOn: LibAddonMenu-2.0>=34 LibCustomMenu>=722 LibFilters-3.0>=340 LibScrollableMenu>=0102
 ## OptionalDependsOn: LibMotifCategories>=2
 ## OptionalDependsOn: FCOCraftFilter>=006020 FCOCompanion>=001040

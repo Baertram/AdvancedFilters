@@ -1,8 +1,7 @@
 AdvancedFilters = AdvancedFilters or {}
 local AF = AdvancedFilters
 
-local LSM = LibScrollableMenu
-AF.LSM = LSM
+local LSM = AF.LSM
 
 local tos = tostring
 
@@ -145,7 +144,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     self.dropdown:SetHeight(24)
     self.dropdown:SetWidth(104)
 
-AF._selfFilterBar = self
+--AF._selfFilterBar = self
 
     --Create the scrollabale dropdown helper via LibScrollableMenu
     -->Add the references to the self.dropdown so that LSM can find them properly
@@ -957,7 +956,7 @@ function AF_FilterBar:ActivateButton(newButton)
 
                                 --Add a header seperator (non clickable, only "headline"/category)
                                 if cbTableDataTab.isHeader == true then
-                                --LibScrollableMenu - LCM entry - No Submenu
+                                --LibScrollableMenu - LSM entry - No Submenu
                                 submenuEntries[#submenuEntries+1] = {
                                     isSubmenu       = false,
                                     isHeader        = true, --Enables the header at LSM
@@ -971,7 +970,7 @@ function AF_FilterBar:ActivateButton(newButton)
                                 }
 
                                 else
-                                    --LibScrollableMenu - LCM entry - No Submenu
+                                    --LibScrollableMenu - LSM entry - No Submenu
                                     submenuEntries[#submenuEntries+1] = {
                                         isSubmenu       = false,
                                         name            = totalDropdownEntryWithIcon,
@@ -1055,7 +1054,7 @@ function AF_FilterBar:ActivateButton(newButton)
                     comboBox:AddItem(itemEntrySubmenuMain, ZO_COMBOBOX_SUPPRESS_UPDATE) --Suppress the sorting etc. here. Will be done once below
                     ]]
 
-                    --LibScrollableMenu - LCM entry - Submenu
+                    --LibScrollableMenu - LSM entry - Submenu
                     comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                         isSubmenu       = true,
                         submenuName     = v.submenuName,
@@ -1073,7 +1072,7 @@ function AF_FilterBar:ActivateButton(newButton)
                 if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
                     --Add a header seperator (non clickable, only "headline"/category)
                     if v.isHeader == true then
-                        --LibScrollableMenu - LCM entry - No Submenu
+                        --LibScrollableMenu - LSM entry - No Submenu
                         comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                             isSubmenu       = false,
                             isHeader        = true, --Enables the header at LSM
@@ -1087,7 +1086,7 @@ function AF_FilterBar:ActivateButton(newButton)
                         }
 
                     else
-                        --LibScrollableMenu - LCM entry - No Submenu
+                        --LibScrollableMenu - LSM entry - No Submenu
                         comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                             isSubmenu       = false,
                             name            = totalDropdownEntryWithIcon,
@@ -1155,7 +1154,7 @@ function AF_FilterBar:ActivateButton(newButton)
         comboBox:SetSelectedItemFont("ZoFontGameSmall")
         comboBox:SetDropdownFont("ZoFontGameSmall")
 
-        --LibScrollableMenu - LCM - Add the items from teh table to the scroll list now
+        --LibScrollableMenu - LSM - Add the items from teh table to the scroll list now
         comboBox:AddItems(comboBoxMenuEntries)
 
         --comboBox:UpdateItems() --Update the combobox items, sort them etc.
