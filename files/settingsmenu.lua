@@ -166,6 +166,7 @@ function AF.LAMSettingsMenu()
                 default = defSettings.hideCharBoundAtBankDeposit,
             },
             --==============================================================================
+            --[[
             {
                 type = "checkbox",
                 name = strings.lamShowFilterDropdownMenuOnRightMouse,
@@ -177,6 +178,7 @@ function AF.LAMSettingsMenu()
                 default = defSettings.showFilterDropdownMenuOnRightMouseAtSubFilterButton,
                 requiresReload = true,
             },
+            ]]
             --==============================================================================
             {
                 type = 'header',
@@ -192,6 +194,17 @@ function AF.LAMSettingsMenu()
                     AF.settings.showIconsInFilterDropdowns = value
                 end,
                 default = defSettings.showIconsInFilterDropdowns,
+            },
+            --==============================================================================
+            {
+                type = "checkbox",
+                name = strings.lamShowSubMenuHeaderlinesInFilterDropdowns,
+                tooltip = strings.lamShowSubMenuHeaderlinesInFilterDropdownsTT,
+                getFunc = function() return settings.showSubMenuHeaderlinesInFilterDropdowns end,
+                setFunc = function(value)
+                    AF.settings.showSubMenuHeaderlinesInFilterDropdowns = value
+                end,
+                default = defSettings.showSubMenuHeaderlinesInFilterDropdowns,
             },
             --==============================================================================
             {
@@ -216,6 +229,38 @@ function AF.LAMSettingsMenu()
                 default = defSettings.showDropdownSelectedReminderAnimation,
                 disabled = function() return not settings.rememberFilterDropdownsLastSelection end,
             },
+            --==============================================================================
+            {
+                type = "slider",
+                name = strings.lamDropdownVisibleRows,
+                tooltip = strings.lamDropdownVisibleRowsTT,
+                min = 5,
+                max = 30,
+                step = 1, -- (optional)
+                getFunc = function() return settings.dropdownVisibleRows end,
+                setFunc = function(value)
+                    AF.settings.dropdownVisibleRows = value
+                end,
+                default = defSettings.dropdownVisibleRows,
+                requiresReload = true,
+            },
+            --==============================================================================
+            {
+                type = "slider",
+                name = strings.lamDropdownVisibleSubmenuRows,
+                tooltip = strings.lamDropdownVisibleSubmenuRowsTT,
+                min = 5,
+                max = 30,
+                step = 1, -- (optional)
+                getFunc = function() return settings.dropdownVisibleSubmenuRows end,
+                setFunc = function(value)
+                    AF.settings.dropdownVisibleSubmenuRows = value
+                end,
+                default = defSettings.dropdownVisibleSubmenuRows,
+                requiresReload = true,
+            },
+
+
             --==============================================================================
             --[[
             {
