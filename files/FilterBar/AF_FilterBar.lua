@@ -154,7 +154,12 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     --self.dropdown.scrollHelper = LSM.ScrollableDropdownHelper:New(self.control, self.dropdown, 15) --15 visible rows
     local settings = AF.settings
 
-    self.dropdown.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.control, self.dropdown, settings.dropdownVisibleRows, settings.dropdownVisibleSubmenuRows, comboBoxObject)
+    self.dropdown.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.control, self.dropdown,
+            {   visibleRowsDropdown=settings.dropdownVisibleRows,
+                visibleRowsSubmenu=settings.dropdownVisibleSubmenuRows,
+                dropdown=comboBoxObject
+            }
+    )
 
 ------------------------------------------------------------------------------------------------------------------------
     --Function for the mouse right click on the dropdown box (filter plugins) of the subfilterBar

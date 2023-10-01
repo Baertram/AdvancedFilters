@@ -848,6 +848,18 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
     ------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------
     ------------------------------------------------------------------------------------------------------------------------------------
+   local function makeAddonDropdownFiltersCompatible(callbackEntry, currentAddonName)
+        --Backwards compatibility: Addons using LibCustomMenu's "header" constant (itemType=MENU_ADD_OPTION_HEADER) to add a header to the dropdown callbacks
+        --will get that changed here to the new LibScrollingMenu isHeader=true tag
+        if callbackEntry.itemType ~= nil then
+            if callbackEntry.itemType == MENU_ADD_OPTION_HEADER then
+                callbackEntry.isHeader = true
+--d(">Switched LCM header->LSM isHeader - addon: " ..tos(currentAddonName) .. ", name: " .. callbackEntry.name)
+            end
+        end
+        return callbackEntry
+    end
+
     local function insertAddonOrBaseAdvancedFiltersSubmenu(addonTable, groupNameLocal, subfilterNameLocal, isBaseAdvancedFiltersSubmenu)
         groupNameLocal = groupNameLocal or ""
         subfilterNameLocal = subfilterNameLocal or subfilterNameLocal
@@ -1045,6 +1057,12 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
             if isBaseAdvancedFiltersSubmenu == true then
                 addonTable.isStandardAFDropdownFilter = true
             end
+
+            local currentAddonTable = addonTable.callbackTable
+            for _, callbackEntry in ipairs(currentAddonTable) do
+                callbackEntry = makeAddonDropdownFiltersCompatible(callbackEntry, addonName)
+            end
+
             --insert whole package
             table.insert(callbackTable, addonTable)
         else
@@ -1054,6 +1072,9 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
                 if isBaseAdvancedFiltersSubmenu == true then
                     callbackEntry.isStandardAFDropdownFilter = true
                 end
+
+                callbackEntry = makeAddonDropdownFiltersCompatible(callbackEntry, addonName)
+
                 table.insert(callbackTable, callbackEntry)
             end
         end
