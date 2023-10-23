@@ -416,7 +416,8 @@ local function InitializeHooks()
     --Show the subfilter bar of AdvancedFilters below the parent filter (e.g. button for armor, weapons, material, ...)
     --The subfilter bars are defined via the file constants.lua in table "subfilterGroups".
     --The contents of the subfilter bars are defined in file constants.lua in table "subfilterButtonNames"
-    --The filter contents and their callback functions (see top of file data.lua) for each content of the subfilter bar are defined in file data.lua in the table "AF.subfilterCallbacks"
+    --The filter contents and their callback functions (see top of file files/filterCallbacks.lua) for each content of the subfilter bar are defined in file files/filterCallbacks.lua
+    --in the table "subfilterCallbacks".
     --Their parents (e.g. the player inventory or the bank or the crafting smithing station) are defined in file constants.lua in table "filterBarParents"
     local function ShowSubfilterBar(currentFilter, craftingType, customInventoryFilterButtonsItemType, currentInvType, isUniversalDecon)
         local debugSpam = AF.settings.debugSpam
@@ -2383,6 +2384,14 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
     util.LibFilters:InitializeLibFilters()
     --SavedVariables
     AF.settings = ZO_SavedVars:NewAccountWide(AF.name .. "_Settings", AF.savedVarsVersion, "Settings", AF.defaultSettings, GetWorldName())
+
+    --20230924 - Disable the right click dropdown menu at the submenu filter buttons as it does not properly
+    --work anymore with update P40, API101040 (LibCustomMenu is not used anymore, LibScrollableMenu is used and
+    --cannot "currently" show the menu at another control as the combobox -> So we disable this feature here for now and
+    --hide the settings menu point for it)
+    AF.settings.showFilterDropdownMenuOnRightMouseAtSubFilterButton = false
+
+
     --Create the subfilter bars below the normal inventories filters
     AF.CreateSubfilterBars()
     --Initialize the prehooks etc. for inventories to react on filter changes etc.
