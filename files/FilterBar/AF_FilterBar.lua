@@ -978,6 +978,7 @@ function AF_FilterBar:ActivateButton(newButton)
         p_newButton.dropdownCallbacks = BuildDropdownCallbacks(p_newButton.groupName, p_newButton.name)
 
 --Todo: For debugging - Remove afterwards
+--[[
 AF._debugButtonCallbacks = AF._debugButtonCallbacks or {}
 AF._debugButtonCallbacks[p_newButton.name] = {
     _button = p_newButton,
@@ -986,6 +987,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
     dropdownCallbacksOrig = ZO_ShallowTableCopy(p_newButton.dropdownCallbacks),
     dropdownCallbacks = p_newButton.dropdownCallbacks,
 }
+]]
 
         local showIconsInFilterDropdowns = AF.settings.showIconsInFilterDropdowns
         local textures = AF.textures
@@ -1080,7 +1082,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                         local isHeader = cbTableDataTab.isHeader
                         if not isHeader then
                             --#75 Do we have nestedSubmenuEntries in the callback table's entry?
-                            --todo #75 2024-03-30 Make the nestedSubmenuEntries loop recursively to check for nested submenus at the nested submenus!
+                            --todo #76 2024-04-01 Make the nestedSubmenuEntries loop recursively to check for nested submenus at the nested submenus at nested submenus ...!
                             local nestedSubmenuEntriesAtCallbackTable = cbTableDataTab.nestedSubmenuEntries
                             if nestedSubmenuEntriesAtCallbackTable ~= nil then
                                 nestedSubmenuEntries = {}
@@ -1167,28 +1169,30 @@ AF._debugButtonCallbacks[p_newButton.name] = {
 
                             --Add a header seperator (non clickable, only "headline"/category)
                             if isHeader == true then
-                                --LibScrollableMenu - LSM entry - No Submenu
+                                --LibScrollableMenu - LSM entry - Header in a submenu
                                 submenuEntries[#submenuEntries+1] = {
                                     isSubmenu       = false,
                                     isHeader        = true, --Enables the header at LSM
                                     name            = totalDropdownEntryWithIcon, --LSM.DIVIDER
                                     nameWithoutIcon = itemEntryName,
                                     baseEntryName   = dropdownEntryName,
+                                    --[[
                                     callback        =   function(comboBox, itemName, item, selectionChanged, oldItem)
                                         --Headers do not use any callback
                                     end,
+                                    ]]
                                     --tooltip         =,
                                     --entries         =,
                                 }
 
                             else
-                                --LibScrollableMenu - LSM entry - No Submenu
+                                --LibScrollableMenu - LSM entry - Normal entry in a submenu (having maybe nested submenu "entries")
                                 submenuEntries[#submenuEntries+1] = {
                                     isSubmenu       = false,
                                     name            = totalDropdownEntryWithIcon,
                                     nameWithoutIcon = itemEntryName,
                                     baseEntryName   = dropdownEntryName,
-                                    callback        =   function(comboBox, itemName, item, selectionChanged, oldItem)
+                                    callback        = (not gotNestedSubmenu and function(comboBox, itemName, item, selectionChanged, oldItem)
 
                                         --d("[AF]Callback func of non-submenu called!")
                                         local callbackInfo = {
@@ -1239,7 +1243,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
 
                                             ClearMenu() --Hide submenu
                                         ]]
-                                    end,
+                                    end),
                                     --tooltip         =
                                     entries          = (gotNestedSubmenu == true and nestedSubmenuEntries) or nil
                                 }
@@ -1259,9 +1263,9 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                 }
                 local dropdownSubmenuMainEntryName, itemEntryName, iconForDropdownCallbackEntry, totalDropdownMainSubmenuEntryWithIcon = updateDropdownEntry(subMenuData, false)
                 if dropdownSubmenuMainEntryName ~= nil and totalDropdownMainSubmenuEntryWithIcon ~= nil and totalDropdownMainSubmenuEntryWithIcon ~= "" and #submenuEntries > 0 then
+                    --TODO #77 The callback for the submenu main item must NOT change the selected entry at the comboBox to that mainSubMenu entry!
+                    --TODO #77 Somehow the entry must have a .callback, else LibScorllableMenu would ignore it
                     --[[
-                    --The callback for the submenu main item must NOT change the selected entry at the comboBox to that mainSubMenu entry!
-                    --todo How to achieve this? Overriden ZO_ComboBox_Entry_OnSelected function which get's executed as an entry get's selected and check for the
                     --dataEntry.data.isSubMenu
                     local itemEntrySubmenuMain           = ZO_ComboBox:CreateItemEntry(totalDropdownEntryWithIcon, nil)
                     itemEntrySubmenuMain.isSubMenu       = true --Important, to enable the ZO_Menu submenu via comboBox:SetEntryMouseOverCallbacks(...)
@@ -1270,7 +1274,9 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                     comboBox:AddItem(itemEntrySubmenuMain, ZO_COMBOBOX_SUPPRESS_UPDATE) --Suppress the sorting etc. here. Will be done once below
                     ]]
 
-                    --LibScrollableMenu - LSM entry - Submenu
+--d("[AF]Adding dropdown entry for submenu \'" .. tos(v.submenuName) .. "\': " ..tos(itemEntryName))
+
+                    --LibScrollableMenu - LSM entry - Normal menu entry having/opening a submenu
                     comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                         isSubmenu       = true,
                         submenuName     = v.submenuName,
@@ -1280,6 +1286,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
 
                         entries         = submenuEntries,
                         --tooltip         =
+                        callback        = nil --Explicitly set it to nil so #77 get's fixed?
                     }
                 end
 
@@ -1289,7 +1296,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                 if dropdownEntryName ~= nil and totalDropdownEntryWithIcon ~= nil and totalDropdownEntryWithIcon ~= "" then
                     --Add a header seperator (non clickable, only "headline"/category)
                     if v.isHeader == true then
-                        --LibScrollableMenu - LSM entry - No Submenu
+                        --LibScrollableMenu - LSM entry - Normal header entry without a submenu
                         comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                             isSubmenu       = false,
                             isHeader        = true, --Enables the header at LSM
@@ -1303,7 +1310,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                         }
 
                     else
-                        --LibScrollableMenu - LSM entry - No Submenu
+                        --LibScrollableMenu - LSM entry - Normal entry without a submenu
                         comboBoxMenuEntries[#comboBoxMenuEntries+1] = {
                             isSubmenu       = false,
                             name            = totalDropdownEntryWithIcon,
@@ -1349,7 +1356,8 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                     ]]
 
                             end,
-                            --tooltip         =,
+                            --tooltip         =nil,
+                            --entries         =nil,
                             filterResetAtStartDelay   = v.filterResetAtStartDelay,
                             filterResetAtStart        = v.filterResetAtStart,
                             filterStartCallback       = v.filterStartCallback,
@@ -1643,7 +1651,7 @@ function AF.CreateSubfilterBars()
                         --Get the LibFilters filtertype of the currently active filterbar
                         local libFiltersFilterType = getSubFilterGroupsLibFiltersFilterType(inventoryType, tradeSkillType, subfilterGroup)
                         if doDebug then
-                        d(">libFiltersFilterType: " ..tos(libFiltersFilterType))
+                            d(">libFiltersFilterType: " ..tos(libFiltersFilterType))
                             d(inventoryNames[inventoryType])
                             d(tradeSkillNames[tradeSkillType])
                             d(filterTypeNames[itemFilterType])

@@ -906,7 +906,7 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
     local preventEndlessLoopDuplicateCallbackEntryNames = false
     local preventEndlessLoopDuplicateCallbackEntryNamesCounter = 0
     local function recursivelyCheckDuplicateAddonFilterCallbackEntryNames(p_addonTable, p_compareNames)
-d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " .. tos(p_compareNames ~= nil and #p_compareNames or 0) .. ", endlessLoopCounter: " ..tos(preventEndlessLoopDuplicateCallbackEntryNamesCounter))
+--d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " .. tos(p_compareNames ~= nil and #p_compareNames or 0) .. ", endlessLoopCounter: " ..tos(preventEndlessLoopDuplicateCallbackEntryNamesCounter))
         --Prevent the recursively submenu checks to do more than 100 loops
         preventEndlessLoopDuplicateCallbackEntryNamesCounter = preventEndlessLoopDuplicateCallbackEntryNamesCounter + 1
         if preventEndlessLoopDuplicateCallbackEntryNames == true and preventEndlessLoopDuplicateCallbackEntryNamesCounter >= maxRecursivelyCallsInLoop then
@@ -924,7 +924,7 @@ d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " ..
                 --Do we have any nestedSubmenuEntries?
                 --Recursively check the nestedSubmenuEntries callbackTable for next names and maybe oher nested submenuEntries
                 if callbackTableNameEntry.nestedSubmenuEntries ~= nil then
-d(">Found nestedSubmenuEntries in callback entries table")
+--d(">Found nestedSubmenuEntries in callback entries table")
                     preventEndlessLoopDuplicateCallbackEntryNames = true
                     recursivelyCheckDuplicateAddonFilterCallbackEntryNames(callbackTableNameEntry.nestedSubmenuEntries, p_compareNames)
                 else
@@ -964,6 +964,7 @@ d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! gr
 
 
 --Todo: For debugging - Remove afterwards
+--[[
 if not isBaseAdvancedFiltersSubmenu then
     AF._debugPluginFilterAddonTables = AF._debugPluginFilterAddonTables or {}
     AF._debugPluginFilterAddonTables[addonName .. "_" .. groupNameLocal .. "_" .. subfilterNameLocal] = {
@@ -974,6 +975,7 @@ if not isBaseAdvancedFiltersSubmenu then
         subfilterNameLocal = subfilterNameLocal,
     }
 end
+]]
 
         ------------------------------------------------------------------------------------------------------------------------
         -- Generator function for callbackTable and strings

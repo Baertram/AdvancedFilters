@@ -37,19 +37,19 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 --[[
 
+--#76 Add support for nested submenus in nested submenus (currently only 1 level depth is supported)
+--#77 Fix entries in filter dropdowns being clickable if they should only open a submenu (their .callback must be nil then or else LSM will run it and select it to the comboBox)
 
---#75 Add nested submenu support via LibScrollableMenu -> to filter plugins ( AF_FilterBar:ActivateButton(newButton) -> PopulateDropdown(p_newButton) )
 
-
-------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-03-30
---Max todos: #75
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-03-30
---#75
+--TODO Last updated: 2024-04-01
+--Max todos: #77
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+--CURRENTLY WORKING ON - Last updated: 2024-04-01
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
@@ -60,6 +60,10 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --
 --
 -- ADDED ON REQUEST
+--#75 Added nested submenu support via LibScrollableMenu to filter plugins. Currently only 1 level of depth is supported for nested submenus (Means: menu -> submenu -> submenu).
+-->    Use nestedSubmenuEntries = yourNestedSubmenuCallbackTable in your plugins filterInformation.callbackTable to add the table of nested submenus. Your filterInformation.submenuName must be specified too.
+-->    enStrings must contain each's "name" entry of the table yourNestedSubmenuCallbackTable, and the table yourNestedSubmenuCallbackTable must contain entries with name = String and filterCallback = filterFunction.
+-->    See one example: AF filter plugin "FCO CraftedSetFilters"
 
 -- CHANGED
 
