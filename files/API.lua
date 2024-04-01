@@ -7,6 +7,8 @@ local debugSpam = AF.debugSpam
 local pluginNameUnknown = "_pluginNameUnknown"
 AF.pluginNameUnknown = pluginNameUnknown
 
+local mapItemFilterTypeToItemFilterCategory = util.mapItemFilterTypeToItemFilterCategory
+
 ------------------------------------------------------------------------------------------------------------------------
 --Local variables from global addon namespace
 ------------------------------------------------------------------------------------------------------------------------
@@ -31,10 +33,13 @@ local function BuildAddonInformation(filterInformation, pluginName)
     --pluginName = pluginName or filterInformation.submenuName or "n/a"
     pluginName = pluginName or (filterInformation.pluginName or filterInformation.submenuName or (filterInformation.callbackTable and filterInformation.callbackTable[1] and filterInformation.callbackTable[1].name))
 
+    --#75 if passed in filterInformation.callbackTable.nestedSubmenuEntries or any entry in nestedSubmenuEntries got nestedSubmenuEntries again (nestedNested...)
+    -->LibScrollableMenu must show those as nested submenu entries then, via data.entries = nestedSubmenuEntries later on in AF_FilterBar:ActivateButton -> local function PopulateDropdown(p_newButton)
+
     local addonInformation = {
         pluginName          = pluginName,
         submenuName         = filterInformation.submenuName,
-        callbackTable       = filterInformation.callbackTable,
+        callbackTable       = filterInformation.callbackTable, --callbackTable.nestedSubmenuEntries could contain nested submenu menus
         subfilters          = filterInformation.subfilters,
         excludeSubfilters   = filterInformation.excludeSubfilters,
         generator           = filterInformation.generator,
@@ -116,7 +121,7 @@ function AdvancedFilters_RemoveDuplicateAddonPlugin(filterInformation, groupName
         --Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
         -->filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
         -->properly and the dropdown filters won't be registered to the correct bars!
-        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        local itemFilterCategory = mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory
 --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     end
@@ -226,7 +231,7 @@ function AdvancedFilters_RegisterFilter(filterInformationTable)
         --Use util.mapItemFilterTypeToItemFilterCategory(itemFilterType) to map the itemFilterTypes specified in the
         -->filterInformationTable to the new ZOs ItemFilterDisplayCategory! Else the subfilterBars won't be recognized
         -->properly and the dropdown filters won't be registered to the correct bars!
-        local itemFilterCategory = util.mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
+        local itemFilterCategory = mapItemFilterTypeToItemFilterCategory(filterInformation.filterType)
         filterInformation.filterType = itemFilterCategory
 --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         local groupName = filterTypeToGroupName[filterInformation.filterType] or nil
@@ -317,13 +322,14 @@ function AdvancedFilters_RegisterSubfilterbarRefreshFilter(filterInformationTabl
     --Register the filter callback function for each inventory type + each crafting type at the inventory type:
     local inventoryTypes = filterInformationTable.inventoryType
     local craftingTypes = filterInformationTable.craftingType
+    local subfilterRefreshCallbacks = AF.SubfilterRefreshCallbacks
     for _, inventoryType in pairs(inventoryTypes) do
         for _, craftingType in pairs(craftingTypes) do
             --insert subfilterbar refresh filter information from external addon
-            if AF.SubfilterRefreshCallbacks[inventoryType] == nil then AF.SubfilterRefreshCallbacks[inventoryType] = {} end
-            if AF.SubfilterRefreshCallbacks[inventoryType][craftingType] == nil then AF.SubfilterRefreshCallbacks[inventoryType][craftingType] = {} end
-            if AF.SubfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId] == nil then AF.SubfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId] = {} end
-            AF.SubfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId][tostring(filterInformationTable.filterName)] = filterInformationTable.callbackFunction
+            if subfilterRefreshCallbacks[inventoryType] == nil then subfilterRefreshCallbacks[inventoryType] = {} end
+            if subfilterRefreshCallbacks[inventoryType][craftingType] == nil then subfilterRefreshCallbacks[inventoryType][craftingType] = {} end
+            if subfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId] == nil then subfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId] = {} end
+            subfilterRefreshCallbacks[inventoryType][craftingType][filterInformationTable.filterPanelId][tostring(filterInformationTable.filterName)] = filterInformationTable.callbackFunction
         end
     end
 end
