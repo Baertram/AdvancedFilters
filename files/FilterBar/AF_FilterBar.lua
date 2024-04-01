@@ -978,6 +978,8 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                 --Check each of the callbackTable entries if an icon should be shown or a pre/suffix text needs to be added
                 if v.callbackTable and #v.callbackTable > 0 then
                     for idx, cbTableDataTab in ipairs(v.callbackTable) do
+                        nestedSubmenuEntries = nil
+
 
                         local isHeader = cbTableDataTab.isHeader
                         if not isHeader then
@@ -987,7 +989,8 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                             if nestedSubmenuEntriesAtCallbackTable ~= nil then
                                 nestedSubmenuEntries = {}
                                 gotNestedSubmenu = true
-                                for _, nestedSubmenuEntryData in ipairs(nestedSubmenuEntries) do
+
+                                for _, nestedSubmenuEntryData in ipairs(nestedSubmenuEntriesAtCallbackTable) do
                                     local dropdownNestedSubmenuEntryName, itemNestedSubmenuEntryName, iconForDropdownCallbackEntry, totalDropdownNestedSubmenuEntryWithIcon = updateDropdownEntry(nestedSubmenuEntryData, true)
                                     if dropdownNestedSubmenuEntryName ~= nil and totalDropdownNestedSubmenuEntryWithIcon ~= nil and totalDropdownNestedSubmenuEntryWithIcon ~= "" then
 
@@ -1144,7 +1147,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                         ClearMenu() --Hide submenu
                                     end,
                                     --tooltip         =
-                                    entris          = gotNestedSubmenu == true and nestedSubmenuEntries
+                                    entries          = gotNestedSubmenu == true and nestedSubmenuEntries
                                 }
                             end --if cbTableDataTab.isHeader == true then
                         end
