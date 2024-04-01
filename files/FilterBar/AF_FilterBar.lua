@@ -979,7 +979,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                 if v.callbackTable and #v.callbackTable > 0 then
                     for idx, cbTableDataTab in ipairs(v.callbackTable) do
                         nestedSubmenuEntries = nil
-
+                        gotNestedSubmenu = false
 
                         local isHeader = cbTableDataTab.isHeader
                         if not isHeader then
@@ -1002,28 +1002,8 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                             baseEntryName   = dropdownNestedSubmenuEntryName,
                                             callback        =   function(comboBox, itemName, item, selectionChanged, oldItem)
 
-                                                --d("[AF]Callback func of non-submenu called!")
-
-                                                --[[
-                                                            local origItem = ZO_ShallowTableCopy(item)
-                                                            local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
-
-                                                            AF.currentCombobox = comboBox
-                                                            AF.currentComboboxSelectedItem = item
-
-                                                            PlaySound(SOUNDS.MENU_BAR_CLICK)
-
-                                                            --ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, origItem) -- Will call the original item's callback function
-                                                            --The same as below:
-                                                            applyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
-                                                            self:UpdateLastSelectedDropdownEntries(p_newButton, "PopulateDropdown-DropdownName: " ..tos(dropdownEntryName) .. ", itemName: " ..tos(itemName))
-
-                                                            --local button = comboBox._AF_FilterBar:GetCurrentButton()
-                                                            p_newButton.previousDropdownSelection = p_newButton.previousDropdownSelection or {}
-                                                            p_newButton.previousDropdownSelection[filterPanelIdActive] = origItem
-                                                ]]
                                                 --Apply the filter now
-                                                applyFilter(cbTableDataTab, AF_CONST_DROPDOWN_FILTER, true)
+                                                applyFilter(nestedSubmenuEntriesAtCallbackTable, AF_CONST_DROPDOWN_FILTER, true)
                                                 self:UpdateLastSelectedDropdownEntries(p_newButton, "AF_FilterBar '"..tos(self.name).."', SubMenu-NameOfEntry: " ..tos(dropdownNestedSubmenuEntryName))
                                                 p_newButton.forceNextDropdownRefresh = true
 
@@ -1036,10 +1016,10 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                                                     selectionChanged or p_newButton.forceNextDropdownRefresh)
                                                             self:UpdateLastSelectedDropdownEntries(p_newButton, "AF_FilterBar '"..tos(comboBox.name).."-ComboBoxEntry SelectedItemData: " ..tos(totalDropdownNestedSubmenuEntryWithIcon))
                                                         end)
-                                                comboBox.m_selectedItemData.filterResetAtStartDelay = cbTableDataTab.filterResetAtStartDelay
-                                                comboBox.m_selectedItemData.filterResetAtStart      = cbTableDataTab.filterResetAtStart
-                                                comboBox.m_selectedItemData.filterStartCallback     = cbTableDataTab.filterStartCallback
-                                                comboBox.m_selectedItemData.filterEndCallback       = cbTableDataTab.filterEndCallback
+                                                comboBox.m_selectedItemData.filterResetAtStartDelay = nestedSubmenuEntriesAtCallbackTable.filterResetAtStartDelay
+                                                comboBox.m_selectedItemData.filterResetAtStart      = nestedSubmenuEntriesAtCallbackTable.filterResetAtStart
+                                                comboBox.m_selectedItemData.filterStartCallback     = nestedSubmenuEntriesAtCallbackTable.filterStartCallback
+                                                comboBox.m_selectedItemData.filterEndCallback       = nestedSubmenuEntriesAtCallbackTable.filterEndCallback
                                                 comboBox.m_selectedItemData.nameWithoutIcon         = itemNestedSubmenuEntryName
                                                 comboBox.m_selectedItemData.baseEntryName           = dropdownNestedSubmenuEntryName
                                                 --Get the current LibFilters filterPanelId
@@ -1054,7 +1034,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                             end,
 
                                             --Nested submenu at the nested submenu?
-                                            --entries = ...
+                                            --entries = nestedSubmenuNestedSubmenuTable
                                         }
                                     end
                                 end
@@ -1097,25 +1077,6 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                     callback        =   function(comboBox, itemName, item, selectionChanged, oldItem)
 
                                         --d("[AF]Callback func of non-submenu called!")
-
-                                        --[[
-                                                    local origItem = ZO_ShallowTableCopy(item)
-                                                    local filterPanelIdActive = getCurrentFilterTypeForInventory(AF.currentInventoryType)
-
-                                                    AF.currentCombobox = comboBox
-                                                    AF.currentComboboxSelectedItem = item
-
-                                                    PlaySound(SOUNDS.MENU_BAR_CLICK)
-
-                                                    --ZO_ComboBox_Base_ItemSelectedClickHelper(p_comboBox, origItem) -- Will call the original item's callback function
-                                                    --The same as below:
-                                                    applyFilter(v, AF_CONST_DROPDOWN_FILTER, selectionChanged or p_newButton.forceNextDropdownRefresh)
-                                                    self:UpdateLastSelectedDropdownEntries(p_newButton, "PopulateDropdown-DropdownName: " ..tos(dropdownEntryName) .. ", itemName: " ..tos(itemName))
-
-                                                    --local button = comboBox._AF_FilterBar:GetCurrentButton()
-                                                    p_newButton.previousDropdownSelection = p_newButton.previousDropdownSelection or {}
-                                                    p_newButton.previousDropdownSelection[filterPanelIdActive] = origItem
-                                        ]]
                                         --Apply the filter now
                                         applyFilter(cbTableDataTab, AF_CONST_DROPDOWN_FILTER, true)
                                         self:UpdateLastSelectedDropdownEntries(p_newButton, "AF_FilterBar '"..tos(self.name).."', SubMenu-NameOfEntry: " ..tos(itemEntryName))
@@ -1147,7 +1108,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
                                         ClearMenu() --Hide submenu
                                     end,
                                     --tooltip         =
-                                    entries          = gotNestedSubmenu == true and nestedSubmenuEntries
+                                    entries          = (gotNestedSubmenu == true and nestedSubmenuEntries) or nil
                                 }
                             end --if cbTableDataTab.isHeader == true then
                         end
