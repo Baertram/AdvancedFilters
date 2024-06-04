@@ -202,7 +202,10 @@ local textures = {
     Polymorph       = "/esoui/art/icons/container_sealed_polymorph_001.dds", --TODO
     Personality     = "/esoui/art/emotes/emotes_indexicon_personality_%s.dds",
 
-    Crafted         = "/EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_up.dds"
+    Crafted         = "/EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_%s.dds",
+
+    Scribing        = "/esoui/art/crafting/scribing_tabicon_scribing_%s.dds",
+    ScribingInk     = "/esoui/art/icons/item_grimoire_ink.dds",
 }
 
 --ALCHEMY

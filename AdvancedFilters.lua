@@ -37,23 +37,52 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 --[[
 
+--#76 Add support for nested submenus in nested submenus (currently only 1 level depth is supported)
 
---#75 Add nested submenu support via LibScrollableMenu -> to filter plugins ( AF_FilterBar:ActivateButton(newButton) -> PopulateDropdown(p_newButton) )
 
-
-------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-03-30
---Max todos: #75
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-03-30
---#75
+--TODO Last updated: 2024-06-04
+--Max todos: #78
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+--CURRENTLY WORKING ON - Last updated: 2024-06-04
+
+--#78  CraftBag - Misc. -> ShowSubfilterBar - SubFilterBar missing
+19:41] >>>======== AF ERROR - BEGIN ========>>>
+[19:41] [AdvancedFilters ERROR] ShowSubfilterBar - SubFilterBar missing
+[19:41] -> [ ShowSubfilterBar - SubFilterBar missing]
+[19:41] InventoryType: 6, craftingType: 0/0, currentFilter: 7, subFilterGroupMissing: false, subfilterBarMissing: false
+[19:41] <<<======== AF ERROR - END ========<<<
+
+
+1) What did you do?
+
+Opened my craft bag and clicked on miscellaneous filter to see the newly acquired LuminousInk.
+
+2)Where did you do it?
+
+The Scholarium
+
+3)Did you test if the error happenes with only the addon AdvancedFilters and libraries activated (please test this!)?
+
+<<UPDATED>>
+
+Yes, the same error happens when all other addons are disabled
+
+
+Added new AF item filter type ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS
+And name of filters CraftBagMiscellaneous
+-> ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS needs to be used as currentFilter if CraftBag tab is shown an currentFilter is ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS (7)
+-> Remapping to ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS in e.g. util.GetCurrentFilter(invType)
+
+
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.1 - Current 1.6.4.2
+--  UPDATE INFORMATION: since AF 1.6.4.2 - Current 1.6.4.3
 --______________________________________________________________________________________________________________________
 
 -- ADDED
@@ -64,7 +93,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 -- CHANGED
 
 -- FIXED
---#74 Fix "Unbound & unknown set item collections" to show any companion items
 
 
 ---==========================================================================================================================================================================
@@ -73,7 +101,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  NOT REPLICABLE
 --______________________________________________________________________________________________________________________
---Not replicable 2019-08-11
 
 
 --______________________________________________________________________________________________________________________

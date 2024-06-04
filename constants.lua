@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram"
-AF.version = "1.6.4.2"
+AF.version = "1.6.4.3"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -283,6 +283,8 @@ local itemFilterTypesDefinedForAdvancedFilters = {
     ITEMFILTERTYPE_AF_UNIVERSAL_DECON_ARMOR         = 0,
     ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY       = 0,
     ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS        = 0,
+    --Craftbag Miscellaneous (for Scribing materials)
+    ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS        = 0
 }
 local counter = AF.maxItemFilterType
 for itemFilterTypeName, _ in pairs(itemFilterTypesDefinedForAdvancedFilters) do
@@ -407,6 +409,7 @@ local filterTypeNames = {
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_JEWELRY]     = "Jewelry" ..universalDeconStr,
     [ITEMFILTERTYPE_AF_UNIVERSAL_DECON_GLYPHS]      = "Glyphs" ..universalDeconStr,
 
+    [ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS]      = "CraftBagMiscellaneous"
     --CUSTOM ADDON TABs
     --[[
     [ITEMFILTERTYPE_AF_STOLENFILTER]         = "HarvensStolenFilter",
@@ -420,6 +423,15 @@ local normalFilterNames = {
     [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY]] = true, -- Jewelry
 }
 AF.normalFilterNames = normalFilterNames
+
+--Mapping between normal inventory currentFilter values (e.g. ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS) and AF custom filterTypes
+local inventoryCurrentFilterToSpecialCurentFilter = {
+    [INVENTORY_CRAFT_BAG] = {
+        [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS,
+    }
+}
+AF.inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter
+
 local normalFilter2CraftingFilter = {
     [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]] = {
         [filterTypeNames[ITEMFILTERTYPE_AF_ARMOR_WOODWORKING]]    = true, --ArmorWoodworking
@@ -744,6 +756,7 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL] = {},
             [ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM] = {},
+            [ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS] = {},
         },
     },
     --Quest items
@@ -1269,7 +1282,7 @@ local subfilterButtonNames = {
         "Potion", "Recipe", "Drink", "Food", "Crown", AF_CONST_ALL,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = {
-        "FurnishingMat", "AllTraits", --"JewelryTrait", "WeaponTrait", "ArmorTrait", -> Removed due to not enough place! Combined within "AllTraits"
+        "Scribing", "FurnishingMat", "AllTraits", --"JewelryTrait", "WeaponTrait", "ArmorTrait", -> Removed due to not enough place! Combined within "AllTraits"
         "Style",
         "JewelryCrafting", "Provisioning", "Enchanting", "Alchemy", "Woodworking",
         "Clothier", "Blacksmithing", AF_CONST_ALL,
@@ -1343,6 +1356,9 @@ local subfilterButtonNames = {
     [AF_QS_PREFIX..ITEMFILTERTYPE_QUEST_QUICKSLOT] = {
         AF_CONST_ALL,
     },
+    [ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS] = {
+        "Scribing", AF_CONST_ALL,
+    }
 
     --CUSTOM ADDON TABs
     --[[
@@ -1513,6 +1529,7 @@ local craftBagFilterGroups = {
     filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL],
     filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM],
     filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING],
+    filterTypeNames[ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS],
 }
 AF.craftBagFilterGroups = craftBagFilterGroups
 

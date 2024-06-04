@@ -1269,6 +1269,12 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallback({ITEMTYPE_FURNISHING_MATERIAL}),
             dropdownCallbacks = {},
         },
+        Scribing = {
+            filterCallback = GetFilterCallback({ITEMTYPE_SCRIBING_INK}),
+            dropdownCallbacks = {
+                {name = "ScribingInk", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SCRIBING_INK})},
+            },
+        }
     },
 --=============================================================================================================================================================================================
     --Furnishing
@@ -1934,6 +1940,19 @@ local subfilterCallbacks = {
             },
             dropdownCallbacksHeaders = true,
         },
+    },
+    --CraftBag's Miscellaneous tab
+    CraftBagMiscellaneous = {
+        addonDropdownCallbacks = {},
+        [AF_CONST_ALL] = {
+            filterCallback = GetFilterCallback(nil),
+            dropdownCallbacks = {
+                {name = "ScribingInk", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_SCRIBING_INK})},
+            },
+        },
+        Scribing = {
+            filterCallback = GetFilterCallback({ITEMTYPE_SCRIBING_INK}),
+        }
     },
 --=============================================================================================================================================================================================
 -- -^- CraftBag & Materials                                                                                          -^-

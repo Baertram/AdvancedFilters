@@ -71,6 +71,16 @@ AF.util.CheckForOtherAddonFlags = checkForOtherAddonFlags
 --======================================================================================================================
 -- -v- Helper functions                                                                                              -v-
 --======================================================================================================================
+--Variable or function?
+function util.getValueOrCallback(arg, ...)
+	if type(arg) == "function" then
+		return arg(...)
+	else
+		return arg
+	end
+end
+local getValueOrCallback = util.getValueOrCallback
+
 --Localization helper
 function util.Localize(text)
     if type(text) == 'number' then
@@ -483,6 +493,21 @@ function util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryT
     end
 end
 
+local inventoryCurrentFilterToSpecialCurentFilter
+function util.GetCurrentFilterOfInventory(invType, invVar)
+    local currentFilter = invVar.currentFilter
+
+    inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter or AF.inventoryCurrentFilterToSpecialCurentFilter
+    if currentFilter ~= nil and inventoryCurrentFilterToSpecialCurentFilter[invType] ~= nil then
+        local mappedCurrentFilter = inventoryCurrentFilterToSpecialCurentFilter[invType][currentFilter]
+        if mappedCurrentFilter ~= nil then
+            currentFilter = getValueOrCallback(mappedCurrentFilter)
+        end
+    end
+    return currentFilter
+end
+local getCurrentFilterOfInventory = util.GetCurrentFilterOfInventory
+
 --Get the currentFilter of an inventory type
 function util.GetCurrentFilter(invType)
 --d("[AF]util.GetCurrentFilter-invType: " ..tos(invType))
@@ -521,8 +546,9 @@ function util.GetCurrentFilter(invType)
         local playerInvVar = controlsForChecks.playerInv
         local playerInv = playerInvVar.inventories[invType]
         if not playerInv then return end
-        --Get the currentFilter of the inventory
-        currentFilter = playerInv.currentFilter
+
+        --Get the currentFilter of the inventory but see if needs a mapping (e.g. Craftbag's "Misc" tab -> to another
+        currentFilter = getCurrentFilterOfInventory(invType, playerInv)
         if not currentFilter then return end
     end
     return currentFilter
@@ -902,13 +928,14 @@ function util.BuildDropdownCallbacks(groupName, subfilterName)
     --Recursively check the addonTable's callbackTable for nestedSubmenus and add the names in that callback entries
     --plus the normal submenuName, plus normal callback entry names to the compare table
     --> The compare table will then be checked against entries in the dropdown filter box so no duplicates will be added again
+    local maxRecursivelyCallsInLoop = 100
     local preventEndlessLoopDuplicateCallbackEntryNames = false
     local preventEndlessLoopDuplicateCallbackEntryNamesCounter = 0
     local function recursivelyCheckDuplicateAddonFilterCallbackEntryNames(p_addonTable, p_compareNames)
-d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " .. tos(p_compareNames ~= nil and #p_compareNames or 0) .. ", endlessLoopCounter: " ..tos(preventEndlessLoopDuplicateCallbackEntryNamesCounter))
+--d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " .. tos(p_compareNames ~= nil and #p_compareNames or 0) .. ", endlessLoopCounter: " ..tos(preventEndlessLoopDuplicateCallbackEntryNamesCounter))
         --Prevent the recursively submenu checks to do more than 100 loops
         preventEndlessLoopDuplicateCallbackEntryNamesCounter = preventEndlessLoopDuplicateCallbackEntryNamesCounter + 1
-        if preventEndlessLoopDuplicateCallbackEntryNames == true and preventEndlessLoopDuplicateCallbackEntryNamesCounter >= 100 then
+        if preventEndlessLoopDuplicateCallbackEntryNames == true and preventEndlessLoopDuplicateCallbackEntryNamesCounter >= maxRecursivelyCallsInLoop then
             return
         end
         if p_addonTable == nil or p_compareNames == nil then return end
@@ -923,7 +950,7 @@ d("[AF]recursivelyCheckDuplicateAddonFilterCallbackEntryNames - EntryCount: " ..
                 --Do we have any nestedSubmenuEntries?
                 --Recursively check the nestedSubmenuEntries callbackTable for next names and maybe oher nested submenuEntries
                 if callbackTableNameEntry.nestedSubmenuEntries ~= nil then
-d(">Found nestedSubmenuEntries in callback entries table")
+--d(">Found nestedSubmenuEntries in callback entries table")
                     preventEndlessLoopDuplicateCallbackEntryNames = true
                     recursivelyCheckDuplicateAddonFilterCallbackEntryNames(callbackTableNameEntry.nestedSubmenuEntries, p_compareNames)
                 else
@@ -955,12 +982,15 @@ d(">Found nestedSubmenuEntries in callback entries table")
         else
             addonName = (addonTable.callbackTable and addonTable.callbackTable[1] and addonTable.callbackTable[1].name) or "n/a"
         end
+
         if displayName == "@Baertram" and (not addonName or addonName ~= nil and addonName == "") then
 d(strfor("[AF]insertAddonOrBaseAdvancedFiltersSubmenu -> addonName not found! groupNameLocal: %s, subfilterNameLocal: %s, isBaseAdvancedFiltersSubmenu: %s\n->Inspect table A_F._addonTable", tos(groupNameLocal), tos(subfilterNameLocal), tos(isBaseAdvancedFiltersSubmenu)) )
         end
         if debugSpam and not debugSpamExcludeDropdownBoxFilters then d("->insertAddon addonName: '" .. tos(addonName) .."', groupNameLocal: '" .. tos(groupNameLocal) .. "', subfilterNameLocal: '" .. tos(subfilterNameLocal).. "'") end
 
 
+--Todo: For debugging - Remove afterwards
+--[[
 if not isBaseAdvancedFiltersSubmenu then
     AF._debugPluginFilterAddonTables = AF._debugPluginFilterAddonTables or {}
     AF._debugPluginFilterAddonTables[addonName .. "_" .. groupNameLocal .. "_" .. subfilterNameLocal] = {
@@ -971,6 +1001,7 @@ if not isBaseAdvancedFiltersSubmenu then
         subfilterNameLocal = subfilterNameLocal,
     }
 end
+]]
 
         ------------------------------------------------------------------------------------------------------------------------
         -- Generator function for callbackTable and strings
