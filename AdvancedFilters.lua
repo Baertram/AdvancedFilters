@@ -38,38 +38,34 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --[[
 
 --#76 Add support for nested submenus in nested submenus (currently only 1 level depth is supported)
---#77 Fix entries in filter dropdowns being clickable if they should only open a submenu (their .callback must be nil then or else LSM will run it and select it to the comboBox)
 
 
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-04-01
---Max todos: #77
+--TODO Last updated: 2024-06-04
+--Max todos: #78
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-04-01
+--CURRENTLY WORKING ON - Last updated: 2024-06-04
+
+--#78  CraftBag - Misc. -> ShowSubfilterBar - SubFilterBar missing (new Scribing materials)
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.1 - Current 1.6.4.2
+--  UPDATE INFORMATION: since AF 1.6.4.2 - Current 1.6.4.3
 --______________________________________________________________________________________________________________________
 
 -- ADDED
 --
 --
 -- ADDED ON REQUEST
---#75 Added nested submenu support via LibScrollableMenu to filter plugins. Currently only 1 level of depth is supported for nested submenus (Means: menu -> submenu -> submenu).
--->    Use nestedSubmenuEntries = yourNestedSubmenuCallbackTable in your plugins filterInformation.callbackTable to add the table of nested submenus. Your filterInformation.submenuName must be specified too.
--->    enStrings must contain each's "name" entry of the table yourNestedSubmenuCallbackTable, and the table yourNestedSubmenuCallbackTable must contain entries with name = String and filterCallback = filterFunction.
--->    See one example: AF filter plugin "FCO CraftedSetFilters"
 
 -- CHANGED
 
 -- FIXED
---#74 Fix "Unbound & unknown set item collections" to show any companion items
-
+--#78  CraftBag - Misc. -> Added scribing category and scribing ink sub- + dropdown filters
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -77,7 +73,6 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 --______________________________________________________________________________________________________________________
 --                                                  NOT REPLICABLE
 --______________________________________________________________________________________________________________________
---Not replicable 2019-08-11
 
 
 --______________________________________________________________________________________________________________________
@@ -659,38 +654,57 @@ local function InitializeHooks()
         --CraftBag
         if invType == INVENTORY_CRAFT_BAG then
             local afCBCurrentFilter = AF.craftBagCurrentFilter
-            if AF.settings.debugSpam then d("[AF]ShowSubfilterBar craftbag, currentFilter: " .. tos(currentFilter) .. ", afCBCurrentFilter: " .. tos(afCBCurrentFilter)) end
+            local oldCurrentFilter = currentFilter
+
+            if AF.settings.debugSpam then d("[AF]ShowSubfilterBar craftbag, oldCurrentFilter: " ..tos(oldCurrentFilter) ..", currentFilter: " .. tos(currentFilter) .. ", afCBCurrentFilter: " .. tos(afCBCurrentFilter)) end
+--d("~~~~~~~~ Show SubfilterBar craftBagCurrentFilter: " ..tos(AF.craftBagCurrentFilter) .. "; oldCurrentFilter: " .. tos(oldCurrentFilter) ..", currentFilter: " ..tos(currentFilter))
+            --Last saved CraftBag selected tab filter (currentFilter) was saved as the CB fragment was hidden, and it was not selecting "All" items, and the current filter at the
+            --CraftBag is the same as the last saved one?
             if afCBCurrentFilter and afCBCurrentFilter ~= ITEMFILTERTYPE_ALL and afCBCurrentFilter == currentFilter then
                 --Set prevention variable for function ShowSubfilterBar at the craftbag.
 
                 --Check if the currentFilter variable changed to 0 () now (Which happens if we opened the guild store after the craftbag, and reopening the craftbag now.
                 --See issue 7 at AdvancedFilters github:  https://github.com/Randactyl/AdvancedFilters/issues/7
                 --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-                local currentCBFilter = getCurrentFilter(invType)
+                local currentCBFilter = getCurrentFilter(INVENTORY_CRAFT_BAG, true) --Only get the base inventory currentFilter, no mapped one (e.g. CraftBag's misc. tab -> ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS  instead of ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS)
                 if debugSpam then
                     d(">currentCBFilter: " .. tos(currentCBFilter))
                 end
                 if currentCBFilter == ITEMFILTERTYPE_ALL then
-                    --The currentfilter reset, so we need to set it to the last known value again now
+                    --The currentFilter has reset to "All", so we need to restore it to the last known value again now
+--d(">>changing PLAYER_INVENTORY craftbag currentfilter to: " .. tos(currentCBFilter))
                     PLAYER_INVENTORY.inventories[INVENTORY_CRAFT_BAG].currentFilter = afCBCurrentFilter
                     currentFilter = afCBCurrentFilter
                 end
             end
-            currentFilterToUse = currentFilter
+            --Check if we need to map the currentFilterToUse to another filter, internal AF filte -> To show the proper subfilterBar
+            --e.g. map inventories ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS at CraftBag to internal AF filterType ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS
+            currentFilterToUse = getCurrentFilter(invType, false, currentFilter)
+
+--d(">>currentFilterToUse: " .. tos(currentFilterToUse))
+
+
         elseif invType == LF_QUICKSLOT then
             --Quickslots
             --Get the currentFilter
             currentFilterToUse = getInvTypeCurrentQuickslotFilter(invType, currentFilter)
             if currentFilterToUse == nil then return end
+
         elseif isUniversalDecon == true then
             --currentFilter is UNIVERSAL_DECONSTRUCTION.deconstructionPanel.inventory.AF_currentFilter
             currentFilterToUse = customInventoryFilterButtonsItemType
             if currentFilterToUse == nil then currentFilterToUse = currentFilter end
+
         else
             --Is the filterType of the current menuBar button a custom addon filter function or filterType?
             currentFilterToUse = customInventoryFilterButtonsItemType
             if currentFilterToUse == nil then currentFilterToUse = currentFilter end
+
+            --Check if we need to map the currentFilterToUse to another filter, internal AF filter.
+            --e.g. map inventories ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS at CraftBag to internal AF filterType ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS
+            currentFilterToUse = getCurrentFilter(invType, false, currentFilterToUse)
         end
+
         if craftingType == nil then craftingType = GetCraftingType() end
         if AF.settings.debugSpam then d("[AF]ShowSubfilterBar - currentFilter: " .. tos(currentFilter) .. ", currentFilterToUse: " ..tos(currentFilterToUse) .. ", craftingType: " .. tos(craftingType) .. ", invType: " .. tos(invType) .. ", customInventoryFilterButtonsItemType: " ..tos(customInventoryFilterButtonsItemType)) end
         --[[
@@ -1009,13 +1023,13 @@ local function InitializeHooks()
                     local invTypeForShowSubfilterBar = inventoryTypeUpdated
                     if inventoryType == INVENTORY_CRAFT_BAG then
                         --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-                        local currentCBFilter = getCurrentFilter(inventoryType)
-                        local afCBCurrentFilter = AF.craftBagCurrentFilter
+                        --local currentCBFilter = getCurrentFilter(inventoryType)
+                        --local afCBCurrentFilter = AF.craftBagCurrentFilter
                         --d("[AF]CraftBag fragment showing, currentFilter: " ..tos(currentFilter) ..", currentFilterCB: " .. tos(currentCBFilter) .. ", afCBCurrentFilter: " .. tos(afCBCurrentFilter))
                         --Overwrite the inventory type for the function ShowSubfilterBar so that addons like AwesomeGuildStore, which add the CraftBag Fragment to
                         --the guild sore sell tab, won't cause 2 subfilterbars to be shown: 1st normal inv. 2nd craftbag. Where the missing invType at teh ShowSubfilterBar function
                         --will make the addon use AF.currentInventoryType and thus produces a combination of normal inv's currentfilter + CraftBag inventory subfilter bars -> Error message!
-                        invTypeForShowSubfilterBar = inventoryTypeUpdated
+                        --invTypeForShowSubfilterBar = inventoryTypeUpdated
                     end
                     if AF.settings.debugSpam then
                         d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>")
@@ -1100,7 +1114,8 @@ local function InitializeHooks()
             --CraftBag
             if inventoryType == INVENTORY_CRAFT_BAG then
                 --AF.craftBagCurrentFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
-                AF.craftBagCurrentFilter = getCurrentFilter(INVENTORY_CRAFT_BAG)
+                AF.craftBagCurrentFilter = getCurrentFilter(INVENTORY_CRAFT_BAG, true) --no mapping, only plain ZOs value of currentFilter
+--d(">hiding craftbag fragment - currentFilter: " ..tos(AF.craftBagCurrentFilter))
                 if AF.settings.debugSpam then d("[AF]CraftBag fragment hiding, currentFilter: " .. tos(AF.craftBagCurrentFilter)) end
             end
             --Reset the current inventory type to the normal inventory, or the quest (depending on the currentFilter before craftbag was opened)
@@ -2307,7 +2322,9 @@ local function createDropdownBoxCallbackFunctionKeys()
     local subfilterButtonNames = AF.subfilterButtonNames
     local filterTypeNames = AF.filterTypeNames
     local subfilterButtonEntriesNotForDropdownCallback = AF.subfilterButtonEntriesNotForDropdownCallback
+    -- subfilterButtonKeyItemFilterTypeOrString = e.g ITEM_TYPE_DISPLAY_CATEGORY_COMPANION / subfilterButtonData = groupNames e.g. { "Weapon", "Armor" , ...}
     for subfilterButtonKeyItemFilterTypeOrString, subfilterButtonData in pairs(subfilterButtonNames) do
+        --dropDownCallbackKeyName = e.g. "Companion"
         local dropDownCallbackKeyName = filterTypeNames[subfilterButtonKeyItemFilterTypeOrString] or ""
         if dropDownCallbackKeyName ~= "" then
             keys[dropDownCallbackKeyName] = {}

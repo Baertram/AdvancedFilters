@@ -202,6 +202,10 @@ local strings = {
     --Crafted
     Crafted = util.Localize(SI_ITEM_FORMAT_STR_CRAFTED),
 
+    --Scribing
+    Scribing = util.Localize(SI_SKILLS_MENU_SCRIBING_LIBRARY),
+    ScribingInk = util.Localize(SI_ITEMTYPE74),
+
     --LAM settings menu
     lamDescription = "Show additional filter buttons in the inventories to seperate item types",
     lamHideItemCount = "Hide item count",
