@@ -244,8 +244,10 @@ local texturesReSize = {
     MuseumPiece     = {width=20, height=20},
     SurveyReport    = {width=20, height=20},
     RecallStone     = {width=20, height=20},
+    ScribingInk     = {width=18, height=18},
 }
 AF.texturesReSize = texturesReSize
 
 --Add the textures to the addon namespace
+-->Used in AF_FilterBar:AddSubfilter
 AF.textures = textures

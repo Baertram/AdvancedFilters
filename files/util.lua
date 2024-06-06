@@ -28,6 +28,13 @@ local strfor = string.format
 
 local controlsForChecks = AF.controlsForChecks
 local researchHorizontalScrollList = controlsForChecks.researchLineList
+
+--These variables will get the currentFilter "updated" so need the full path via AF.controlsForChecks!
+local companionInv = AF.controlsForChecks.companionInv
+local store = AF.controlsForChecks.store
+local quickslots = AF.controlsForChecks.quickslot
+
+
 local checkIfOtherAddonsProvideSubfilterBarRefreshFilters
 local isItemFilterTypeInItemFilterData
 
@@ -494,22 +501,46 @@ function util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryT
 end
 
 local inventoryCurrentFilterToSpecialCurentFilter
-function util.GetCurrentFilterOfInventory(invType, invVar)
+function util.GetCurrentFilterOfInventory(invType, invVar, noSpecialInventoryMapping)
+    noSpecialInventoryMapping = noSpecialInventoryMapping or false
     local currentFilter = invVar.currentFilter
 
-    inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter or AF.inventoryCurrentFilterToSpecialCurentFilter
-    if currentFilter ~= nil and inventoryCurrentFilterToSpecialCurentFilter[invType] ~= nil then
-        local mappedCurrentFilter = inventoryCurrentFilterToSpecialCurentFilter[invType][currentFilter]
-        if mappedCurrentFilter ~= nil then
-            currentFilter = getValueOrCallback(mappedCurrentFilter)
+    if not noSpecialInventoryMapping then
+        inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter or AF.inventoryCurrentFilterToSpecialCurentFilter
+        if currentFilter ~= nil and inventoryCurrentFilterToSpecialCurentFilter[invType] ~= nil then
+            local mappedCurrentFilter = inventoryCurrentFilterToSpecialCurentFilter[invType][currentFilter]
+            if mappedCurrentFilter ~= nil then
+                currentFilter = getValueOrCallback(mappedCurrentFilter)
+            end
         end
     end
     return currentFilter
 end
 local getCurrentFilterOfInventory = util.GetCurrentFilterOfInventory
 
+local inventorySpecialCurentFilterToCurrentFilter
+function util.SetCurrentFilterOfInventory(invVar, invType, currentFilter)
+    if not invVar or not invVar.inventories[invType] then
+        if AF.settings.debugSpam then df("<<ABORT[AF]util.UpdateCurrentFilter - invType %q missing in PLAYER_INVENTORY.inventories! CurrentFilter: %s", tostring(invType), tostring(currentFilter)) end
+        return false
+    end
+
+    --Check if the currentFilter needs to be mappd back from AF* special iventory filtertype to ZOs vanilla inventory filter/display type:
+    --todo 20240606
+    inventorySpecialCurentFilterToCurrentFilter = inventorySpecialCurentFilterToCurrentFilter or AF.inventorySpecialCurrentFilterToCurentFilter
+    if currentFilter ~= nil and inventorySpecialCurentFilterToCurrentFilter[invType] ~= nil then
+        local mappedCurrentFilter = inventorySpecialCurentFilterToCurrentFilter[invType][currentFilter]
+        if mappedCurrentFilter ~= nil then
+            currentFilter = getValueOrCallback(mappedCurrentFilter)
+        end
+    end
+
+    invVar.inventories[invType].currentFilter = currentFilter
+end
+local setCurrentFilterOfInventory = util.SetCurrentFilterOfInventory
+
 --Get the currentFilter of an inventory type
-function util.GetCurrentFilter(invType)
+function util.GetCurrentFilter(invType, noSpecialInventoryMapping, currentFilterBefore)
 --d("[AF]util.GetCurrentFilter-invType: " ..tos(invType))
     if not invType then return end
     local currentFilter
@@ -518,7 +549,7 @@ function util.GetCurrentFilter(invType)
     local isCraftingInventoryType = false
     --local craftingType = getCraftingType()
     --local subfilterBarBase = util.GetSubfilterBar(invType, craftingType)
-    if AF.settings.debugSpam then d("[AF]util.GetCurrentFilter-invType: " ..tos(invType)) end
+    if AF.settings.debugSpam then d("[AF]util.GetCurrentFilter-invType: " ..tos(invType) ..", currentFilterBefore: " ..tos(currentFilterBefore) ..", noSpecialInventoryMapping: " ..tos(noSpecialInventoryMapping)) end
     local subfilterBar = util.GetActiveSubfilterBar(invType)
     if isCraftingPanelShown() and subfilterBar then
         isCraftingInventoryType = isCraftingStationInventoryType(subfilterBar.inventoryType)
@@ -536,22 +567,22 @@ function util.GetCurrentFilter(invType)
 
     elseif isCraftingInventoryType then
         local craftingInv = subfilterBar and getInventoryFromCraftingPanel(subfilterBar.inventoryType)
-        if not craftingInv then return end
+        if not craftingInv then return currentFilterBefore end
         currentFilter = craftingInv.currentFilter
     elseif invType == LF_INVENTORY_COMPANION then
         --CurrentFilter is a table
-        currentFilter = AF.controlsForChecks.companionInv.currentFilter.descriptor
+        currentFilter = companionInv.currentFilter.descriptor
     else
         --Get the player inventory for the inventory type
         local playerInvVar = controlsForChecks.playerInv
         local playerInv = playerInvVar.inventories[invType]
-        if not playerInv then return end
+        if not playerInv then return currentFilterBefore end
 
         --Get the currentFilter of the inventory but see if needs a mapping (e.g. Craftbag's "Misc" tab -> to another
-        currentFilter = getCurrentFilterOfInventory(invType, playerInv)
-        if not currentFilter then return end
+        currentFilter = getCurrentFilterOfInventory(invType, playerInv, noSpecialInventoryMapping)
+        if not currentFilter then return currentFilterBefore end
     end
-    return currentFilter
+    return currentFilter or currentFilterBefore
 end
 local getCurrentFilter = util.GetCurrentFilter
 
@@ -585,7 +616,7 @@ end
 
 --Update the currentFilter to the current inventory or crafting inventory
 function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryType, craftingInv, currentFilterToUse)
-    if AF.settings.debugSpam then d("[AF]util.UpdateCurrentFilter - invType: " .. tos(invType) .. ", currentFilter: " ..tos(currentFilter).. ", isCraftingInventoryType: " ..tos(isCraftingInventoryType)) end
+    if AF.settings.debugSpam then d("[AF]util.UpdateCurrentFilter - invType: " .. tos(invType) .. ", currentFilter: " ..tos(currentFilter).. ", isCraftingInventoryType: " ..tos(isCraftingInventoryType) .. ", currentFilterToUse: " ..tos(currentFilterToUse)) end
     if invType == nil or currentFilter == nil then return nil end
     isCraftingInventoryType = isCraftingInventoryType or false
     if isCraftingInventoryType and craftingInv == nil then
@@ -596,7 +627,7 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
     if invType == INVENTORY_TYPE_VENDOR_BUY then
         --Map the currentfilter, containing the
         --local currentFilterForVendorBuy =
-        controlsForChecks.store.currentFilter = currentFilter
+        store.currentFilter = currentFilter
     elseif subfilterBarInventorytypesOfUniversalDecon[invType] then
         universalDeconPanelInv.AF_currentFilter = currentFilter
 --d(">updated universalInv.AF_currentFilter: " .. tos(currentFilter))
@@ -605,17 +636,15 @@ function util.UpdateCurrentFilter(invType, currentFilter, isCraftingInventoryTyp
     elseif invType == LF_QUICKSLOT then
         --CurrentFilter is a table
         --currentFilterToUse = currentFilterToUse or util.GetInvTypeCurrentQuickslotFilter(invType, currentFilter)
-        AF.controlsForChecks.quickslot.currentFilter = currentFilter
+        quickslots.currentFilter = currentFilter
     elseif invType == LF_INVENTORY_COMPANION then
         --CurrentFilter is a table
-        AF.controlsForChecks.companionInv.currentFilter.descriptor = currentFilter
+        companionInv.currentFilter.descriptor = currentFilter
     else
         local playerInvVar = controlsForChecks.playerInv
-        if not playerInvVar.inventories[invType] then
-            if AF.settings.debugSpam then d("<<ABORT[AF]util.UpdateCurrentFilter - invType missing in PLAYER_INVENTORY.inventories!") end
-            return false
-        end
-        playerInvVar.inventories[invType].currentFilter = currentFilter
+        --playerInvVar.inventories[invType].currentFilter = currentFilter
+        --Check if the currentFilter needs a mapping back from AF* special to normal ZOs item filter/display type
+        setCurrentFilterOfInventory(playerInvVar, invType, currentFilter)
     end
 end
 

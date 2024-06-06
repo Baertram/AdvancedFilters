@@ -431,6 +431,14 @@ local inventoryCurrentFilterToSpecialCurentFilter = {
     }
 }
 AF.inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter
+--And the mapping backwards for the same
+local inventorySpecialCurrentFilterToCurentFilter = {
+    [INVENTORY_CRAFT_BAG] = {
+        [ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS] = ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS,
+    }
+}
+AF.inventorySpecialCurrentFilterToCurentFilter = inventorySpecialCurrentFilterToCurentFilter
+
 
 local normalFilter2CraftingFilter = {
     [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]] = {
