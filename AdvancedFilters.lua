@@ -2089,7 +2089,7 @@ local function presetCraftingStationHookVariables()
     smithingVar.improvementPanel.inventory.currentFilter    = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_IMPROVEMENT,    CRAFTING_TYPE_BLACKSMITHING)
     smithingVar.researchPanel.currentFilter                 = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_RESEARCH,       CRAFTING_TYPE_BLACKSMITHING)
     enchantingVar.inventory.currentFilter                   = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING,      LF_ENCHANTING_EXTRACTION,   CRAFTING_TYPE_ENCHANTING)
-    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT,                LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
+    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT_WEAPON,         LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
 end
 
 local function presetUniversalDeconstructionHookVariables()
