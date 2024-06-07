@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram"
-AF.version = "1.6.4.3"
+AF.version = "1.6.4.4"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
