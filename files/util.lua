@@ -594,7 +594,7 @@ function util.GetCurrentFilter(invType, noSpecialInventoryMapping, currentFilter
         currentFilter = getCurrentFilterOfInventory(invType, playerInv, noSpecialInventoryMapping)
         if not currentFilter then return currentFilterBefore end
     end
-d(">currentFilter now: " ..tos(currentFilter))
+--d(">currentFilter now: " ..tos(currentFilter))
     return currentFilter or currentFilterBefore
 end
 local getCurrentFilter = util.GetCurrentFilter

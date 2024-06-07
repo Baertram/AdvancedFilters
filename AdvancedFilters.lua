@@ -703,6 +703,7 @@ local function InitializeHooks()
 
             --Check if we need to map the currentFilterToUse to another filter, internal AF filter.
             --e.g. map inventories ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS at CraftBag to internal AF filterType ITEMFILTERTYPE_AF_CRAFTBAG_MISCELLANEOUS
+            doesInventoryTypeNeedsMappingToCustomAFCurrentFilter = doesInventoryTypeNeedsMappingToCustomAFCurrentFilter or util.DoesInventoryTypeNeedsMappingToCustomAFCurrentFilter
             if doesInventoryTypeNeedsMappingToCustomAFCurrentFilter(invType) then
                 currentFilterToUse = getCurrentFilter(invType, false, currentFilterToUse)
             end
