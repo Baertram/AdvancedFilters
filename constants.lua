@@ -230,7 +230,7 @@ local inventories = {
         searchBox = ZO_CraftBagSearchFiltersTextSearchBox,
     },
     [LF_QUICKSLOT] = {
-        searchBox = (quickslotKeyboard ~= nil and quickslotKeyboard.searchBox) or ZO_QuickSlotSearchFiltersTextSearchBox,
+        searchBox = (quickslotKeyboard ~= nil and quickslotKeyboard.searchBox) or ZO_QuickSlot_Keyboard_TopLevelSearchFiltersTextSearch, --old: ZO_QuickSlotSearchFiltersTextSearchBox,
     },
     [LF_INVENTORY_COMPANION] = {
         searchBox = ZO_CompanionEquipment_Panel_KeyboardSearchFiltersTextSearchBox, --controlsForChecks.companionInv.searchBox
@@ -438,7 +438,16 @@ local inventorySpecialCurrentFilterToCurentFilter = {
     }
 }
 AF.inventorySpecialCurrentFilterToCurentFilter = inventorySpecialCurrentFilterToCurentFilter
-
+--Enable the mapping between normal inventory currentFilter values (e.g. ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS) and AF custom filterTypes
+-->Only at some inventory types (e.g. do not enable at crafting tables or it will throw errors as those use other custom AF variables already!)
+local inventoryTypeNeedsMappingToCustomAFCurrentFilter = {
+    [INVENTORY_BACKPACK] = true,
+    [INVENTORY_CRAFT_BAG] = true,
+    [INVENTORY_BANK] = true,
+    [INVENTORY_GUILD_BANK] = true,
+    [INVENTORY_HOUSE_BANK] = true,
+}
+AF.inventoryTypeNeedsMappingToCustomAFCurrentFilter = inventoryTypeNeedsMappingToCustomAFCurrentFilter
 
 local normalFilter2CraftingFilter = {
     [filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR]] = {

@@ -130,7 +130,7 @@ local strings = {
     Furnishings = util.Localize(SI_ITEMFILTERTYPE21),
 
     --MISCELLANEOUS
-    Runes = util.Localize(SI_WEAPONMODELTYPE11),
+    Runes = util.Localize(SI_WEAPONMODELTYPE8),
     Glyphs = util.Localize(SI_GAMEPADITEMCATEGORY13),
     ArmorGlyph = util.Localize(SI_ITEMTYPE21),
     JewelryGlyph = util.Localize(SI_ITEMTYPE26),

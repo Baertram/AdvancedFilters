@@ -6,6 +6,8 @@ AF.util = AF.util or {}
 local util = AF.util
 local libFilters = util.LibFilters
 
+local showChatDebug = AF.showChatDebug
+
 local displayName = GetDisplayName()
 
 --Get the language of the client
@@ -47,6 +49,9 @@ local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypes
 local universalDeconKeyToAFFilterType = AF.universalDeconKeyToAFFilterType
 local universalDeconSelectedTabToActualInventories = AF.universalDeconSelectedTabToActualInventories
 local subfilterButtonEntriesNotForDropdownCallback = AF.subfilterButtonEntriesNotForDropdownCallback
+local inventorySpecialCurentFilterToCurrentFilter = AF.inventorySpecialCurrentFilterToCurentFilter
+local inventoryCurrentFilterToSpecialCurentFilter = AF.inventoryCurrentFilterToSpecialCurentFilter
+local inventoryTypeNeedsMappingToCustomAFCurrentFilter = AF.inventoryTypeNeedsMappingToCustomAFCurrentFilter
 
 
 local detectUniversalDeconstructionPanelActiveTab
@@ -500,17 +505,24 @@ function util.CheckSpecialInventoryTypesAndUpdateCurrentInventoryType(inventoryT
     end
 end
 
-local inventoryCurrentFilterToSpecialCurentFilter
+function util.DoesInventoryTypeNeedsMappingToCustomAFCurrentFilter(invType)
+    if invType == nil then return false end
+    local needsMapping = (inventoryTypeNeedsMappingToCustomAFCurrentFilter[invType] == true and true) or false
+    return needsMapping
+end
+local doesInventoryTypeNeedsMappingToCustomAFCurrentFilter = util.DoesInventoryTypeNeedsMappingToCustomAFCurrentFilter
+
 function util.GetCurrentFilterOfInventory(invType, invVar, noSpecialInventoryMapping)
     noSpecialInventoryMapping = noSpecialInventoryMapping or false
     local currentFilter = invVar.currentFilter
 
     if not noSpecialInventoryMapping then
-        inventoryCurrentFilterToSpecialCurentFilter = inventoryCurrentFilterToSpecialCurentFilter or AF.inventoryCurrentFilterToSpecialCurentFilter
-        if currentFilter ~= nil and inventoryCurrentFilterToSpecialCurentFilter[invType] ~= nil then
-            local mappedCurrentFilter = inventoryCurrentFilterToSpecialCurentFilter[invType][currentFilter]
-            if mappedCurrentFilter ~= nil then
-                currentFilter = getValueOrCallback(mappedCurrentFilter)
+        if doesInventoryTypeNeedsMappingToCustomAFCurrentFilter(invType) then
+            if currentFilter ~= nil and inventoryCurrentFilterToSpecialCurentFilter[invType] ~= nil then
+                local mappedCurrentFilter = inventoryCurrentFilterToSpecialCurentFilter[invType][currentFilter]
+                if mappedCurrentFilter ~= nil then
+                    currentFilter = getValueOrCallback(mappedCurrentFilter)
+                end
             end
         end
     end
@@ -518,23 +530,20 @@ function util.GetCurrentFilterOfInventory(invType, invVar, noSpecialInventoryMap
 end
 local getCurrentFilterOfInventory = util.GetCurrentFilterOfInventory
 
-local inventorySpecialCurentFilterToCurrentFilter
 function util.SetCurrentFilterOfInventory(invVar, invType, currentFilter)
-    if not invVar or not invVar.inventories[invType] then
+    if not invVar or not invType or not invVar.inventories[invType] then
         if AF.settings.debugSpam then df("<<ABORT[AF]util.UpdateCurrentFilter - invType %q missing in PLAYER_INVENTORY.inventories! CurrentFilter: %s", tostring(invType), tostring(currentFilter)) end
         return false
     end
-
-    --Check if the currentFilter needs to be mappd back from AF* special iventory filtertype to ZOs vanilla inventory filter/display type:
-    --todo 20240606
-    inventorySpecialCurentFilterToCurrentFilter = inventorySpecialCurentFilterToCurrentFilter or AF.inventorySpecialCurrentFilterToCurentFilter
-    if currentFilter ~= nil and inventorySpecialCurentFilterToCurrentFilter[invType] ~= nil then
-        local mappedCurrentFilter = inventorySpecialCurentFilterToCurrentFilter[invType][currentFilter]
-        if mappedCurrentFilter ~= nil then
-            currentFilter = getValueOrCallback(mappedCurrentFilter)
+    if doesInventoryTypeNeedsMappingToCustomAFCurrentFilter(invType) then
+        --Check if the currentFilter needs to be mappd back from AF* special iventory filtertype to ZOs vanilla inventory filter/display type:
+        if currentFilter ~= nil and inventorySpecialCurentFilterToCurrentFilter[invType] ~= nil then
+            local mappedCurrentFilter = inventorySpecialCurentFilterToCurrentFilter[invType][currentFilter]
+            if mappedCurrentFilter ~= nil then
+                currentFilter = getValueOrCallback(mappedCurrentFilter)
+            end
         end
     end
-
     invVar.inventories[invType].currentFilter = currentFilter
 end
 local setCurrentFilterOfInventory = util.SetCurrentFilterOfInventory
@@ -551,8 +560,10 @@ function util.GetCurrentFilter(invType, noSpecialInventoryMapping, currentFilter
     --local subfilterBarBase = util.GetSubfilterBar(invType, craftingType)
     if AF.settings.debugSpam then d("[AF]util.GetCurrentFilter-invType: " ..tos(invType) ..", currentFilterBefore: " ..tos(currentFilterBefore) ..", noSpecialInventoryMapping: " ..tos(noSpecialInventoryMapping)) end
     local subfilterBar = util.GetActiveSubfilterBar(invType)
+    local subfilterBarInvType
     if isCraftingPanelShown() and subfilterBar then
-        isCraftingInventoryType = isCraftingStationInventoryType(subfilterBar.inventoryType)
+        subfilterBarInvType = subfilterBar.inventoryType
+        isCraftingInventoryType = isCraftingStationInventoryType(subfilterBarInvType)
     end
 
     if invType == INVENTORY_TYPE_VENDOR_BUY then
@@ -566,7 +577,8 @@ function util.GetCurrentFilter(invType, noSpecialInventoryMapping, currentFilter
 --d(">util.GetCurrentFilter: " ..tos(currentFilter))
 
     elseif isCraftingInventoryType then
-        local craftingInv = subfilterBar and getInventoryFromCraftingPanel(subfilterBar.inventoryType)
+        local craftingInv = subfilterBar and getInventoryFromCraftingPanel(subfilterBarInvType)
+--d(">IsCraftingInv of subfilterBar: " ..tos(craftingInv) .. ", invType: " ..tos(invType))
         if not craftingInv then return currentFilterBefore end
         currentFilter = craftingInv.currentFilter
     elseif invType == LF_INVENTORY_COMPANION then
@@ -582,6 +594,7 @@ function util.GetCurrentFilter(invType, noSpecialInventoryMapping, currentFilter
         currentFilter = getCurrentFilterOfInventory(invType, playerInv, noSpecialInventoryMapping)
         if not currentFilter then return currentFilterBefore end
     end
+--d(">currentFilter now: " ..tos(currentFilter))
     return currentFilter or currentFilterBefore
 end
 local getCurrentFilter = util.GetCurrentFilter
@@ -1218,7 +1231,7 @@ end
             recursivelyCheckDuplicateAddonFilterCallbackEntryNames(addonTable, compareNames)
             preventEndlessLoopDuplicateCallbackEntryNamesCounter = 0
             preventEndlessLoopDuplicateCallbackEntryNames = false
-AF._debugCompareNames = compareNames
+--AF._debugCompareNames = compareNames
 
             --Compare names with the entries in dropdownbox now
             for _, compareName in ipairs(compareNames) do
@@ -1897,6 +1910,11 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     if debugSpam then d("<SubFilter refresh - go on: onlyEnableAllSubfilterBarButtons: " ..tos(onlyEnableAllSubfilterBarButtons) ..", bagVendorBuyGiven: " ..tos((bagVendorBuy~=nil and #bagVendorBuy) or "no") ..", #realInvTypes: " .. tos((realInvTypes~=nil and #realInvTypes) or "none") .. ", subfilterBar: " ..tos(subfilterBar) .. ", bagWornToo?: " ..tos(bagWornItemCache ~= nil)) end
     --Check if a bank/guild bank/house storage is opened, junk button is selected, etc.
     local subFilterBarFilterInfo = getSubFilterBarsFilterTypeInfo(subfilterBar, inventoryType)
+    if subFilterBarFilterInfo == nil then
+        showChatDebug("RefreshSubfilterBar - subFilterBarFilterInfo missing", "InventoryType: " ..tos(inventoryType) .. ", craftingType: " ..tos(craftingType) .. "/" .. util.GetCraftingType() .. ", isUniversalDecon: " .. tos(isUniversalDecon) .. ", calledFromExternalAddonName: " ..tos(calledFromExternalAddonName) .. ", subfilterBarName: " ..tos(subfilterBar ~= nil and subfilterBar.name))
+        return
+    end
+
     local libFiltersPanelId             = subFilterBarFilterInfo.libFiltersPanelId
     local isMailSendPanel               = subFilterBarFilterInfo.isMailSendPanel
     local isVendorBuy                   = subFilterBarFilterInfo.isVendorBuy

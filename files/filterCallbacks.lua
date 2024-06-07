@@ -145,6 +145,7 @@ local function checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDi
             slot.filterData = filterData
         end
         --local isSlotFilterDataInItemTypeDisplayCategory = ITEM_FILTER_UTILS.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory)
+        --Info: 3rd param isCompanionItem is a compatibility fix for FCOCompanion's feature "Companion junk" where the ZOs function get#s changed and the new 3rd param gets added
         local isSlotFilterDataInItemTypeDisplayCategory = IFUisfdiitdc(slotCopy, itemTypeDisplayCategory, isCompanionItem)
 
         if not isSlotFilterDataInItemTypeDisplayCategory then return false end

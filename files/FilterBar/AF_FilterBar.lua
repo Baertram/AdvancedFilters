@@ -1344,7 +1344,7 @@ AF._debugButtonCallbacks[p_newButton.name] = {
         self:ApplyDropdownSelection(newButton)
         --Check if the settings to show an animationa round the dropdown entry, if any selection is active, is enabled
         --and show the rectangle around the box then
-        self:ShowDropdownSelectedAnimation(newButton)
+        self:ShowDropdownSelectedAnimation()
     end
 end
 
