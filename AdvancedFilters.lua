@@ -43,17 +43,17 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-06-07
+--TODO Last updated: 2024-09-09
 --Max todos: #80
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-06-04
+--CURRENTLY WORKING ON - Last updated: 2024-09-09
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.3 - Current 1.6.4.4
+--  UPDATE INFORMATION: since AF 1.6.4.7 - Current 1.6.4.8
 --______________________________________________________________________________________________________________________
 
 -- ADDED
@@ -64,8 +64,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 -- CHANGED
 
 -- FIXED
---#79 Opening 2nd Crafting table (e.g. smithing, then woodworking) produces error
---#80 Some fixes for old code, global leaking variables, translations, nil checks (thanks to dakjaniels)
+--Removed debug messages
+
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -735,33 +735,33 @@ local function InitializeHooks()
         if doDebugOutput then
             local showErrorInChat = false
             if invType == nil then
-d(">InvType is nil")
+--d(">InvType is nil")
                 showErrorInChat = true
             end
             if AF.subfilterGroups[invType] == nil then
                 showErrorInChat = true
-d(">subfilterGroupMissingForInvType: " .. tos(invType))
+--d(">subfilterGroupMissingForInvType: " .. tos(invType))
                 subfilterGroupMissingForInvType = true
             end
             if currentFilterToUse == nil then
-d(">currentFilterToUse is nil")
+--d(">currentFilterToUse is nil")
                 showErrorInChat = true
             end
             if craftingType == nil then
-d(">craftingType is nil")
+--d(">craftingType is nil")
                 showErrorInChat = true
             end
             local subFilterBarName
             if invType ~= nil and craftingType ~= nil and currentFilterToUse ~= nil then
                 local nextSubfilterBar = AF.subfilterGroups[invType][craftingType][currentFilterToUse]
                 if nextSubfilterBar == nil then
-d(">subfilterBarMissing true")
+--d(">subfilterBarMissing true")
                     subfilterBarMissing = true
                     showErrorInChat = true
                     subFilterBarName = "N/A"
                 else
                     subFilterBarName = nextSubfilterBar.name
-d(">nextSubfilterBarName: " ..tos(subFilterBarName))
+--d(">nextSubfilterBarName: " ..tos(subFilterBarName))
                 end
             end
             if notSupportedPanel then
@@ -2089,7 +2089,7 @@ local function presetCraftingStationHookVariables()
     smithingVar.improvementPanel.inventory.currentFilter    = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_IMPROVEMENT,    CRAFTING_TYPE_BLACKSMITHING)
     smithingVar.researchPanel.currentFilter                 = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_RESEARCH,       CRAFTING_TYPE_BLACKSMITHING)
     enchantingVar.inventory.currentFilter                   = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING,      LF_ENCHANTING_EXTRACTION,   CRAFTING_TYPE_ENCHANTING)
-    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT_WEAPON,         LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
+    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT_WEAPONS,        LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
 end
 
 local function presetUniversalDeconstructionHookVariables()

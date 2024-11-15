@@ -204,6 +204,8 @@ local strings = {
 
     --Scribing
     Scribing = util.Localize(SI_SKILLS_MENU_SCRIBING_LIBRARY),
+    ScribingGrimoire = util.Localize(SI_ITEMTYPE72),
+    ScribingScript = util.Localize(SI_ITEMTYPE73),
     ScribingInk = util.Localize(SI_ITEMTYPE74),
 
     --LAM settings menu

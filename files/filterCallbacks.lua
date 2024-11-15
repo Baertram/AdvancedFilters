@@ -33,6 +33,7 @@ local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndR
 local allItemTypesTrophies = {
     [ITEMTYPE_TROPHY] = true,                                   [ITEMTYPE_COLLECTIBLE] = true,                          [ITEMTYPE_FISH] = true,
     [ITEMTYPE_TREASURE] = true,                                 [ITEMTYPE_RECALL_STONE] = true,
+    [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = true,                   [ITEMTYPE_CRAFTED_ABILITY] = true,
 }
 --Non fencable itemTypes
 local nonFencableItemTypes = {
@@ -1148,6 +1149,8 @@ local subfilterCallbacks = {
                 {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
                 {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
+                {name = "ScribingScript", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY_SCRIPT})},
+                {name = "ScribingGrimoire", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY})},
             },
             dropdownCallbacksHeaders = true,
         },

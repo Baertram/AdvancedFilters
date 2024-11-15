@@ -205,6 +205,8 @@ local textures = {
     Crafted         = "/EsoUI/Art/Inventory/inventory_tabIcon_Craftbag_%s.dds",
 
     Scribing        = "/esoui/art/crafting/scribing_tabicon_scribing_%s.dds",
+    ScribingGrimoire= "/esoui/art/icons/grimoire_soulmagic1.dds",
+    ScribingScript  = "/esoui/art/icons/scribing_tertiary_intellectendurance.dds",
     ScribingInk     = "/esoui/art/icons/item_grimoire_ink.dds",
 }
 
@@ -245,6 +247,8 @@ local texturesReSize = {
     SurveyReport    = {width=20, height=20},
     RecallStone     = {width=20, height=20},
     ScribingInk     = {width=18, height=18},
+    ScribingScript  = {width=20, height=20},
+    ScribingGrimoire = {width=20, height=20},
 }
 AF.texturesReSize = texturesReSize
 

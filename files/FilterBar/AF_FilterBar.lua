@@ -212,7 +212,7 @@ function AF_FilterBar:Initialize(inventoryName, tradeSkillname, groupName, subfi
     local AF_FilterBarName = self.name
     self.control = WINDOW_MANAGER:CreateControlFromVirtual("AF_FilterBar" .. self.name, parent, "AF_Base")
     self.control:SetAnchor(TOPLEFT, parent, TOPLEFT, 0, offsetY)
- -- IsJustaGhost 2023-10-15 -> For his new addon teh inventory fragment get's squeezed a bit in width and the AF filter bar does not anchor to the right of the FilterDiviver too, only to the left.
+ -- IsJustaGhost 2023-10-15 -> For his new addon the inventory fragment get's squeezed a bit in width and the AF filter bar does not anchor to the right of the FilterDiviver too, only to the left.
  -- So the AF filter bar is too wide if inventory width changes. since right is anchored to the same point, "TOP", as left, +40 will retain the desired height
  -- We add a 2nd anchor here to the right to change the FilterBar's width accordingly with the inventory width
     --self.control:SetAnchor(TOPRIGHT, parent, TOPRIGHT, 0, 0)
