@@ -33,6 +33,7 @@ local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndR
 local allItemTypesTrophies = {
     [ITEMTYPE_TROPHY] = true,                                   [ITEMTYPE_COLLECTIBLE] = true,                          [ITEMTYPE_FISH] = true,
     [ITEMTYPE_TREASURE] = true,                                 [ITEMTYPE_RECALL_STONE] = true,
+    [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = true,                   [ITEMTYPE_CRAFTED_ABILITY] = true,
 }
 --Non fencable itemTypes
 local nonFencableItemTypes = {
@@ -1121,7 +1122,7 @@ local subfilterCallbacks = {
         },
         Container = {
             filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype(
-                    {ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY},
+                    {ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_CONTAINER_STACKABLE},
                     {SPECIALIZED_ITEMTYPE_CONTAINER, SPECIALIZED_ITEMTYPE_CONTAINER_CURRENCY, SPECIALIZED_ITEMTYPE_CONTAINER_EVENT, SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE}, false, false)
                     or GetFilterCallbackForItemTypeAndSpecializedItemtype(
                     {ITEMFILTERTYPE_PROVISIONING},
@@ -1148,6 +1149,8 @@ local subfilterCallbacks = {
                 {name = "UpgradeFragment", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_TROPHY_UPGRADE_FRAGMENT})},
                 {name = "Fish", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_FISH}, {}, false, false)},
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
+                {name = "ScribingScript", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY_SCRIPT})},
+                {name = "ScribingGrimoire", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY})},
             },
             dropdownCallbacksHeaders = true,
         },
@@ -2452,7 +2455,7 @@ local subfilterCallbacks = {
                 {name = "Poison", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_POISON}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Motif", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_RACIAL_STYLE_MOTIF}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Writ", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_MASTER_WRIT}, true, nil, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
-                {name = "Container", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY}, true, true, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
+                {name = "Container", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_CONTAINER_STACKABLE}, true, true, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Repair", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_AVA_REPAIR, ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR, ITEMTYPE_GROUP_REPAIR}, true, itemIds.lockpick, nil, nil, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
                 {name = "Trophy", showIcon=true, filterCallback = GetFilterCallbackForTrophy(true, ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE)},
             },

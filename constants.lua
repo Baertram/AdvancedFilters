@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram"
-AF.version = "1.6.4.4"
+AF.version = "1.6.4.9"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -89,6 +89,7 @@ local scenesForChecks = {
     guildStoreSell  = "tradinghouse",
     fence           = "fence_keyboard",
     universalDecon  = "universalDeconstructionSceneKeyboard",
+    furnitureVault  = "furnitureVault",
 }
 AF.scenesForChecks = scenesForChecks
 --local sceneNameStoreVendor      = ""
@@ -105,6 +106,7 @@ local bankInvTypes = {
     [INVENTORY_BANK]        = true,
     [INVENTORY_GUILD_BANK]  = true,
     [INVENTORY_HOUSE_BANK]  = true,
+    [INVENTORY_FURNITURE_VAULT] = true,
 }
 AF.bankInvTypes = bankInvTypes
 
@@ -184,6 +186,8 @@ local controlsForChecks = {
     retrait                 = ZO_RETRAIT_KEYBOARD, --ZO_RETRAIT_STATION_KEYBOARD -- needed for the other retrait related filter stuff (hooks, util functions)
     fence                   = FENCE_KEYBOARD,
     companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
+    furnitureVault          = ZO_FurnitureVault,
+    furnitureVaultList      = ZO_FurnitureVaultList,
 }
 
 controlsForChecks.universalDecon          = UNIVERSAL_DECONSTRUCTION
@@ -235,6 +239,9 @@ local inventories = {
     [LF_INVENTORY_COMPANION] = {
         searchBox = ZO_CompanionEquipment_Panel_KeyboardSearchFiltersTextSearchBox, --controlsForChecks.companionInv.searchBox
     },
+    [INVENTORY_FURNITURE_VAULT] = {
+        searchBox = ZO_FurnitureVaultSearchFiltersTextSearchBox,
+    }
 }
 AF.inventories = inventories
 --New defined vendor buy inventory type (only known by AdvancedFilters)
@@ -311,6 +318,7 @@ local inventoryNames = {
     [INVENTORY_BANK]            = "PlayerBank",
     [INVENTORY_GUILD_BANK]      = "GuildBank",
     [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
+    [INVENTORY_FURNITURE_VAULT] = "FurnitureVault",
 
     --LibFilters crafting filterTypes
     [LF_SMITHING_CREATION]      = "SmithingCreate",
@@ -446,6 +454,7 @@ local inventoryTypeNeedsMappingToCustomAFCurrentFilter = {
     [INVENTORY_BANK] = true,
     [INVENTORY_GUILD_BANK] = true,
     [INVENTORY_HOUSE_BANK] = true,
+    [INVENTORY_FURNITURE_VAULT] = true,
 }
 AF.inventoryTypeNeedsMappingToCustomAFCurrentFilter = inventoryTypeNeedsMappingToCustomAFCurrentFilter
 
@@ -760,6 +769,12 @@ local subfilterGroups = {
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING] = {},
         },
     },
+    --Furniture Vault
+    [INVENTORY_FURNITURE_VAULT] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {}, --todo 20250605 Define subcategory mapping and add those to callback for filters, textures etc.
+        },
+    },
     --Craft bag
     [INVENTORY_CRAFT_BAG] = {
         [CRAFTING_TYPE_INVALID] = {
@@ -1045,6 +1060,7 @@ local mapInvTypeToLibFiltersFilterType = {
     [INVENTORY_BANK]            = LF_BANK_WITHDRAW,
     [INVENTORY_HOUSE_BANK]      = LF_HOUSE_BANK_WITHDRAW,
     [INVENTORY_GUILD_BANK]      = LF_GUILDBANK_WITHDRAW,
+    [INVENTORY_FURNITURE_VAULT] = LF_FURNITURE_VAULT_WITHDRAW,
     --Universal deconstruction
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ALL] =     LF_SMITHING_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_WEAPONS] = LF_SMITHING_DECONSTRUCT,
@@ -1085,6 +1101,7 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_BANK]]            = GetControl(controlsForChecks.bank, filterDividerSuffix),
     [inventoryNames[INVENTORY_GUILD_BANK]]      = GetControl(controlsForChecks.guildBank, filterDividerSuffix),
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
+    [inventoryNames[INVENTORY_FURNITURE_VAULT]] = GetControl(controlsForChecks.furnitureVault, filterDividerSuffix),
 
     --LibFilters crafting filterTypes
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
@@ -1183,7 +1200,13 @@ local filterBarParentControlsToHide = {
     },
     [LF_INVENTORY_COMPANION] = {
         GetControl(controlsForChecks.companionInv.control, searchDividerSuffix),
-    }
+    },
+    [LF_FURNITURE_VAULT_DEPOSIT]   = {
+        GetControl(controlsForChecks.inv, searchDividerSuffix),
+    },
+    [LF_FURNITURE_VAULT_WITHDRAW]   = {
+        GetControl(controlsForChecks.furnitureVault, searchDividerSuffix),
+    },
 }
 filterBarParentControlsToHide[LF_SMITHING_DECONSTRUCT]["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix)
 filterBarParentControlsToHide[LF_JEWELRY_DECONSTRUCT]["universalDeconstruction"] = GetControl(controlsForChecks.universalDeconPanelInvControl, buttonDividerSuffix)
@@ -1198,6 +1221,7 @@ local layoutDataFragments = {
     BACKPACK_DEFAULT_LAYOUT_FRAGMENT,
     BACKPACK_MENU_BAR_LAYOUT_FRAGMENT,
     BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT,
+    --BACKPACK_FURNITURE_VAULT_LAYOUT_FRAGMENT, --todo 20250605 needed?
 }
 table.insert(layoutDataFragments, quickslotFragment)
 

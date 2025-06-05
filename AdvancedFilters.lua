@@ -43,17 +43,17 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-06-07
+--TODO Last updated: 2024-09-09
 --Max todos: #80
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-06-04
+--CURRENTLY WORKING ON - Last updated: 2024-09-09
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.3 - Current 1.6.4.4
+--  UPDATE INFORMATION: since AF 1.6.4.7 - Current 1.6.4.8
 --______________________________________________________________________________________________________________________
 
 -- ADDED
@@ -64,8 +64,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 -- CHANGED
 
 -- FIXED
---#79 Opening 2nd Crafting table (e.g. smithing, then woodworking) produces error
---#80 Some fixes for old code, global leaking variables, translations, nil checks (thanks to dakjaniels)
+--Removed debug messages
+
 
 ---==========================================================================================================================================================================
 ---==========================================================================================================================================================================
@@ -95,6 +95,7 @@ local quickslotVar = controlsForChecks.quickslot
 local quickslotFragment = controlsForChecks.quickslotFragment
 local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
+local furnitureVault = controlsForChecks.furnitureVault
 
 --local universalDecon = controlsForChecks.universalDecon
 local universalDeconPanel = controlsForChecks.universalDeconPanel
@@ -735,33 +736,33 @@ local function InitializeHooks()
         if doDebugOutput then
             local showErrorInChat = false
             if invType == nil then
-d(">InvType is nil")
+--d(">InvType is nil")
                 showErrorInChat = true
             end
             if AF.subfilterGroups[invType] == nil then
                 showErrorInChat = true
-d(">subfilterGroupMissingForInvType: " .. tos(invType))
+--d(">subfilterGroupMissingForInvType: " .. tos(invType))
                 subfilterGroupMissingForInvType = true
             end
             if currentFilterToUse == nil then
-d(">currentFilterToUse is nil")
+--d(">currentFilterToUse is nil")
                 showErrorInChat = true
             end
             if craftingType == nil then
-d(">craftingType is nil")
+--d(">craftingType is nil")
                 showErrorInChat = true
             end
             local subFilterBarName
             if invType ~= nil and craftingType ~= nil and currentFilterToUse ~= nil then
                 local nextSubfilterBar = AF.subfilterGroups[invType][craftingType][currentFilterToUse]
                 if nextSubfilterBar == nil then
-d(">subfilterBarMissing true")
+--d(">subfilterBarMissing true")
                     subfilterBarMissing = true
                     showErrorInChat = true
                     subFilterBarName = "N/A"
                 else
                     subFilterBarName = nextSubfilterBar.name
-d(">nextSubfilterBarName: " ..tos(subFilterBarName))
+--d(">nextSubfilterBarName: " ..tos(subFilterBarName))
                 end
             end
             if notSupportedPanel then
@@ -1013,8 +1014,15 @@ d(">nextSubfilterBarName: " ..tos(subFilterBarName))
                     if debugSpam then
                         d(">>>>>>>currentFilter: " ..tos(currentFilter) .. "; inventoryTypeUpdated: " ..tos(inventoryTypeUpdated))
                     end
+
+                    if inventoryType == INVENTORY_FURNITURE_VAULT then
+                        --todo 20250605 Anything to do?
+
+                        --inventoryControl = furnitureVault
+                    end
+
                     if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
-                        --Ist the currentFilter the quest tab? Then change the currentInventory variable!
+                        --Is the currentFilter the quest tab? Then change the currentInventory variable!
                         if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
                             AF.currentInventoryType = INVENTORY_QUEST_ITEM
                             inventoryTypeUpdated = INVENTORY_QUEST_ITEM
@@ -1150,6 +1158,7 @@ d(">nextSubfilterBarName: " ..tos(subFilterBarName))
 
     hookFragment(INVENTORY_FRAGMENT, INVENTORY_BACKPACK)
     hookFragment(BANK_FRAGMENT, INVENTORY_BANK)
+    hookFragment(FURNITURE_VAULT_FRAGMENT, INVENTORY_FURNITURE_VAULT)
     hookFragment(HOUSE_BANK_FRAGMENT, INVENTORY_HOUSE_BANK)
     hookFragment(GUILD_BANK_FRAGMENT, INVENTORY_GUILD_BANK) -- new value is: 5
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
@@ -2089,7 +2098,7 @@ local function presetCraftingStationHookVariables()
     smithingVar.improvementPanel.inventory.currentFilter    = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_IMPROVEMENT,    CRAFTING_TYPE_BLACKSMITHING)
     smithingVar.researchPanel.currentFilter                 = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_WEAPONS_SMITHING,       LF_SMITHING_RESEARCH,       CRAFTING_TYPE_BLACKSMITHING)
     enchantingVar.inventory.currentFilter                   = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_GLYPHS_ENCHANTING,      LF_ENCHANTING_EXTRACTION,   CRAFTING_TYPE_ENCHANTING)
-    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT_WEAPON,         LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
+    retraitVar.inventory.currentFilter                      = mapItemFilterType2CraftingStationFilterType(ITEMFILTERTYPE_AF_RETRAIT_WEAPONS,        LF_RETRAIT,                 CRAFTING_TYPE_INVALID)
 end
 
 local function presetUniversalDeconstructionHookVariables()
@@ -2152,9 +2161,12 @@ local function SetBankEventVariable(bankType, opened)
         bankInvType = INVENTORY_GUILD_BANK
         AF.guildBankOpened = opened
         --House storage
-    elseif bankType == "hb" then
+    elseif bankType == "hb" then --todo 20250605 Not working as it is never set?
         bankInvType = INVENTORY_HOUSE_BANK
         AF.houseBankOpened = opened
+    elseif bankType == "fv" then --todo 20250605 Not working as it is never set?
+        bankInvType = INVENTORY_FURNITURE_VAULT
+        AF.furnitureVaultOpened = opened
     end
     --Save the last opened subfilterBar button to the global AF table, so it can be used later on as the bank get's opened
     --again to re-open the samel subfilterGroup and button
@@ -2372,6 +2384,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
     AF.bankOpened       = false
     AF.guildBankOpened  = false
     AF.houseBankOpened  = false
+    AF.furnitureVaultOpened  = false
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_BankOpened",                    EVENT_OPEN_BANK,                        function() SetBankEventVariable("b", true) end)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_BankClosed",                    EVENT_CLOSE_BANK,                       function() SetBankEventVariable("b", false) end)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_GuildBankOpened",               EVENT_OPEN_GUILD_BANK,                  function() SetBankEventVariable("gb", true) end)

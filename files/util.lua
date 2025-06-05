@@ -1604,6 +1604,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     local controlVendorBuyback = controlsForChecks.buyBackList
     local controlVendorRepair = controlsForChecks.repairWindow
     local controlBankDeposit = controlsForChecks.bankBackpack
+    local controlFurnitureVaultDeposit = controlsForChecks.furnitureVaultList
     local controlGuildBankDeposit = controlsForChecks.guildBankBackpack
     local controlGuildStoreSell = controlsForChecks.guildStoreSellBackpack
     local controlsFence = controlsForChecks.fence
@@ -1611,6 +1612,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
     local scenesForChecks = AF.scenesForChecks
     local sceneNameStoreVendor = scenesForChecks.storeVendor
     local sceneNameBankDeposit = scenesForChecks.bank
+    local sceneNameFurnitureVaultDeposit = scenesForChecks.furnitureVault
     local sceneNameGuildBankDeposit = scenesForChecks.guildBank
     local sceneNameGuildStoreSell = scenesForChecks.guildStoreSell
     local sceneNameFence = scenesForChecks.fence
@@ -1624,6 +1626,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
         [LF_BANK_DEPOSIT]       = controlInventory,
         [LF_GUILDBANK_DEPOSIT]  = controlInventory,
         [LF_HOUSE_BANK_DEPOSIT] = controlInventory,
+        [LF_FURNITURE_VAULT_DEPOSIT] = controlInventory,
         [LF_GUILDSTORE_SELL]    = controlGuildStoreSell,
         [LF_FENCE_SELL]         = function() return (not controlsFence.control:IsHidden() and controlsFence.mode == ZO_MODE_STORE_SELL_STOLEN) or false end,
         [LF_FENCE_LAUNDER]      = function() return (not controlsFence.control:IsHidden() and controlsFence.mode == ZO_MODE_STORE_LAUNDER) or false end,
@@ -1633,6 +1636,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
         [LF_BANK_DEPOSIT]       = controlBankDeposit,
         [LF_GUILDBANK_DEPOSIT]  = controlGuildBankDeposit,
         [LF_HOUSE_BANK_DEPOSIT] = controlBankDeposit,
+        [LF_FURNITURE_VAULT_DEPOSIT] = controlFurnitureVaultDeposit,
     }
     local filterPanelId2SceneName = {
         [LF_VENDOR_BUY]         = sceneNameStoreVendor,
@@ -1643,6 +1647,7 @@ function util.IsFilterPanelShown(libFiltersFilterPanelId)
         [LF_GUILDBANK_DEPOSIT]  = sceneNameGuildBankDeposit,
         [LF_HOUSE_BANK_DEPOSIT] = sceneNameBankDeposit,
         [LF_GUILDSTORE_SELL]    = sceneNameGuildStoreSell,
+        [LF_FURNITURE_VAULT_DEPOSIT] = sceneNameFurnitureVaultDeposit,
         [LF_FENCE_SELL]         = sceneNameFence,
         [LF_FENCE_LAUNDER]      = sceneNameFence,
     }
@@ -1725,6 +1730,8 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isHouseBankDepositPanel       = AF.houseBankOpened  and isFilterPanelShown(LF_HOUSE_BANK_DEPOSIT) or false
     local isGuildStoreSellPanel         = isFilterPanelShown(LF_GUILDSTORE_SELL) or false
     local isRetraitStation              = isRetraitPanelShown()
+    local isFurnitureVaultDepositPanel  = AF.furnitureVaultOpened and isFilterPanelShown(LF_FURNITURE_VAULT_DEPOSIT) or false
+
     local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNamePlayerInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isJunkButtonActive            = subFilterBar.name == (AFsubFilterNameActiveInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
 
@@ -1763,6 +1770,7 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
         isCompanionInv = isCompanionInv,
         isCompanionInvButtonActive = isCompanionInvButtonActive,
         isUniversalDeconstruction = isUniversalDecon,
+        isFurnitureVaultDepositPanel = isFurnitureVaultDepositPanel,
     }
 end
 local getSubFilterBarsFilterTypeInfo = util.GetSubFilterBarsFilterTypeInfo
@@ -2973,6 +2981,8 @@ function util.GetSubFilterBarsLibFiltersFilterType(subfilterBar, inventoryType)
         libFiltersFilterType = LF_GUILDBANK_DEPOSIT
     elseif subFilterBarFilterInfo.isHouseBankDepositPanel == true then
         libFiltersFilterType = LF_HOUSE_BANK_DEPOSIT
+    elseif subFilterBarFilterInfo.isFurnitureVaultDepositPanel == true then
+        libFiltersFilterType = LF_FURNITURE_VAULT_DEPOSIT
     elseif subFilterBarFilterInfo.isGuildStoreSellPanel == true then
         libFiltersFilterType = LF_GUILDSTORE_SELL
     elseif subFilterBarFilterInfo.isTradePanel == true then
