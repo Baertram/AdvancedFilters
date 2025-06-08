@@ -95,6 +95,7 @@ local quickslotVar = controlsForChecks.quickslot
 local quickslotFragment = controlsForChecks.quickslotFragment
 local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
+local furnitureVault = controlsForChecks.furnitureVault
 
 --local universalDecon = controlsForChecks.universalDecon
 local universalDeconPanel = controlsForChecks.universalDeconPanel
@@ -1013,8 +1014,15 @@ local function InitializeHooks()
                     if debugSpam then
                         d(">>>>>>>currentFilter: " ..tos(currentFilter) .. "; inventoryTypeUpdated: " ..tos(inventoryTypeUpdated))
                     end
+
+                    if inventoryType == INVENTORY_FURNITURE_VAULT then
+                        --todo 20250605 Anything to do?
+
+                        --inventoryControl = furnitureVault
+                    end
+
                     if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
-                        --Ist the currentFilter the quest tab? Then change the currentInventory variable!
+                        --Is the currentFilter the quest tab? Then change the currentInventory variable!
                         if currentFilter and currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_QUEST then
                             AF.currentInventoryType = INVENTORY_QUEST_ITEM
                             inventoryTypeUpdated = INVENTORY_QUEST_ITEM
@@ -1150,6 +1158,7 @@ local function InitializeHooks()
 
     hookFragment(INVENTORY_FRAGMENT, INVENTORY_BACKPACK)
     hookFragment(BANK_FRAGMENT, INVENTORY_BANK)
+    hookFragment(FURNITURE_VAULT_FRAGMENT, INVENTORY_FURNITURE_VAULT)
     hookFragment(HOUSE_BANK_FRAGMENT, INVENTORY_HOUSE_BANK)
     hookFragment(GUILD_BANK_FRAGMENT, INVENTORY_GUILD_BANK) -- new value is: 5
     hookFragment(CRAFT_BAG_FRAGMENT, INVENTORY_CRAFT_BAG) -- new value is: 6
@@ -2152,9 +2161,12 @@ local function SetBankEventVariable(bankType, opened)
         bankInvType = INVENTORY_GUILD_BANK
         AF.guildBankOpened = opened
         --House storage
-    elseif bankType == "hb" then
+    elseif bankType == "hb" then --todo 20250605 Not working as it is never set?
         bankInvType = INVENTORY_HOUSE_BANK
         AF.houseBankOpened = opened
+    elseif bankType == "fv" then --todo 20250605 Not working as it is never set?
+        bankInvType = INVENTORY_FURNITURE_VAULT
+        AF.furnitureVaultOpened = opened
     end
     --Save the last opened subfilterBar button to the global AF table, so it can be used later on as the bank get's opened
     --again to re-open the samel subfilterGroup and button
@@ -2372,6 +2384,7 @@ local function AdvancedFilters_Loaded(eventCode, addonName)
     AF.bankOpened       = false
     AF.guildBankOpened  = false
     AF.houseBankOpened  = false
+    AF.furnitureVaultOpened  = false
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_BankOpened",                    EVENT_OPEN_BANK,                        function() SetBankEventVariable("b", true) end)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_BankClosed",                    EVENT_CLOSE_BANK,                       function() SetBankEventVariable("b", false) end)
     EVENT_MANAGER:RegisterForEvent(AF.name .. "_GuildBankOpened",               EVENT_OPEN_GUILD_BANK,                  function() SetBankEventVariable("gb", true) end)

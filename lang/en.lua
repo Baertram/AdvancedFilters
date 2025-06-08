@@ -208,6 +208,9 @@ local strings = {
     ScribingScript = util.Localize(SI_ITEMTYPE73),
     ScribingInk = util.Localize(SI_ITEMTYPE74),
 
+    --Stackable containers
+    StackableContainer = "Stackable container",
+
     --LAM settings menu
     lamDescription = "Show additional filter buttons in the inventories to seperate item types",
     lamHideItemCount = "Hide item count",
