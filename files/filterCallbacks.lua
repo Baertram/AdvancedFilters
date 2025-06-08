@@ -1077,6 +1077,7 @@ local subfilterCallbacks = {
             dropdownCallbacks = {
                 {name = "Crafted", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction("IsItemLinkCrafted")},
                 {name = "Crown", showIcon=true, filterCallback = GetFilterCallbackWithItemLinkFunction({"IsItemLinkFromCrownStore", "IsItemLinkFromCrownCrate"})},
+                {name = "StackableContainer", showIcon=true, filterCallback = GetFilterCallback({ITEMTYPE_CONTAINER_STACKABLE})},
             },
         },
         Crown = {

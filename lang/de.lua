@@ -73,6 +73,9 @@ strings.Hat = "Hut"
 strings.Skin = "Haut"
 strings.Polymorph = "Verwandlung"
 strings.Personality = "Persönlichkeit"
+strings.StackableContainer = "Stapelbare Container",
+
+
 
 setmetatable(strings, {__index = enStrings})
 AdvancedFilters.strings = strings

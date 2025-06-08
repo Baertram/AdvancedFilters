@@ -208,6 +208,8 @@ local textures = {
     ScribingGrimoire= "/esoui/art/icons/grimoire_soulmagic1.dds",
     ScribingScript  = "/esoui/art/icons/scribing_tertiary_intellectendurance.dds",
     ScribingInk     = "/esoui/art/icons/item_grimoire_ink.dds",
+
+    StackableContainer   = "/esoui/art/icons/hirelingmail_jewelrycrafting_generic.dds",
 }
 
 --ALCHEMY
