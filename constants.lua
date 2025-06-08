@@ -773,6 +773,7 @@ local subfilterGroups = {
     [INVENTORY_FURNITURE_VAULT] = {
         [CRAFTING_TYPE_INVALID] = {
             [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {}, --todo 20250605 Define subcategory mapping and add those to callback for filters, textures etc.
+            [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = {},
         },
     },
     --Craft bag
