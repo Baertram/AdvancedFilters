@@ -4,7 +4,7 @@ local AF = AdvancedFilters
 --Addon base variables
 AF.name = "AdvancedFilters"
 AF.author = "ingeniousclown, Randactyl, Baertram"
-AF.version = "1.6.4.9"
+AF.version = "1.6.5.0"
 AF.savedVarsVersion = 1.511
 AF.website = "https://www.esoui.com/downloads/fileinfo.php?id=2215"
 AF.feedback = "https://www.esoui.com/portal.php?id=136&a=faq"
@@ -110,19 +110,19 @@ local bankInvTypes = {
 }
 AF.bankInvTypes = bankInvTypes
 
-local defaultUnivesalInvTypes = {
+local defaultUniversalInvTypes = {
 	INVENTORY_BACKPACK,
 	INVENTORY_BANK,
 	INVENTORY_HOUSE_BANK
 }
-AF.defaultUnivesalInvTypes = defaultUnivesalInvTypes
+AF.defaultUniversalInvTypes = defaultUniversalInvTypes
 
 local universalDeconSelectedTabToActualInventories = {
-    ["all"] =           defaultUnivesalInvTypes,
-    ["weapons"] =       defaultUnivesalInvTypes,
-    ["armor"] =         defaultUnivesalInvTypes,
-    ["jewelry"] =       defaultUnivesalInvTypes,
-    ["enchantments"] =  defaultUnivesalInvTypes,
+    ["all"] =           defaultUniversalInvTypes,
+    ["weapons"] =       defaultUniversalInvTypes,
+    ["armor"] =         defaultUniversalInvTypes,
+    ["jewelry"] =       defaultUniversalInvTypes,
+    ["enchantments"] =  defaultUniversalInvTypes,
 }
 AF.universalDeconSelectedTabToActualInventories = universalDeconSelectedTabToActualInventories
 
@@ -188,6 +188,8 @@ local controlsForChecks = {
     companionInv            = COMPANION_EQUIPMENT_KEYBOARD,
     furnitureVault          = ZO_FurnitureVault,
     furnitureVaultList      = ZO_FurnitureVaultList,
+    vengeanceInv            = ZO_VengeanceInventory,
+    vengeanceInvList        = ZO_VengeanceInventoryList,
 }
 
 controlsForChecks.universalDecon          = UNIVERSAL_DECONSTRUCTION
@@ -319,6 +321,7 @@ local inventoryNames = {
     [INVENTORY_GUILD_BANK]      = "GuildBank",
     [INVENTORY_HOUSE_BANK]      = "HouseBankWithdraw",
     [INVENTORY_FURNITURE_VAULT] = "FurnitureVault",
+    [INVENTORY_VENGEANCE]       = "VengeanceInventory",
 
     --LibFilters crafting filterTypes
     [LF_SMITHING_CREATION]      = "SmithingCreate",
@@ -455,6 +458,7 @@ local inventoryTypeNeedsMappingToCustomAFCurrentFilter = {
     [INVENTORY_GUILD_BANK] = true,
     [INVENTORY_HOUSE_BANK] = true,
     [INVENTORY_FURNITURE_VAULT] = true,
+    [INVENTORY_VENGEANCE] = true,
 }
 AF.inventoryTypeNeedsMappingToCustomAFCurrentFilter = inventoryTypeNeedsMappingToCustomAFCurrentFilter
 
@@ -827,6 +831,19 @@ local subfilterGroups = {
     },
 ]]
 
+    --API101048 Cyrodiil Vengeance campaign inventory stuff
+    [INVENTORY_VENGEANCE] = {
+        [CRAFTING_TYPE_INVALID] = {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = {},
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {},
+        },
+    },
+
     --Crafting SMITHING: Create
     --[[
     [LF_SMITHING_CREATION] = {
@@ -1068,6 +1085,8 @@ local mapInvTypeToLibFiltersFilterType = {
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_ARMOR] =   LF_SMITHING_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_JEWELRY] = LF_JEWELRY_DECONSTRUCT,
     [INVENTORY_TYPE_UNIVERSAL_DECONSTRUCTION_GLYPHS] =  LF_ENCHANTING_EXTRACTION,
+    --API101048 Cyrodiil Vengeance
+    [INVENTORY_VENGEANCE]       = LF_INVENTORY_VENGEANCE
 }
 AF.mapInvTypeToLibFiltersFilterType = mapInvTypeToLibFiltersFilterType
 
@@ -1103,6 +1122,7 @@ local filterBarParents = {
     [inventoryNames[INVENTORY_GUILD_BANK]]      = GetControl(controlsForChecks.guildBank, filterDividerSuffix),
     [inventoryNames[INVENTORY_HOUSE_BANK]]      = GetControl(controlsForChecks.houseBank, filterDividerSuffix),
     [inventoryNames[INVENTORY_FURNITURE_VAULT]] = GetControl(controlsForChecks.furnitureVault, filterDividerSuffix),
+    [inventoryNames[INVENTORY_VENGEANCE]]       = GetControl(controlsForChecks.vengeanceInv, filterDividerSuffix),
 
     --LibFilters crafting filterTypes
     --[inventoryNames[LF_SMITHING_CREATION]]      = controlsForChecks.smithing.creationPanel.control,
@@ -1142,6 +1162,10 @@ local filterBarParentControlsToHide = {
     [LF_INVENTORY]   = {
         --ZO_PlayerInventorySearchDivider
         GetControl(controlsForChecks.inv, searchDividerSuffix),
+    },
+    [LF_INVENTORY_VENGEANCE]   = {
+        --ZO_VengeanceInventorySearchDivider
+        GetControl(controlsForChecks.vengeanceInv, searchDividerSuffix),
     },
     [LF_MAIL_SEND]   = {
         --ZO_PlayerInventorySearchDivider

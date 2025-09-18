@@ -43,28 +43,28 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2024-09-09
---Max todos: #80
+--TODO Last updated: 2025-09-18
+--Max todos: #81
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2024-09-09
+--CURRENTLY WORKING ON - Last updated: 2025-09-18
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.7 - Current 1.6.4.8
+--  UPDATE INFORMATION: since AF 1.6.4.9 - Current 1.6.5.0
 --______________________________________________________________________________________________________________________
 
 -- ADDED
---
+#81 Add Cyrodiil vengeance inventory support
 --
 -- ADDED ON REQUEST
 
 -- CHANGED
 
 -- FIXED
---Removed debug messages
+--
 
 
 ---==========================================================================================================================================================================
@@ -95,12 +95,12 @@ local quickslotVar = controlsForChecks.quickslot
 local quickslotFragment = controlsForChecks.quickslotFragment
 local companionInvVar = controlsForChecks.companionInv
 local store = controlsForChecks.store
-local furnitureVault = controlsForChecks.furnitureVault
+--local furnitureVault = controlsForChecks.furnitureVault
 
 --local universalDecon = controlsForChecks.universalDecon
 local universalDeconPanel = controlsForChecks.universalDeconPanel
 local universalDeconPanelInv = controlsForChecks.universalDeconPanelInv
-local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvControl
+--local universalDeconPanelInvControl = controlsForChecks.universalDeconPanelInvControl
 local universalDeconScene = controlsForChecks.universalDeconScene
 local subfilterBarInventorytypesOfUniversalDecon = AF.subfilterBarInventorytypesOfUniversalDecon
 local universalDeconSelectedTabToAFInventoryType = AF.universalDeconSelectedTabToAFInventoryType
@@ -1015,11 +1015,22 @@ local function InitializeHooks()
                         d(">>>>>>>currentFilter: " ..tos(currentFilter) .. "; inventoryTypeUpdated: " ..tos(inventoryTypeUpdated))
                     end
 
+                    --[[
                     if inventoryType == INVENTORY_FURNITURE_VAULT then
                         --todo 20250605 Anything to do?
 
                         --inventoryControl = furnitureVault
                     end
+                    ]]
+
+                    --[[
+                    if inventoryType == INVENTORY_VENGEANCE then
+                        --todo 20250918 Anything to do?
+
+                        --inventoryControl = vengeanceInv
+                    end
+                    ]]
+
 
                     if inventoryTypeUpdated == INVENTORY_BACKPACK or inventoryTypeUpdated == INVENTORY_QUEST_ITEM then
                         --Is the currentFilter the quest tab? Then change the currentInventory variable!
@@ -1034,6 +1045,7 @@ local function InitializeHooks()
 
                     --CraftBag
                     local invTypeForShowSubfilterBar = inventoryTypeUpdated
+                    --[[
                     if inventoryType == INVENTORY_CRAFT_BAG then
                         --local currentCBFilter = playerInvVar.inventories[INVENTORY_CRAFT_BAG].currentFilter
                         --local currentCBFilter = getCurrentFilter(inventoryType)
@@ -1044,6 +1056,7 @@ local function InitializeHooks()
                         --will make the addon use AF.currentInventoryType and thus produces a combination of normal inv's currentfilter + CraftBag inventory subfilter bars -> Error message!
                         --invTypeForShowSubfilterBar = inventoryTypeUpdated
                     end
+                    ]]
                     if AF.settings.debugSpam then
                         d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~>")
                         d("[AF]hookFragment " .. tos(fragment.control:GetName()) .. " - fragment OnShow -> ShowSubfilterBar")
@@ -1165,6 +1178,7 @@ local function InitializeHooks()
     --hookFragment(STORE_FRAGMENT, INVENTORY_TYPE_VENDOR_BUY)
     hookFragment(quickslotFragment, LF_QUICKSLOT)
     hookFragment(COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT, LF_INVENTORY_COMPANION)
+    hookFragment(VENGEANCE_INVENTORY_FRAGMENT, INVENTORY_VENGEANCE)
 
     --=== SCENES ===========================================================================================================
     --Hook some scenes to register variables as the scenes show/hide.
@@ -1724,7 +1738,7 @@ local function InitializeHooks()
         ThrottledUpdate("ShowSubfilterBar_" .. invType .. "_" .. craftingType, 0,
                 ShowSubfilterBar, currentFilter, craftingType, customInventoryFilterButtonsItemType, invType, true)
 
-        local subfilterGroup = AF.subfilterGroups[invType]
+        --local subfilterGroup = AF.subfilterGroups[invType]
         if not subfilterGroup then
 --d("<subfilter Group is missing")
             return
@@ -2061,6 +2075,7 @@ local function InitializeHooks()
         local invTypesForEquipUpdate = {
             [INVENTORY_BACKPACK]        = true,
             [LF_INVENTORY_COMPANION]    = true,
+            [INVENTORY_VENGEANCE]       = true,
         }
         if not inventoryType or not invTypesForEquipUpdate[inventoryType] then return end
 
