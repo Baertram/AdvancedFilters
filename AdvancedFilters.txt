@@ -2,8 +2,8 @@
 ## Author: Randactyl & Baertram
 ## Version: 1.6.5.0
 ## AddOnVersion: 1650
-## APIVersion: 101047 101048
-## DependsOn: LibAddonMenu-2.0>=40 LibCustomMenu>=730 LibFilters-3.0>=346 LibScrollableMenu>=020306
+## APIVersion: 101048 101049
+## DependsOn: LibAddonMenu-2.0>=41 LibCustomMenu>=730 LibFilters-3.0>=346 LibScrollableMenu>=020306
 ## OptionalDependsOn: LibMotifCategories>=2 FCOCraftFilter>=006090 FCOCompanion>=001080
 ## SavedVariables: AdvancedFilters_Settings
 

@@ -780,7 +780,7 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BACKPACK,
         [LF_JEWELRY_RESEARCH]       = INVENTORY_BACKPACK,
         [LF_INVENTORY_COMPANION]    = INVENTORY_BACKPACK,
-        [LV_INVENTORY_VENGEANCE]    = INVENTORY_VENGEANCE,
+        [LF_INVENTORY_VENGEANCE]    = INVENTORY_VENGEANCE,
     }
     local mapLibFiltersInvToRealInvType2 = {
         [LF_RETRAIT]                = INVENTORY_BANK,
@@ -796,7 +796,7 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         [LF_JEWELRY_DECONSTRUCT]    = INVENTORY_BANK,
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BANK,
         [LF_JEWELRY_RESEARCH]       = INVENTORY_BANK,
-        --[LV_INVENTORY_VENGEANCE]    = INVENTORY_BACKPACK,
+        --[LF_INVENTORY_VENGEANCE]    = INVENTORY_BACKPACK,
     }
     local mapLibFiltersInvToRealInvType3 = {
         [LF_RETRAIT]                = INVENTORY_HOUSE_BANK,
