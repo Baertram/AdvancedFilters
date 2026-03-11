@@ -247,7 +247,9 @@ local function GetFilterCallbackForWeaponType(filterTypes, checkOnlyJunk, addFil
         local itemLink = ugil(slot)
         if not itemLink then return false end
 
-        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then return false end
+        if not checkZOsVanillaItemTypeDisplayCategory(slot, itemLink, itemTypeDisplayCategory) then
+            return false
+        end
 
         local weaponType = gilwt(itemLink)
         if addFilterTypesToMatch ~= nil then

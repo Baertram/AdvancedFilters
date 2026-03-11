@@ -10,6 +10,28 @@ local showChatDebug = AF.showChatDebug
 
 local displayName = GetDisplayName()
 
+
+--Added 202060311: New inventory buy backspace icon needs to be hidden?
+local ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl, ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl
+local function hideInventoryCountControls()
+    ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl = ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl or ZO_PlayerInventoryInfoBarBuyBagSpace
+    if ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl then
+        local nextBuyBagSpaceGoldCost = GetNextBackpackUpgradePrice() or 0
+        if nextBuyBagSpaceGoldCost <= 0 then
+            --Hide - No more bag space can be bought
+            ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:SetHidden(true)
+        else
+            --Reanchor and move -> Only if PerfectPixel is not enabled
+            if PP then return end
+            ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl = ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl or ((ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl ~= nil and ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:GetParent()) or nil)
+            if ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl then
+                ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:ClearAnchors()
+                ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:SetAnchor(TOPLEFT, ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl, BOTTOMLEFT, 5, -5)
+            end
+        end
+    end
+end
+
 --Get the language of the client
 function util.GetLanguage()
     local lang = GetCVar("language.2")
@@ -780,6 +802,7 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BACKPACK,
         [LF_JEWELRY_RESEARCH]       = INVENTORY_BACKPACK,
         [LF_INVENTORY_COMPANION]    = INVENTORY_BACKPACK,
+        [LF_INVENTORY_VENGEANCE]    = INVENTORY_VENGEANCE,
     }
     local mapLibFiltersInvToRealInvType2 = {
         [LF_RETRAIT]                = INVENTORY_BANK,
@@ -795,6 +818,7 @@ function util.MapLibFiltersInventoryTypeToRealInventoryType(inventoryType)
         [LF_JEWELRY_DECONSTRUCT]    = INVENTORY_BANK,
         [LF_JEWELRY_IMPROVEMENT]    = INVENTORY_BANK,
         [LF_JEWELRY_RESEARCH]       = INVENTORY_BANK,
+        --[LF_INVENTORY_VENGEANCE]    = INVENTORY_BACKPACK,
     }
     local mapLibFiltersInvToRealInvType3 = {
         [LF_RETRAIT]                = INVENTORY_HOUSE_BANK,
@@ -1480,6 +1504,8 @@ end
 --Do not update the inventories itemCount as it got no count label or no value to update
 --(e.g. smithing research panel)
 function util.DoNotUpdateInventoryItemCount(filterTypeToUse)
+    hideInventoryCountControls()
+
     filterTypeToUse = filterTypeToUse or getCurrentFilterTypeForInventory(AF.currentInventoryType)
     local doNotUpdateInventoryItemCountFilterPanels = {
         [LF_SMITHING_CREATION]          = true,
@@ -1731,6 +1757,7 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
     local isGuildStoreSellPanel         = isFilterPanelShown(LF_GUILDSTORE_SELL) or false
     local isRetraitStation              = isRetraitPanelShown()
     local isFurnitureVaultDepositPanel  = AF.furnitureVaultOpened and isFilterPanelShown(LF_FURNITURE_VAULT_DEPOSIT) or false
+    local isVengeanceInvPanel           = isFilterPanelShown(LF_INVENTORY_VENGEANCE) or false
 
     local isJunkInvButtonActive         = subFilterBar.name == (AFsubFilterNamePlayerInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
     local isJunkButtonActive            = subFilterBar.name == (AFsubFilterNameActiveInv .. "_" .. filterTypeNames[ITEM_TYPE_DISPLAY_CATEGORY_JUNK]) or false
@@ -1771,6 +1798,7 @@ function util.GetSubFilterBarsFilterTypeInfo(subFilterBar, inventoryType)
         isCompanionInvButtonActive = isCompanionInvButtonActive,
         isUniversalDeconstruction = isUniversalDecon,
         isFurnitureVaultDepositPanel = isFurnitureVaultDepositPanel,
+        isVengeanceInvPanel = isVengeanceInvPanel,
     }
 end
 local getSubFilterBarsFilterTypeInfo = util.GetSubFilterBarsFilterTypeInfo
@@ -1940,6 +1968,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
     local isCompanionInvPanel           = subFilterBarFilterInfo.isCompanionInv
     local isCompanionInvButtonActive    = subFilterBarFilterInfo.isCompanionInvButtonActive
     local isUniversalDeconstructionActive = subFilterBarFilterInfo.isUniversalDeconstruction
+    local isVengeanceInvPanel           = subFilterBarFilterInfo.isVengeanceInvPanel
 
     --For FCOCompanion "Junk" tab
     local isFCOCompanionJunkTabAtCompanionInv = (FCOCompanionJunkEnabled == true and isCompanionInv and isJunkButtonActive and true) or false
@@ -2259,9 +2288,9 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                     elseif isMailSendPanel then
                         doEnableSubFilterButtonAgain = not isItemStolen and not isBound
 
-                    --[Companion inventory]
+                        --[Companion inventory]
                     elseif isCompanionInvPanel then
---d(">isCompanionInvPanel - FCOCompanionJunkEnabled: " ..tos(FCOCompanionJunkEnabled))
+                        --d(">isCompanionInvPanel - FCOCompanionJunkEnabled: " ..tos(FCOCompanionJunkEnabled))
                         --FCOCompanion Junk is enabled?
                         if FCOCompanionJunkEnabled == true then
                             --Item is:
@@ -2280,7 +2309,12 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         end
 
 
-                        --Others & other addons
+                        --Cyrodiil Vengeance inventory
+                    elseif isVengeanceInvPanel then
+                        --todo 2025-09-18 Anything to do extra here?
+
+
+                    --Others & other addons
                     else
                         --FCOCompanion Junk is enabled?
                         if FCOCompanionJunkEnabled == true then
@@ -2307,10 +2341,10 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         end
                     end
 
-                    ----------------------------------------------------------------------------------------
-                    --[Crafting panel] (e.g. refine, creation, deconstruction, improvement, research, recipes, extraction, retrait):
-                    --Item is:
-                    -->Not stolen (currently deactivated!)
+                        ----------------------------------------------------------------------------------------
+                        --[Crafting panel] (e.g. refine, creation, deconstruction, improvement, research, recipes, extraction, retrait):
+                        --Item is:
+                        -->Not stolen (currently deactivated!)
                 else -- if isNoCrafting then
                     --if isRetraitStation and button.name == "Shield" then
                     --d(">" .. GetItemLink(bagId, slotIndex) .. " passesCallback: " ..tos(passesCallback) .. ", otherAddonUsesFilters: " .. tos(otherAddonUsesFilters) .. ", passesFilter: " ..tos(passesFilter) .. ", canBeRetraited: " .. tos(CanItemBeRetraited(bagId, slotIndex)) .. " - doEnableSubFilterButtonAgain: " ..tos(doEnableSubFilterButtonAgain))
@@ -2983,6 +3017,8 @@ function util.GetSubFilterBarsLibFiltersFilterType(subfilterBar, inventoryType)
         libFiltersFilterType = LF_HOUSE_BANK_DEPOSIT
     elseif subFilterBarFilterInfo.isFurnitureVaultDepositPanel == true then
         libFiltersFilterType = LF_FURNITURE_VAULT_DEPOSIT
+    elseif subFilterBarFilterInfo.isVengeanceInvPanel == true then
+        libFiltersFilterType = LF_INVENTORY_VENGEANCE
     elseif subFilterBarFilterInfo.isGuildStoreSellPanel == true then
         libFiltersFilterType = LF_GUILDSTORE_SELL
     elseif subFilterBarFilterInfo.isTradePanel == true then
