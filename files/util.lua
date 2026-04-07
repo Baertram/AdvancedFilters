@@ -10,6 +10,28 @@ local showChatDebug = AF.showChatDebug
 
 local displayName = GetDisplayName()
 
+
+--Added 202060311: New inventory buy backspace icon needs to be hidden?
+local ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl, ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl
+local function hideInventoryCountControls()
+    ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl = ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl or ZO_PlayerInventoryInfoBarBuyBagSpace
+    if ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl then
+        local nextBuyBagSpaceGoldCost = GetNextBackpackUpgradePrice() or 0
+        if nextBuyBagSpaceGoldCost <= 0 then
+            --Hide - No more bag space can be bought
+            ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:SetHidden(true)
+        else
+            --Reanchor and move -> Only if PerfectPixel is not enabled
+            if PP then return end
+            ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl = ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl or ((ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl ~= nil and ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:GetParent()) or nil)
+            if ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl then
+                ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:ClearAnchors()
+                ZO_PlayerInventoryInfoBarBuyBagSpace_Ctrl:SetAnchor(TOPLEFT, ZO_PlayerInventoryInfoBarBuyBagSpace_ParentCtrl, BOTTOMLEFT, 5, -5)
+            end
+        end
+    end
+end
+
 --Get the language of the client
 function util.GetLanguage()
     local lang = GetCVar("language.2")
@@ -1482,6 +1504,8 @@ end
 --Do not update the inventories itemCount as it got no count label or no value to update
 --(e.g. smithing research panel)
 function util.DoNotUpdateInventoryItemCount(filterTypeToUse)
+    hideInventoryCountControls()
+
     filterTypeToUse = filterTypeToUse or getCurrentFilterTypeForInventory(AF.currentInventoryType)
     local doNotUpdateInventoryItemCountFilterPanels = {
         [LF_SMITHING_CREATION]          = true,
