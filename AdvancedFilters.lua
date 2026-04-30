@@ -43,28 +43,28 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2025-09-18
---Max todos: #81
+--TODO Last updated: 2026-04-39
+--Max todos: #82
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2025-09-18
+--CURRENTLY WORKING ON - Last updated: 2026-04-39
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.4.9 - Current 1.6.5.0
+--  UPDATE INFORMATION: since AF 1.6.5.2 - Current 1.6.5.3
 --______________________________________________________________________________________________________________________
 
 -- ADDED
-#81 Add Cyrodiil vengeance inventory support
+
 --
 -- ADDED ON REQUEST
 
 -- CHANGED
 
 -- FIXED
---
+--#82 Guild store sell (with Awesome Guild Store enabled) junk subfilter bar enables properly again
 
 
 ---==========================================================================================================================================================================
@@ -920,6 +920,47 @@ local function InitializeHooks()
 
 
     --=== FRAGMENTS=========================================================================================================
+    --Custom inventory e.g. fragments added to e.g. LAM settings to preview anything in other addons?
+    --Provide an API so devs can skip AF for these fragments (must be called once before their custom fragment is shown, and unskip called after their custom fragment is hidden again)
+    local skippedFragments = {}
+    --e.g. AdvancedFilters.SkipFragmentStateChange("Personal Assistant", INVENTORY_FRAGMENT) skips the inventory frgament state changes so no errors appear until
+    --     AdvancedFilters.UnskipFragmentStateChange("Personal Assistant", INVENTORY_FRAGMENT) was called -> Both function calls need to be done in the calling other addon, skip before the fragment is added and unskip after the frgment was removed again
+    function AF.SkipFragmentStateChange(addonName, fragment)
+        assert(addonName ~= nil and addonName ~= "" and type(fragment) == "table", "[AdvancedFilters]SkipFragmentStateChange needs an addonName string and a valid fragment as parameters!")
+        skippedFragments[addonName] = skippedFragments[addonName] or {}
+        if not skippedFragments[addonName][fragment] then
+            skippedFragments[addonName][fragment] = true
+        else
+            d("[AdvancedFilters]SkipFragmentStateChange for \'" .. tos(addonName) .. "\' and fragment " ..tos(fragment) .. " was already registered!")
+        end
+    end
+    function AF.UnskipFragmentStateChange(addonName, fragment)
+        assert(addonName ~= nil and addonName ~= "" and type(fragment) == "table" and skippedFragments[addonName] ~= nil and skippedFragments[addonName][fragment] ~= nil, "[AdvancedFilters]UnskipFragmentStateChange needs an addonName string and a valid fragment as parameters, and both need to be registered via the AdvancedFilters.SkipFragmentStateChange API before!")
+        skippedFragments[addonName][fragment] = nil
+        if ZO_IsTableEmpty(skippedFragments[addonName]) then
+            skippedFragments[addonName] = nil
+        end
+    end
+    local function AF_IsFragmentStateChangeSkipRegistered(fragment)
+        if not ZO_IsTableEmpty(skippedFragments) then
+            for addonName, fragmentsRegistered in pairs(skippedFragments) do
+                return (fragmentsRegistered ~= nil and fragmentsRegistered[fragment] == true and true) or false, addonName
+            end
+        end
+        return false, nil
+    end
+    local function doSkipNowCheckAndChatOutput(p_fragment, debugSpam)
+        local skipNow, addonNameRegistered = AF_IsFragmentStateChangeSkipRegistered(p_fragment)
+        if skipNow then
+            if debugSpam == nil then debugSpam = AF.settings.debugSpam end
+            if debugSpam then
+                d("[AF]Skipping fragment State 'OnShowing' because of AddOn: " .. tos(addonNameRegistered))
+            end
+            return true
+        end
+        return false
+    end
+
     --FRAGMENT HOOKS
     local function hookFragment(fragment, inventoryType)
         local function onFragmentShowing(p_fragment)
@@ -927,12 +968,15 @@ local function InitializeHooks()
             if debugSpam then
                 d("[AF]OnFragmentShowing - inventoryType: " ..tos(inventoryType) .. ", invTypeOverride: " ..tos(AF.currentInventoryTypeOverride))
             end
+            --Do not execute further AF code if this fragment is said to be skipped
+            if doSkipNowCheckAndChatOutput(p_fragment, debugSpam) then return end
+
             local doNormalChecks = true
             local inventoryControl
             local inventoryTypeUpdated
             --Special treatment for qucisklots
             if p_fragment == quickslotFragment and inventoryType == LF_QUICKSLOT then
---d(">quickSlot")
+                --d(">quickSlot")
                 if debugSpam then
                     d(">quickslots")
                 end
@@ -1130,10 +1174,16 @@ local function InitializeHooks()
             ]]
             --d("[AF]OnFragmentShown")
             --Not called in OnFragmentShowing as it would be too early. The controls would just be unhidden
+            --Do not execute further AF code if this fragment is said to be skipped
+            if doSkipNowCheckAndChatOutput(p_fragment, nil) then return end
+
             hideInventoryControls(nil)
         end
 
         local function onFragmentHiding(p_fragment)
+            --Do not execute further AF code if this fragment is said to be skipped
+            if doSkipNowCheckAndChatOutput(p_fragment, nil) then return end
+
             if inventoryType ~= LF_INVENTORY_COMPANION then
                 PLAYER_INVENTORY.isListDirty = untrack(playerInvVar.isListDirty)
             end

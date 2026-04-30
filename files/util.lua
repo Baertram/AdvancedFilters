@@ -2272,7 +2272,7 @@ function util.RefreshSubfilterBar(subfilterBar, calledFromExternalAddonName, isU
                         -->not junk
                         -->not bound
                     elseif isGuildStoreSellPanel then
-                        doEnableSubFilterButtonAgain = not isItemStolen and not isItemJunk and not isBound and not isBOPTradeable
+                        doEnableSubFilterButtonAgain = not isItemStolen and not isBound and not isBOPTradeable and (not isItemJunk or (isJunkInvButtonActive and isItemJunk)) --#82
 
                         --[Vendor buy]
                         --Item is:
