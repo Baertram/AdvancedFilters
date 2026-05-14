@@ -43,17 +43,17 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---TODO Last updated: 2026-04-39
---Max todos: #82
+--TODO Last updated: 2026-05-14
+--Max todos: #83
 
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
---CURRENTLY WORKING ON - Last updated: 2026-04-39
+--CURRENTLY WORKING ON - Last updated: 2026-05-14
 
 
 --==========================================================================================================================================================================
 --______________________________________________________________________________________________________________________
---  UPDATE INFORMATION: since AF 1.6.5.2 - Current 1.6.5.3
+--  UPDATE INFORMATION: since AF 1.6.5.3 - Current 1.6.5.4
 --______________________________________________________________________________________________________________________
 
 -- ADDED
@@ -64,7 +64,8 @@ ZO_StackSplitSource_DragStart:4: in function '(main chunk)'
 -- CHANGED
 
 -- FIXED
---#82 Guild store sell (with Awesome Guild Store enabled) junk subfilter bar enables properly again
+--#83 Companion items subfilter buttons not activating for junk, at bank deposit/withdraw and house bank withdraw
+
 
 
 ---==========================================================================================================================================================================
@@ -2341,7 +2342,7 @@ local function createAdditionalSubFilterGroups()
     if FCOCO ~= nil and FCOCO.IsCompanionJunkEnabled ~= nil then
         local isCompanionJunkEnabled, companionJunkedItemsOfChar = FCOCO.IsCompanionJunkEnabled()
         if isCompanionJunkEnabled == true then
-d("[AF]FCOCompanion Junk is enabled!")
+--d("[AF]FCOCompanion Junk is enabled!")
             --Add "Junk" tab to the Companion inventory subfilterGroup
             AF.subfilterGroups[LF_INVENTORY_COMPANION][CRAFTING_TYPE_INVALID][ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = {}
             --Update "Junk" subfilterButtonNames -> Not needed as it already got all types of junk we need for the companion items
