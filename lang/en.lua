@@ -96,6 +96,7 @@ local strings = {
     Writ = util.Localize(SI_ITEMTYPE60),
     Container = util.Localize(SI_ITEMTYPE18),
     Repair = util.Localize(SI_STORE_MODE_REPAIR),
+    ConsumableAbility = util.Localize(SI_WINDOW_TITLE_SKILLS) .." " .. util.Localize(SI_SPECIALIZEDITEMTYPE105), --Skills scroll
 
     --MATERIALS
     Blacksmithing = util.Localize(SI_GAMEPADITEMCATEGORY4), --"Blacksmithing",

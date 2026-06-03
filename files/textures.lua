@@ -210,6 +210,8 @@ local textures = {
     ScribingInk     = "/esoui/art/icons/item_grimoire_ink.dds",
 
     StackableContainer   = "/esoui/art/icons/hirelingmail_jewelrycrafting_generic.dds",
+
+    ConsumableAbility = "/esoui/art/icons/achievement_u46_skill_meta.dds",
 }
 
 --ALCHEMY
@@ -251,6 +253,7 @@ local texturesReSize = {
     ScribingInk     = {width=18, height=18},
     ScribingScript  = {width=20, height=20},
     ScribingGrimoire = {width=20, height=20},
+    ConsumableAbility = {width=20, height=20},
 }
 AF.texturesReSize = texturesReSize
 

@@ -32,7 +32,7 @@ local checkForResearchPanelAndRunFilterFunction = util.CheckForResearchPanelAndR
 --Trophy itemTypes (all trophies)
 local allItemTypesTrophies = {
     [ITEMTYPE_TROPHY] = true,                                   [ITEMTYPE_COLLECTIBLE] = true,                          [ITEMTYPE_FISH] = true,
-    [ITEMTYPE_TREASURE] = true,                                 [ITEMTYPE_RECALL_STONE] = true,
+    [ITEMTYPE_TREASURE] = true,                                 [ITEMTYPE_RECALL_STONE] = true,                         [ITEMTYPE_CONSUMABLE_ABILITY] = true,
     [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = true,                   [ITEMTYPE_CRAFTED_ABILITY] = true,
 }
 --Non fencable itemTypes
@@ -1127,9 +1127,7 @@ local subfilterCallbacks = {
             filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype(
                     {ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY, ITEMTYPE_CONTAINER_STACKABLE},
                     {SPECIALIZED_ITEMTYPE_CONTAINER, SPECIALIZED_ITEMTYPE_CONTAINER_CURRENCY, SPECIALIZED_ITEMTYPE_CONTAINER_EVENT, SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE}, false, false)
-                    or GetFilterCallbackForItemTypeAndSpecializedItemtype(
-                    {ITEMFILTERTYPE_PROVISIONING},
-                    {SPECIALIZED_ITEMTYPE_CONTAINER}, false, true),
+                    or GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMFILTERTYPE_PROVISIONING}, {SPECIALIZED_ITEMTYPE_CONTAINER}, false, true),
             dropdownCallbacks = {
             },
         },
@@ -1154,6 +1152,7 @@ local subfilterCallbacks = {
                 {name = "RecallStone", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({SPECIALIZED_ITEMTYPE_RECALL_STONE_KEEP})},
                 {name = "ScribingScript", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY_SCRIPT})},
                 {name = "ScribingGrimoire", showIcon=true, filterCallback = GetFilterCallbackForItemTypeAndSpecializedItemtype({ITEMTYPE_CRAFTED_ABILITY})},
+                {name = "ConsumableAbility", showIcon=true, filterCallback = GetFilterCallbackForSpecializedItemtype({SPECIALIZED_ITEMTYPE_CONSUMABLE_ABILITY})},
             },
             dropdownCallbacksHeaders = true,
         },
